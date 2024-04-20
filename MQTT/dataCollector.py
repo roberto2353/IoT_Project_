@@ -30,7 +30,12 @@ class DataCollector():
 
 
 if __name__ == '__main__':
-    conf = json.load(open("settings.json"))
+    conf = json.load(open('settings.json', 'r'))
+    conf = {
+    "broker": "mqtt.eclipseprojects.io",
+    "port": 1883,
+    "baseTopic": "IoT_project"
+    }
     coll = DataCollector('dc'+str(random.randint(1, 10**5)), conf["broker"], baseTopic=conf["baseTopic"])
     coll.run()
     print(f'This is the client to follow the data coming from the sensors of the building of {coll.baseTopic}')
