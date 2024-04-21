@@ -32,10 +32,8 @@ class Sensor(MyPublisher):
 
     def sendData(self):
         message = self.__message
-        message['e'][0]['value'] = random.randint(10, 30)
-        message['e'][1]['value'] = random.randint(50, 90)
+        message['e'][0]['value'] = random.randint(0, 1)
         message['e'][0]['timestamp'] = str(time.time())
-        message['e'][1]['timestamp'] = str(time.time())
         self.client.myPublish(self.topic, message)
 
     def start(self):
