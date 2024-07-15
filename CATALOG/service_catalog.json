@@ -1,0 +1,11 @@
+{
+    "projectOwner": "IoTGroup8",
+    "projectName": "Iot4SmartParking",
+    "lastUpdate": "2020-03-30 12:58",
+    "broker": {
+      "IP": "test.mosquitto.org",
+      "port": 1883
+    },
+    "serviceList": []
+  }
+  
