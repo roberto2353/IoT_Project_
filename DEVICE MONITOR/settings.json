@@ -1,0 +1,9 @@
+{
+    "catalogURL":"http://localhost:8080",
+    "removeInterval":10,
+    "removeThreshold":20,
+    "serviceInfo":[
+        {"ID":2,"serviceName":"DeviceMonitor","last_updated":""},
+        {"ID":3,"serviceName":"GenericService","last_updated":""}
+    ]
+}

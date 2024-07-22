@@ -1,4 +1,15 @@
 {
+    "project_name": "IoT4SmartParking",
+    "project_owner": "IoT_Group8",
+    "device_catalog": {
+        "ip": "localhost",
+        "port": 8080,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
     "devices": [
         {
             "ID": 1,
@@ -8,7 +19,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1721641782.461468
+            "last_update": 1721662104.5251148
         },
         {
             "ID": 2,
@@ -18,8 +29,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1721641782.477094
+            "last_update": 1721662104.532205
         }
-    ],
-    "services": []
+    ]
 }
