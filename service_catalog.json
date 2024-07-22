@@ -1,0 +1,32 @@
+{
+    "project_name": "IoT4SmartParking",
+    "project_owner": "IoTGroup8",
+    "lastUpdate": "2020-03-30 12:58",
+    "services_catalog": {
+        "ip": "0.0.0.0",
+        "port": 8082,
+        "methods": [
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE"
+        ]
+    },
+    "broker": {
+        "ip": "mqtt.eclipseprojects.io",
+        "port_n": 1883
+    },
+    "telegram": {
+        "telegram_token": "",
+        "telegram_link": ""
+    },
+    "device_catalog": {
+        "ip": "",
+        "port": -1,
+        "methods": [],
+        "last_update": ""
+    },
+    "users": [],
+    "greenhouses": [],
+    "services": []
+}
