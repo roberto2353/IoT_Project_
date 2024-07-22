@@ -1,0 +1,21 @@
+{
+    "catalogURL": "http://localhost:8080",
+    "devices":[
+        {
+            "deviceInfo":{
+            "ID": 1,
+            "name": "sensor1",
+            "type": "photocell",
+            "location": "P0-1"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 2,
+            "name": "sensor2",
+            "type": "photocell",
+            "location": "P0-2"
+            }
+        }
+    ]
+}  
