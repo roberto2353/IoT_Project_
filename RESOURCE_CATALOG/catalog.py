@@ -17,20 +17,6 @@ def removeDevices(catalog, deviceID):
         if device['ID'] == int(deviceID):
             catalog["devices"].pop(i)
 
-def addService(catalog, serviceInfo):
-    catalog["services"].append(serviceInfo)
-
-def updateService(catalog, serviceID, serviceInfo):
-    for i in range(len(catalog["services"])):
-        service = catalog["services"][i]
-        if service['ID'] == serviceID:
-            catalog["services"][i] = serviceInfo
-
-def removeService(catalog, seviceID):
-    for i in range(len(catalog["services"])):
-        service = catalog["services"][i]
-        if service['ID'] == int(seviceID):
-            catalog["services"].pop(i)
 
 class CatalogREST(object):
     exposed = True
@@ -46,8 +32,6 @@ class CatalogREST(object):
             output = catalog
         elif uri[0]=='devices':
             output = {"devices":catalog["devices"]}
-        elif uri[0]=='services':
-            output = {"services":catalog["services"]}
         return json.dumps(output)
 
     def POST(self, *uri, **params):
@@ -63,15 +47,7 @@ class CatalogREST(object):
                 print(output)
             else:
                 raise cherrypy.HTTPError(status=400, message='DEVICE ALREADY REGISTERED')
-        elif uri[0]=='services':
-            if not any(d['ID'] == json_body['ID'] for d in catalog["services"]):
-                last_update = time.time()
-                json_body['last_update'] = last_update
-                addService(catalog, json_body)
-                output = f"Service with ID {json_body['ID']} has been added"
-                print(output)
-            else:
-                raise cherrypy.HTTPError(status=400, message='SERVICE ALREADY REGISTERED')
+  
         json.dump(catalog,open(self.catalog_address,"w"),indent=4)
         print(catalog)
         return output
@@ -88,13 +64,6 @@ class CatalogREST(object):
                 last_update = time.time()
                 json_body['last_update'] = last_update
                 updateDevice(catalog, json_body['ID'], json_body)
-        elif uri[0]=='services':
-            if not any(d['ID'] == json_body['ID'] for d in catalog["services"]):
-                raise cherrypy.HTTPError(status=400, message='SERVICE NOT FOUND')
-            else:
-                last_update = time.time()
-                json_body['last_update'] = last_update
-                updateService(catalog, json_body['ID'], json_body)
         print(catalog)
         json.dump(catalog,open(self.catalog_address,"w"),indent=4)
         return json_body
@@ -104,10 +73,6 @@ class CatalogREST(object):
         if uri[0]=='devices':
             removeDevices(catalog,uri[1])
             output = f"Device with ID {uri[1]} has been removed"
-            print(output)
-        elif uri[0]=='services':
-            catalog = removeService(catalog,uri[1])
-            output = f"Service with ID {uri[0]} has been removed"
             print(output)
         json.dump(catalog,open(self.catalog_address,"w"),indent=4)
 

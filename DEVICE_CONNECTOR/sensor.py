@@ -35,7 +35,7 @@ class SensorREST(threading.Thread):
     def GET(self, *uri, **params):
         if len(uri) != 0:
             if uri[0] == 'status':
-                value = random.randint(0, 1)
+                value = random.randint(0, 500)
             #if uri[0] == 'temp':
                 #value = random.randint(10, 25)
             output = {'deviceID': self.deviceInfo['ID'], str(uri[0]): value}

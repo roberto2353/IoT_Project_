@@ -1,4 +1,25 @@
 {
-    "devices": [],
+    "devices": [
+        {
+            "ID": 1,
+            "name": "sensor1",
+            "type": "photocell",
+            "location": "P0-1",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1721641782.461468
+        },
+        {
+            "ID": 2,
+            "name": "sensor2",
+            "type": "photocell",
+            "location": "P0-2",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1721641782.477094
+        }
+    ],
     "services": []
 }
