@@ -1,0 +1,77 @@
+{
+    "project_name": "IoT4SmartParking",
+    "project_owner": "IoT_Group8",
+    "device_catalog": {
+        "ip": "localhost",
+        "port": 8080,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "devices": [
+        {
+            "ID": 1,
+            "name": "sensor1",
+            "type": "photocell",
+            "location": "P0-1",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1724683232.9955747
+        },
+        {
+            "ID": 2,
+            "name": "sensor2",
+            "type": "photocell",
+            "location": "P0-2",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1724683233.0147552
+        },
+        {
+            "ID": 3,
+            "name": "sensor3",
+            "type": "photocell",
+            "location": "P0-3",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1724683233.0471325
+        },
+        {
+            "ID": 4,
+            "name": "sensor4",
+            "type": "photocell",
+            "location": "P0-4",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1724683233.0668721
+        },
+        {
+            "ID": 5,
+            "name": "sensor5",
+            "type": "photocell",
+            "location": "P0-5",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1724683233.0885415
+        }
+    ],
+    "service_catalog": {
+        "ip": "localhost",
+        "port": 8084,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "users": [],
+    "services": [],
+    "parkings": []
+}

@@ -16,6 +16,30 @@
             "type": "photocell",
             "location": "P0-2"
             }
+        },
+        {
+            "deviceInfo":{
+            "ID": 3,
+            "name": "sensor3",
+            "type": "photocell",
+            "location": "P0-3"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 4,
+            "name": "sensor4",
+            "type": "photocell",
+            "location": "P0-4"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 5,
+            "name": "sensor5",
+            "type": "photocell",
+            "location": "P0-5"
+            }
         }
     ]
 }  
