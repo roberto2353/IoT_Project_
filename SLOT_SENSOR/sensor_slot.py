@@ -19,7 +19,7 @@ class SlotSensor:
         self.subTopic = baseTopic + "/+"  # Subscribe to all messages under baseTopic
         self.aliveBn = "updateCatalogSlot"
         self.slotCode = slotCode
-        self.aliveTopic = baseTopic + "/alive"
+        self.aliveTopic = "ParkingLot/alive/" + self.slotCode  # Definizione di aliveTopic
         self.simulate_occupancy = True  
         self.myPub = MyPublisher(self.sensorId + "Pub", self.pubTopic)
         self.mySub = MySubscriber(self.sensorId + "Sub1", self.subTopic)
@@ -34,14 +34,14 @@ class SlotSensor:
 
         # Pubblica lo stato corrente
         state = "occupied" if self.isOccupied else "free"
-        event = {"n": "status", "u": "boolean", "t": str(time.time()), "v": state}
+        event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": state}  # Modifica qui per avere l'ID del posto nel campo "n"
         out = {"bn": self.pubTopic, "e": [event]}
         self.myPub.myPublish(json.dumps(out), self.pubTopic)
 
         # Pubblica il messaggio di vitalità
         eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
         outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
-        self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
+        self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)  # Usa la variabile aliveTopic qui
 
     def toggle_simulation(self):
         # Attiva o disattiva la simulazione
@@ -110,8 +110,6 @@ def update_sensors(sensors):
             sensors.remove(sens)
 
 
-
-
 class MyPublisher:
     def __init__(self, clientID, topic):
         self.clientID = clientID + "status"
@@ -138,6 +136,7 @@ class MyPublisher:
         self._paho_mqtt.disconnect()
 
     def myPublish(self, message, topic):
+        print(f"Pubblicazione messaggio su topic {topic}: {message}")  # Debugging
         self._paho_mqtt.publish(topic, message, self.qos)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
