@@ -178,7 +178,7 @@ class MySubscriber:
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         if msg.topic.split("/")[3] in ["occupancy"]:
             self.q.put(msg)
-            print(f"Topic: '{msg.topic}', QoS: '{msg.qos}' Message: '{msg.payload}'")
+            print(f"Topic: '{msg.topic}', QoS:'{msg.qos}' Message: '{msg.payload}'")
 
 
 def main():

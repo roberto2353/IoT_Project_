@@ -26,7 +26,6 @@ class SlotBoard:
                 response.raise_for_status()
                 slots = response.json().get('devices', [])
                 self.total_slots = len(slots)
-                #self.free_slots = self.total_slots
                 print(f"Tabellone inizializzato: {self.total_slots} posti totali")
             except Exception as e:
                 print(f"Errore nell'inizializzazione del tabellone: {e}")
@@ -39,7 +38,7 @@ class SlotBoard:
         self.sensors_data[slot_id] = status
         if status == "free":
             if previous_status == "occupied":
-                self.occupied_slots -= 1
+                self.occupied_slots -=1
             self.free_slots += 1
         elif status == "occupied":
             if previous_status == "free":
