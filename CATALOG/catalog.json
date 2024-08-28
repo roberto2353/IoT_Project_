@@ -19,7 +19,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724683232.9955747
+            "last_update": 1724686374.8399198
         },
         {
             "ID": 2,
@@ -29,7 +29,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724683233.0147552
+            "last_update": 1724686374.8489184
         },
         {
             "ID": 3,
@@ -39,7 +39,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724683233.0471325
+            "last_update": 1724686374.8580453
         },
         {
             "ID": 4,
@@ -49,17 +49,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724683233.0668721
-        },
-        {
-            "ID": 5,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P0-5",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1724683233.0885415
+            "last_update": 1724686374.8663502
         }
     ],
     "service_catalog": {

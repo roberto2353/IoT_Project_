@@ -32,14 +32,6 @@
             "type": "photocell",
             "location": "P0-4"
             }
-        },
-        {
-            "deviceInfo":{
-            "ID": 5,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P0-5"
-            }
         }
     ]
 }  
