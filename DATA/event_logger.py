@@ -15,14 +15,20 @@ class EventLogger:
         self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
         self.write_api = self.client.write_api(write_options=WriteOptions())
         
-    def log_event(self, slot_id, previous_status, current_status):
+    def log_event(self, slot_id, previous_status, current_status, duration):
         """Logga un evento in InfluxDB."""
-        point = Point("event_log") \
+        print(f"Logging event to InfluxDB: Slot ID={slot_id}, Previous Status={previous_status}, Current Status={current_status}, Duration={duration}")
+        
+        point = Point("parking_slot_state") \
             .tag("slot_id", slot_id) \
             .field("previous_status", previous_status) \
             .field("current_status", current_status) \
+            .field("duration", duration) \
             .time(datetime.utcnow(), WritePrecision.NS)
         self.write_api.write(bucket=self.bucket, org=self.org, record=point)
+
+
+
         
     def generate_report(self, start_date, end_date):
         """Genera un report di occupazione tra due date."""
