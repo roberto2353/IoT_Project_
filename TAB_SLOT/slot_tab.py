@@ -4,6 +4,13 @@ import json
 import time
 import requests
 from paho.mqtt.client import CallbackAPIVersion
+import sys
+
+# Percorso assoluto alla cartella del progetto
+sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+
+from DATA.event_logger import EventLogger
+
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -15,42 +22,43 @@ class SlotBoard:
         self.occupied_slots = 0
         self.total_slots = 0
         self.sensors_data = {}
+        self.event_logger = EventLogger()  # Istanza di EventLogger
         self.initialize_board()
 
     def initialize_board(self):
-            try:
-                with open(SETTINGS, "r") as fs:
-                    settings = json.loads(fs.read())
-                url = settings["catalog_url"] + "/devices"
-                response = requests.get(url)
-                response.raise_for_status()
-                slots = response.json().get('devices', [])
-                self.total_slots = len(slots)
-                print(f"Tabellone inizializzato: {self.total_slots} posti totali")
-            except Exception as e:
-                print(f"Errore nell'inizializzazione del tabellone: {e}")
+        try:
+            with open(SETTINGS, "r") as fs:
+                settings = json.loads(fs.read())
+            url = settings["catalog_url"] + "/devices"
+            response = requests.get(url)
+            response.raise_for_status()
+            slots = response.json().get('devices', [])
+            self.total_slots = len(slots)
+            print(f"Tabellone inizializzato: {self.total_slots} posti totali")
+        except Exception as e:
+            print(f"Errore nell'inizializzazione del tabellone: {e}")
 
     def update_slot(self, slot_id, status):
-        previous_status = self.sensors_data.get(slot_id)
+        previous_status = self.sensors_data.get(slot_id, "unknown")  # Default a 'unknown' se non presente
         if previous_status == status:
-            return
+            return  # Non fare nulla se lo stato non cambia
 
         self.sensors_data[slot_id] = status
         if status == "free":
             if previous_status == "occupied":
-                self.occupied_slots -=1
+                self.occupied_slots -= 1
             self.free_slots += 1
         elif status == "occupied":
             if previous_status == "free":
                 self.free_slots -= 1
             self.occupied_slots += 1
 
+        # Registra l'evento nel database
+        self.event_logger.log_event(slot_id, previous_status, status)
+
         print(f"Slot aggiornato: {slot_id} - Stato: {status}")
         print(f"Posti liberi: {self.free_slots}, Posti occupati: {self.occupied_slots}")
-
         self.display_board()
-
-
 
     def display_board(self):
         print(f"Posti Liberi: {self.free_slots} | Posti Occupati: {self.occupied_slots} | Totale: {self.total_slots}")

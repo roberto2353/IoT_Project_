@@ -5,6 +5,12 @@ from queue import Queue
 import json
 import requests
 import random
+import sys
+
+# Percorso assoluto alla cartella del progetto
+sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+
+from DATA.event_logger import EventLogger
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -25,23 +31,37 @@ class SlotSensor:
         self.mySub = MySubscriber(self.sensorId + "Sub1", self.subTopic)
         self.myPub.start()
         self.mySub.start()
+        self.event_logger = EventLogger()
+        
 
     def update_state(self):
+    # Stato precedente per il logging
+        previous_state = "occupied" if self.isOccupied else "free"
+        
         # Simula cambiamenti di stato
         if self.simulate_occupancy:
-            self.isOccupied = random.choice([True, False]) 
-        print(f"Slot {self.slotCode} stato aggiornato a: {'NOT free' if self.isOccupied else 'free'}")
+            self.isOccupied = random.choice([True, False])
+        
+        # Nuovo stato
+        new_state = "occupied" if self.isOccupied else "free"
 
-        # Pubblica lo stato corrente
-        state = "occupied" if self.isOccupied else "free"
-        event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": state}  # Modifica qui per avere l'ID del posto nel campo "n"
-        out = {"bn": self.pubTopic, "e": [event]}
-        self.myPub.myPublish(json.dumps(out), self.pubTopic)
+        # Controllo se lo stato è cambiato
+        if new_state != previous_state:
+            print(f"Slot {self.slotCode} stato aggiornato da: {previous_state} a {new_state}")
 
-        # Pubblica il messaggio di vitalità
-        eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
-        outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
-        self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)  # Usa la variabile aliveTopic qui
+            # Pubblica lo stato corrente
+            event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": new_state}
+            out = {"bn": self.pubTopic, "e": [event]}
+            self.myPub.myPublish(json.dumps(out), self.pubTopic)
+
+            # Registra l'evento nel database InfluxDB
+            self.event_logger.log_event(self.slotCode, previous_state, new_state)
+
+            # Pubblica il messaggio di vitalità
+            eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
+            outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
+            self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
+
 
     def toggle_simulation(self):
         # Attiva o disattiva la simulazione
