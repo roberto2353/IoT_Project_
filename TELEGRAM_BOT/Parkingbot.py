@@ -5,13 +5,13 @@ import json
 import time
 from threading import Timer
 
-# Carica le impostazioni dal file settings.json
+
 SETTINGS_PATH = '/Users/alexbenedetti/Desktop/IoT_Project_/TAB_SLOT/settings.json'
 with open(SETTINGS_PATH, 'r') as file:
     settings = json.load(file)
 
-# Configura il bot Telegram
-TOKEN = '7501377611:AAFjyciB61TVr_b5y9Bc3PAER4MeavWCP7c'  # Sostituisci con il tuo token
+
+TOKEN = '7501377611:AAFjyciB61TVr_b5y9Bc3PAER4MeavWCP7c'  
 
 # Gestore di aggiornamento per mostrare i posti liberi
 async def start(update: Update, context: CallbackContext):
@@ -25,10 +25,10 @@ async def check_free_slots(update: Update, context: CallbackContext):
         response.raise_for_status()
         slots = response.json().get('devices', [])
 
-        # Stampa di debug per vedere la struttura dei dati
+        
         print(f"Risposta del server: {slots}")
 
-        free_slots = [slot for slot in slots if slot.get('status') == 'free']  # Usa .get() per evitare errori se 'status' non esiste
+        free_slots = [slot for slot in slots if slot.get('status') == 'free']  
         if free_slots:
             slots_info = "\n".join([f"ID: {slot['location']}, Nome: {slot['name']}" for slot in free_slots])
             await update.message.reply_text(f'Posti liberi:\n{slots_info}')
@@ -41,7 +41,7 @@ async def check_free_slots(update: Update, context: CallbackContext):
 # Gestore di comando per prenotare un posto
 async def book_slot(update: Update, context: CallbackContext):
     try:
-        slot_id = context.args[0]  # L'ID del posto passato dall'utente
+        slot_id = context.args[0]  # ID del posto passato dall'utente
         url = settings['catalog_url'] + f'/book/{slot_id}'
         
         response = requests.post(url)
@@ -49,7 +49,7 @@ async def book_slot(update: Update, context: CallbackContext):
         
         await update.message.reply_text(f'Il posto {slot_id} è stato prenotato con successo per 2 minuti!')
         
-        # Imposta un timer per scadere la prenotazione dopo 2 minuti
+        #  timer per togliere la prenotazione dopo 2 minuti
         Timer(120, expire_reservation, args=[slot_id]).start()
     
     except IndexError:
@@ -57,7 +57,7 @@ async def book_slot(update: Update, context: CallbackContext):
     except Exception as e:
         await update.message.reply_text(f'Errore durante la prenotazione: {e}')
 
-# Funzione per scadere una prenotazione
+# togliere una prenotazione
 def expire_reservation(slot_id):
     url = settings['catalog_url'] + f'/expire/{slot_id}'
     try:
@@ -68,14 +68,14 @@ def expire_reservation(slot_id):
         print(f'Errore nel scadere la prenotazione per il posto {slot_id}: {e}')
 
 def main():
-    # Usa ApplicationBuilder per creare il bot
+    
     application = ApplicationBuilder().token(TOKEN).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('check', check_free_slots))
     application.add_handler(CommandHandler('book', book_slot))
 
-    # Usa run_polling in modo sincrono
+    # run_polling in modo sincrono
     application.run_polling()
 
 if __name__ == '__main__':
