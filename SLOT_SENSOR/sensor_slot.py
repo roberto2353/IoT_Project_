@@ -7,6 +7,7 @@ import requests
 import random
 import sys
 from datetime import datetime
+
 # Percorso assoluto alla cartella del progetto
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
@@ -34,9 +35,6 @@ class SlotSensor:
         self.myPub.start()
         self.mySub.start()
         self.event_logger = EventLogger()
-        
-
-
 
     def update_state(self):
         new_state = random.choice([True, False])  # True if occupied, False if free
@@ -45,7 +43,7 @@ class SlotSensor:
 
         if new_state != self.isOccupied:
             current_time = datetime.now()
-            duration = (current_time - self.last_change_time).total_seconds()  # Duration in seconds for example
+            duration = (current_time - self.last_change_time).total_seconds()  # Duration in seconds
             self.event_logger.log_event(self.slotCode, last_state_str, new_state_str, duration)
             self.last_change_time = current_time
             self.last_state = new_state
@@ -57,16 +55,44 @@ class SlotSensor:
             out = {"bn": self.pubTopic, "e": [event]}
             self.myPub.myPublish(json.dumps(out), self.pubTopic)
 
+            # Aggiorna lo stato del sensore nel catalogo
+            self.update_catalog_state(new_state_str)
+
             # Pubblica il messaggio di vitalità
             eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
             outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
             self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
 
+    def update_catalog_state(self, new_state):
+        """Invia una richiesta PUT per aggiornare lo stato del sensore nel catalogo."""
+        try:
+            with open(SETTINGS, "r") as fs:
+                settings = json.loads(fs.read())
+            
+            catalog_url = settings["catalog_url"]
+            url = f"{catalog_url}/devices"
 
+            # Ottieni i dati attuali dal catalogo
+            response = requests.get(url)
+            response.raise_for_status()
+            devices = response.json().get('devices', [])
+            
+            # Trova il dispositivo nel catalogo e aggiorna il suo stato
+            for device in devices:
+                if device["location"] == self.slotCode:
+                    device["status"] = new_state
+                    device["last_update"] = time.time()
+                    break
 
+            # Invia la richiesta PUT per aggiornare lo stato nel catalogo
+            response = requests.put(url, json=device)
+            response.raise_for_status()
+            print(f"Stato del sensore {self.slotCode} aggiornato nel catalogo a: {new_state}")
+        
+        except Exception as e:
+            print(f"Errore durante l'aggiornamento del catalogo per il sensore {self.slotCode}: {e}")
 
     def toggle_simulation(self):
-        # Attiva o disattiva la simulazione
         self.simulate_occupancy = not self.simulate_occupancy
     
     def stop(self):
@@ -207,7 +233,6 @@ def main():
     """Funzione principale che esegue continuamente il processamento dei dati dei sensori di parcheggio."""
     sensors = []
 
-    
     for sens in sensors:
         sens.toggle_simulation()  
 
@@ -216,7 +241,7 @@ def main():
         for sens in sensors:
             sens.update_state()  
             
-        time.sleep(10) 
+        time.sleep(35) 
 
 
 if __name__ == '__main__':

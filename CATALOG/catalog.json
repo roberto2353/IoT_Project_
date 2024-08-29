@@ -19,7 +19,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724855524.142199
+            "last_update": 1724935354.38604,
+            "status": "free"
         },
         {
             "ID": 2,
@@ -29,7 +30,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724855524.153488
+            "last_update": 1724935354.391862,
+            "status": "free"
         },
         {
             "ID": 3,
@@ -39,7 +41,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724855524.158498
+            "last_update": 1724935354.395,
+            "status": "free"
         },
         {
             "ID": 4,
@@ -49,7 +52,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724855524.1619442
+            "last_update": 1724935355.017449,
+            "status": "free"
         },
         {
             "ID": 5,
@@ -59,7 +63,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724855524.165317
+            "last_update": 1724935354.400256,
+            "status": "occupied"
         },
         {
             "ID": 6,
@@ -69,7 +74,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724855524.168104
+            "last_update": 1724935354.4031081,
+            "status": "free"
         }
     ],
     "service_catalog": {
