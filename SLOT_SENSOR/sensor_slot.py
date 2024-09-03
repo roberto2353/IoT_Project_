@@ -6,6 +6,7 @@ import json
 import requests
 import random
 import sys
+from datetime import datetime
 
 # Percorso assoluto alla cartella del progetto
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
@@ -20,6 +21,8 @@ class SlotSensor:
     def __init__(self, sensorId, baseTopic, slotCode):
         self.sensorId = sensorId
         self.isOccupied = False  # True if occupied, False if free
+        self.last_state = False
+        self.last_change_time = datetime.now()
         self.active = True
         self.pubTopic = baseTopic + "/status"
         self.subTopic = baseTopic + "/+"  # Subscribe to all messages under baseTopic
@@ -32,39 +35,64 @@ class SlotSensor:
         self.myPub.start()
         self.mySub.start()
         self.event_logger = EventLogger()
-        
 
     def update_state(self):
-    # Stato precedente per il logging
-        previous_state = "occupied" if self.isOccupied else "free"
-        
-        # Simula cambiamenti di stato
-        if self.simulate_occupancy:
-            self.isOccupied = random.choice([True, False])
-        
-        # Nuovo stato
-        new_state = "occupied" if self.isOccupied else "free"
+        new_state = random.choice([True, False])  # True if occupied, False if free
+        new_state_str = "occupied" if new_state else "free"
+        last_state_str = "occupied" if self.last_state else "free"
 
-        # Controllo se lo stato è cambiato
-        if new_state != previous_state:
-            print(f"Slot {self.slotCode} stato aggiornato da: {previous_state} a {new_state}")
+        if new_state != self.isOccupied:
+            current_time = datetime.now()
+            duration = (current_time - self.last_change_time).total_seconds()  # Duration in seconds
+            self.event_logger.log_event(self.slotCode, last_state_str, new_state_str, duration)
+            self.last_change_time = current_time
+            self.last_state = new_state
+            self.isOccupied = new_state
+            print(f"Slot {self.slotCode} stato aggiornato da: {last_state_str} a {new_state_str}")
 
             # Pubblica lo stato corrente
-            event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": new_state}
+            event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": new_state_str}
             out = {"bn": self.pubTopic, "e": [event]}
             self.myPub.myPublish(json.dumps(out), self.pubTopic)
 
-            # Registra l'evento nel database InfluxDB
-            self.event_logger.log_event(self.slotCode, previous_state, new_state)
+            # Aggiorna lo stato del sensore nel catalogo
+            self.update_catalog_state(new_state_str)
 
             # Pubblica il messaggio di vitalità
             eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
             outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
             self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
 
+    def update_catalog_state(self, new_state):
+        """Invia una richiesta PUT per aggiornare lo stato del sensore nel catalogo."""
+        try:
+            with open(SETTINGS, "r") as fs:
+                settings = json.loads(fs.read())
+            
+            catalog_url = settings["catalog_url"]
+            url = f"{catalog_url}/devices"
+
+            # Ottieni i dati attuali dal catalogo
+            response = requests.get(url)
+            response.raise_for_status()
+            devices = response.json().get('devices', [])
+            
+            # Trova il dispositivo nel catalogo e aggiorna il suo stato
+            for device in devices:
+                if device["location"] == self.slotCode:
+                    device["status"] = new_state
+                    device["last_update"] = time.time()
+                    break
+
+            # Invia la richiesta PUT per aggiornare lo stato nel catalogo
+            response = requests.put(url, json=device)
+            response.raise_for_status()
+            print(f"Stato del sensore {self.slotCode} aggiornato nel catalogo a: {new_state}")
+        
+        except Exception as e:
+            print(f"Errore durante l'aggiornamento del catalogo per il sensore {self.slotCode}: {e}")
 
     def toggle_simulation(self):
-        # Attiva o disattiva la simulazione
         self.simulate_occupancy = not self.simulate_occupancy
     
     def stop(self):
@@ -205,7 +233,6 @@ def main():
     """Funzione principale che esegue continuamente il processamento dei dati dei sensori di parcheggio."""
     sensors = []
 
-    
     for sens in sensors:
         sens.toggle_simulation()  
 
@@ -214,7 +241,7 @@ def main():
         for sens in sensors:
             sens.update_state()  
             
-        time.sleep(10) 
+        time.sleep(35) 
 
 
 if __name__ == '__main__':

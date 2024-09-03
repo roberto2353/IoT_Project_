@@ -1,16 +1,15 @@
-from pathlib import Path
-import paho.mqtt.client as PahoMQTT
 import json
 import time
 import requests
-from paho.mqtt.client import CallbackAPIVersion
+from pathlib import Path
+import paho.mqtt.client as PahoMQTT
+from datetime import datetime
 import sys
 
 # Percorso assoluto alla cartella del progetto
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
 from DATA.event_logger import EventLogger
-
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -39,9 +38,9 @@ class SlotBoard:
             print(f"Errore nell'inizializzazione del tabellone: {e}")
 
     def update_slot(self, slot_id, status):
-        previous_status = self.sensors_data.get(slot_id, "unknown")  # Default a 'unknown' se non presente
+        previous_status = self.sensors_data.get(slot_id, "unknown")
         if previous_status == status:
-            return  # Non fare nulla se lo stato non cambia
+            return
 
         self.sensors_data[slot_id] = status
         if status == "free":
@@ -52,9 +51,6 @@ class SlotBoard:
             if previous_status == "free":
                 self.free_slots -= 1
             self.occupied_slots += 1
-
-        # Registra l'evento nel database
-        self.event_logger.log_event(slot_id, previous_status, status)
 
         print(f"Slot aggiornato: {slot_id} - Stato: {status}")
         print(f"Posti liberi: {self.free_slots}, Posti occupati: {self.occupied_slots}")
@@ -68,16 +64,10 @@ class MySubscriber:
         self.clientID = clientID
         self.topic = topic
         self.message_callback = message_callback
-        self._paho_mqtt = PahoMQTT.Client(
-            client_id=self.clientID,
-            clean_session=False,
-            
-        )
-
+        self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID, clean_session=False)
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
-        # Configura il broker MQTT
         try:
             with open(SETTINGS, "r") as fs:
                 self.settings = json.loads(fs.read())
@@ -108,22 +98,32 @@ class MySubscriber:
             print("Errore nella connessione!")
 
     def myOnMessageReceived(self, client, userdata, msg):
-        print(f"Messaggio ricevuto: Topic={msg.topic}, Payload={msg.payload.decode()}") 
+        print(f"Messaggio ricevuto: Topic={msg.topic}, Payload={msg.payload.decode()}")
         self.message_callback(msg)
-
-
 
 def main():
     slot_board = SlotBoard()
 
     def on_message_received(msg):
         try:
-            data = json.loads(msg.payload.decode())  # Aggiunta .decode() per leggere il payload come stringa
-            print(f"Payload decodificato: {data}")  # Debugging
+            data = json.loads(msg.payload.decode())
+            print(f"Payload decodificato: {data}")
             event = data.get("e", [])[0]
             slot_status = event.get("v")
-            slot_id = event.get("n").split("/")[0]  # Assumendo che "n" contenga l'ID del posto
+            slot_id = event.get("n").split("/")[0] 
+
+            previous_status = slot_board.sensors_data.get(slot_id, "unknown")
+            
+            current_time = datetime.now()  
+            last_change_time = slot_board.sensors_data.get(slot_id + "_time", current_time)
+            duration = (current_time - last_change_time).total_seconds() if last_change_time else 0
+            
             slot_board.update_slot(slot_id, slot_status)
+            
+            slot_board.event_logger.log_event(slot_id, previous_status, slot_status, duration)
+            
+            slot_board.sensors_data[slot_id + "_time"] = current_time
+            
         except Exception as e:
             print(f"Errore nel processare il messaggio: {e}")
 
