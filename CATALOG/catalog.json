@@ -19,8 +19,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724935354.38604,
-            "status": "free"
+            "last_update": 1725297281.266931,
+            "status": "occupied"
         },
         {
             "ID": 2,
@@ -30,8 +30,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724935354.391862,
-            "status": "free"
+            "last_update": 1725297281.274739,
+            "status": "occupied"
         },
         {
             "ID": 3,
@@ -41,7 +41,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724935354.395,
+            "last_update": 1725297281.280195,
             "status": "free"
         },
         {
@@ -52,8 +52,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724935355.017449,
-            "status": "free"
+            "last_update": 1725297281.284401,
+            "status": "occupied"
         },
         {
             "ID": 5,
@@ -63,8 +63,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724935354.400256,
-            "status": "occupied"
+            "last_update": 1725297281.288254,
+            "status": "free"
         },
         {
             "ID": 6,
@@ -74,7 +74,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1724935354.4031081,
+            "last_update": 1725297281.292726,
             "status": "free"
         }
     ],
