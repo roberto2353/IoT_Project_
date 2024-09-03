@@ -5,6 +5,12 @@ from queue import Queue
 import json
 import requests
 import random
+import sys
+
+# Percorso assoluto alla cartella del progetto
+sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+
+from DATA.event_logger import EventLogger
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -19,29 +25,43 @@ class SlotSensor:
         self.subTopic = baseTopic + "/+"  # Subscribe to all messages under baseTopic
         self.aliveBn = "updateCatalogSlot"
         self.slotCode = slotCode
-        self.aliveTopic = baseTopic + "/alive"
+        self.aliveTopic = "ParkingLot/alive/" + self.slotCode  # Definizione di aliveTopic
         self.simulate_occupancy = True  
         self.myPub = MyPublisher(self.sensorId + "Pub", self.pubTopic)
         self.mySub = MySubscriber(self.sensorId + "Sub1", self.subTopic)
         self.myPub.start()
         self.mySub.start()
+        self.event_logger = EventLogger()
+        
 
     def update_state(self):
+    # Stato precedente per il logging
+        previous_state = "occupied" if self.isOccupied else "free"
+        
         # Simula cambiamenti di stato
         if self.simulate_occupancy:
-            self.isOccupied = random.choice([True, False]) 
-        print(f"Slot {self.slotCode} stato aggiornato a: {'NOT free' if self.isOccupied else 'free'}")
+            self.isOccupied = random.choice([True, False])
+        
+        # Nuovo stato
+        new_state = "occupied" if self.isOccupied else "free"
 
-        # Pubblica lo stato corrente
-        state = "occupied" if self.isOccupied else "free"
-        event = {"n": "status", "u": "boolean", "t": str(time.time()), "v": state}
-        out = {"bn": self.pubTopic, "e": [event]}
-        self.myPub.myPublish(json.dumps(out), self.pubTopic)
+        # Controllo se lo stato è cambiato
+        if new_state != previous_state:
+            print(f"Slot {self.slotCode} stato aggiornato da: {previous_state} a {new_state}")
 
-        # Pubblica il messaggio di vitalità
-        eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
-        outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
-        self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
+            # Pubblica lo stato corrente
+            event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": new_state}
+            out = {"bn": self.pubTopic, "e": [event]}
+            self.myPub.myPublish(json.dumps(out), self.pubTopic)
+
+            # Registra l'evento nel database InfluxDB
+            self.event_logger.log_event(self.slotCode, previous_state, new_state)
+
+            # Pubblica il messaggio di vitalità
+            eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
+            outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
+            self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
+
 
     def toggle_simulation(self):
         # Attiva o disattiva la simulazione
@@ -110,8 +130,6 @@ def update_sensors(sensors):
             sensors.remove(sens)
 
 
-
-
 class MyPublisher:
     def __init__(self, clientID, topic):
         self.clientID = clientID + "status"
@@ -138,6 +156,7 @@ class MyPublisher:
         self._paho_mqtt.disconnect()
 
     def myPublish(self, message, topic):
+        print(f"Pubblicazione messaggio su topic {topic}: {message}")  # Debugging
         self._paho_mqtt.publish(topic, message, self.qos)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
@@ -179,7 +198,7 @@ class MySubscriber:
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         if msg.topic.split("/")[3] in ["occupancy"]:
             self.q.put(msg)
-            print(f"Topic: '{msg.topic}', QoS: '{msg.qos}' Message: '{msg.payload}'")
+            print(f"Topic: '{msg.topic}', QoS:'{msg.qos}' Message: '{msg.payload}'")
 
 
 def main():

@@ -2,7 +2,7 @@
     "project_name": "IoT4SmartParking",
     "project_owner": "IoT_Group8",
     "device_catalog": {
-        "ip": "localhost",
+        "ip": "127.0.0.1",
         "port": 8080,
         "methods": [
             "GET",
@@ -19,7 +19,11 @@
             "commands": [
                 "status"
             ],
+<<<<<<< HEAD
             "last_update": 1724686374.8399198
+=======
+            "last_update": 1724851365.1341598
+>>>>>>> defd80024a71fb4fb4ea6d6098a9e4c264d05629
         },
         {
             "ID": 2,
@@ -29,7 +33,11 @@
             "commands": [
                 "status"
             ],
+<<<<<<< HEAD
             "last_update": 1724686374.8489184
+=======
+            "last_update": 1724851365.142642
+>>>>>>> defd80024a71fb4fb4ea6d6098a9e4c264d05629
         },
         {
             "ID": 3,
@@ -39,7 +47,11 @@
             "commands": [
                 "status"
             ],
+<<<<<<< HEAD
             "last_update": 1724686374.8580453
+=======
+            "last_update": 1724851365.150049
+>>>>>>> defd80024a71fb4fb4ea6d6098a9e4c264d05629
         },
         {
             "ID": 4,
@@ -49,11 +61,35 @@
             "commands": [
                 "status"
             ],
+<<<<<<< HEAD
             "last_update": 1724686374.8663502
+=======
+            "last_update": 1724851365.1556852
+        },
+        {
+            "ID": 5,
+            "name": "sensor5",
+            "type": "photocell",
+            "location": "P0-5",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1724851365.1599889
+        },
+        {
+            "ID": 6,
+            "name": "sensor6",
+            "type": "photocell",
+            "location": "P0-6",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1724851365.1639721
+>>>>>>> defd80024a71fb4fb4ea6d6098a9e4c264d05629
         }
     ],
     "service_catalog": {
-        "ip": "localhost",
+        "ip": "127.0.0.1",
         "port": 8084,
         "methods": [
             "GET",
