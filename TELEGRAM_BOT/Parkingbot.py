@@ -43,19 +43,22 @@ async def book_slot(update: Update, context: CallbackContext):
     try:
         slot_id = context.args[0]  # ID del posto passato dall'utente
         url = settings['catalog_url'] + f'/book/{slot_id}'
-        
-        response = requests.post(url)
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps({"status": "occupied"})  # Ensure you're sending data
+
+        response = requests.post(url, headers=headers, data=data)
         response.raise_for_status()
-        
+
         await update.message.reply_text(f'Il posto {slot_id} è stato prenotato con successo per 2 minuti!')
-        
+
         #  timer per togliere la prenotazione dopo 2 minuti
         Timer(120, expire_reservation, args=[slot_id]).start()
-    
+
     except IndexError:
         await update.message.reply_text('Per favore specifica un ID di posto da prenotare. Uso: /book <posto_id>')
     except Exception as e:
         await update.message.reply_text(f'Errore durante la prenotazione: {e}')
+
 
 # togliere una prenotazione
 def expire_reservation(slot_id):
