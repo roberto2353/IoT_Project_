@@ -74,7 +74,15 @@ async def book_slot(update: Update, context: CallbackContext):
         book_response = requests.post(book_url, headers=headers, data=json.dumps({"status": "occupied", "booking_code": booking_code}))
         book_response.raise_for_status()
 
+        # Logga l'evento di "entrata" in InfluxDB
+        event_logger.log_event(
+                slot_id=booking_code,
+                previous_status= "free",
+                current_status= "reserved",
+                duration = 0.0  # Il tempo di permanenza sarà calcolato al momento dell'uscita
+            )
         await update.message.reply_text(f'Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {booking_code}. La prenotazione è valida per 2 minuti.')
+
 
         # Timer per liberare il posto dopo 2 minuti
         Timer(120, expire_reservation, args=[slot_id]).start()

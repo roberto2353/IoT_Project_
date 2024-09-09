@@ -22,16 +22,28 @@ class ParkingService:
 
             if not booking_code:
                 raise cherrypy.HTTPError(400, "Reservation code does not exist in the system")
+            
+            query = f'''
+            from(bucket: "{self.event_logger.bucket}")
+              |> range(start: -24h)  // Puoi modificare l'intervallo di tempo se necessario
+              |> filter(fn: (r) => r._measurement == "parking_slot_state" and r.slot_id == "{booking_code}" and r._field == "current_status" and r._value == "reserved")
+              |> last()
+            '''
 
-            # Logga l'evento di "entrata" in InfluxDB
-            self.event_logger.log_event(
-                slot_id=booking_code,
-                previous_status= "reserved",
-                current_status= "occupied",
-                duration = 0.0  # Il tempo di permanenza sarà calcolato al momento dell'uscita
-            )
+            result = self.event_logger.client.query_api().query(org=self.event_logger.org, query=query)
 
-            return {"message": f"Parking {booking_code} succesfully activated!"}
+            if not result or len(result[0].records) == 0:
+                raise cherrypy.HTTPError(404, "Evento di prenotazione non trovato")
+            else:
+                # Logga l'evento di "entrata" in InfluxDB
+                self.event_logger.log_event(
+                    slot_id=booking_code,
+                    previous_status= "reserved",
+                    current_status= "occupied",
+                    duration = 0.0  # Il tempo di permanenza sarà calcolato al momento dell'uscita
+                )
+
+                return {"message": f"Parking {booking_code} succesfully activated!"}
 
         except cherrypy.HTTPError as e:
             raise e 
