@@ -19,8 +19,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1725881054.5917618,
-            "status": "occupied",
+            "last_update": 1725881105.031403,
+            "status": "free",
             "booking_code": "31041555-9fba-4361-8196-5ad025de34a2"
         },
         {
@@ -31,8 +31,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1725881054.604586,
-            "status": "occupied",
+            "last_update": 1725881105.069226,
+            "status": "free",
             "booking_code": "455e0c17-3670-453b-88b0-e6326850e40f"
         },
         {
@@ -43,8 +43,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1725881054.611943,
-            "status": "occupied",
+            "last_update": 1725881105.07176,
+            "status": "free",
             "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
         },
         {
@@ -55,8 +55,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1725881054.616556,
-            "status": "free"
+            "last_update": 1725881105.07366,
+            "status": "occupied"
         },
         {
             "ID": 5,
@@ -66,8 +66,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1725881054.6206431,
-            "status": "occupied"
+            "last_update": 1725881105.0753422,
+            "status": "free"
         },
         {
             "ID": 6,
@@ -77,8 +77,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1725881054.6237261,
-            "status": "occupied",
+            "last_update": 1725881105.07724,
+            "status": "free",
             "booking_code": "35c44dcc-fedf-4c29-9027-172d3dac88a4"
         }
     ],
