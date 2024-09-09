@@ -28,7 +28,7 @@ class ParkingService:
                 slot_id=booking_code,
                 previous_status= "reserved",
                 current_status= "occupied",
-                duration = 0  # Il tempo di permanenza sarà calcolato al momento dell'uscita
+                duration = 0.0  # Il tempo di permanenza sarà calcolato al momento dell'uscita
             )
 
             return {"message": f"Parking {booking_code} succesfully activated!"}

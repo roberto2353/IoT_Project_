@@ -32,8 +32,6 @@
             "type": "photocell",
             "location": "P0-4"
             }
-<<<<<<< HEAD
-=======
         },
         {
             "deviceInfo":{
@@ -50,7 +48,6 @@
             "type": "photocell",
             "location": "P0-6"
             }
->>>>>>> defd80024a71fb4fb4ea6d6098a9e4c264d05629
         }
     ]
 }  

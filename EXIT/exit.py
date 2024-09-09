@@ -1,5 +1,8 @@
 import cherrypy
 import sys
+import pytz
+from datetime import datetime, timedelta, timezone
+
 
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
@@ -39,7 +42,7 @@ class ParkingExitService:
             query = f'''
             from(bucket: "{self.event_logger.bucket}")
               |> range(start: -24h)  // Puoi modificare l'intervallo di tempo se necessario
-              |> filter(fn: (r) => r._measurement == "parking_slot_state" and r.slot_id == "{booking_code}" and r.current_status == "occupied")
+              |> filter(fn: (r) => r._measurement == "parking_slot_state" and r.slot_id == "{booking_code}" and r._field == "current_status" and r._value == "occupied")
               |> last()
             '''
 
@@ -48,9 +51,12 @@ class ParkingExitService:
             if not result or len(result[0].records) == 0:
                 raise cherrypy.HTTPError(404, "Evento di entrata non trovato")
 
-            entry_time = result[0].records[0].get_time()
+            # Assicurati che entry_time sia aware
+            entry_time = result[0].records[0].get_time().replace(tzinfo=pytz.UTC)
 
-            exit_time = datetime.utcnow()
+            # Assicurati che exit_time sia aware
+            exit_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
+
             self.event_logger.log_event(
                 slot_id=booking_code,
                 previous_status="occupied",
@@ -59,7 +65,6 @@ class ParkingExitService:
             )
 
             parking_duration = exit_time - entry_time
-
             parking_fee = self.calculate_parking_fee(parking_duration)
 
             return {
@@ -75,5 +80,5 @@ class ParkingExitService:
             return {"error": str(e)}
 
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8086})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8087})
     cherrypy.quickstart(ParkingExitService())

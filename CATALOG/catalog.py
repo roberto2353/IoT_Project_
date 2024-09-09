@@ -1,7 +1,7 @@
 import cherrypy
 import json
 import time
-
+import uuid
 # Funzioni per gestire i dispositivi e gli altri elementi del catalogo
 def addDevice(catalog, devicesInfo):
     catalog["devices"].append(devicesInfo)
@@ -86,87 +86,75 @@ class CatalogREST(object):
             output = {"users": catalog["users"]}
         elif uri[0] == 'parkings':
             output = {"parkings": catalog["parkings"]}
-        elif uri[0] == 'book':
-                try:
-                    slot_id = uri[1]
-                    found = False
-                    for device in catalog["devices"]:
-                        if device['location'] == slot_id:
-                            if device.get('status') == 'free':
-                                device['status'] = 'occupied'
-                                found = True
-                                output = f"Slot {slot_id} has been successfully booked."
-                                break
-                            else:
-                                output = "Slot is already occupied."
-                                break
-                    if not found:
-                        raise cherrypy.HTTPError(404, 'Slot not found')
-                    json.dump(catalog, open(self.catalog_address, "w"), indent=4)
-                    return output
-                except Exception as e:
-                    cherrypy.log.error(f"Failed to book slot {slot_id}: {str(e)}", traceback=True)
-                    raise cherrypy.HTTPError(500, 'Internal Server Error')
-
         else:
             raise cherrypy.HTTPError(status=404, message='RESOURCE NOT FOUND')
         return json.dumps(output)
 
     def POST(self, *uri, **params):
+        try:
             catalog = json.load(open(self.catalog_address, "r"))
             body = cherrypy.request.body.read()
-            json_body = json.loads(body.decode('utf-8'))
-            
+            json_body = json.loads(body.decode('utf-8')) if body else {}
+
             if uri[0] == 'devices':
                 if not any(d['ID'] == json_body['ID'] for d in catalog["devices"]):
                     last_update = time.time()
                     json_body['last_update'] = last_update
                     addDevice(catalog, json_body)
                     output = f"Device with ID {json_body['ID']} has been added"
-                    print(output)
                 else:
-                    raise cherrypy.HTTPError(status=400, message='DEVICE ALREADY REGISTERED')  
+                    raise cherrypy.HTTPError(400, 'DEVICE ALREADY REGISTERED')
+
             elif uri[0] == 'services':
                 if not any(d['ID'] == json_body['ID'] for d in catalog["services"]):
                     add_service(catalog, json_body)
                     output = f"Service with ID {json_body['ID']} has been added"
                 else:
-                    raise cherrypy.HTTPError(status=400, message='SERVICE ALREADY REGISTERED')
+                    raise cherrypy.HTTPError(400, 'SERVICE ALREADY REGISTERED')
+
             elif uri[0] == 'users':
                 if not any(d['ID'] == json_body['ID'] for d in catalog["users"]):
                     add_user(catalog, json_body)
                     output = f"User with ID {json_body['ID']} has been added"
                 else:
-                    raise cherrypy.HTTPError(status=400, message='USER ALREADY REGISTERED')
+                    raise cherrypy.HTTPError(400, 'USER ALREADY REGISTERED')
+
             elif uri[0] == 'parkings':
                 if not any(d['ID'] == json_body['ID'] for d in catalog["parkings"]):
                     add_parking(catalog, json_body)
                     output = f"Parking with ID {json_body['ID']} has been added"
                 else:
-                    raise cherrypy.HTTPError(status=400, message='PARKING ALREADY REGISTERED')
+                    raise cherrypy.HTTPError(400, 'PARKING ALREADY REGISTERED')
+
             elif uri[0] == 'book':
-                try:
-                    print("URI: ",uri)
-                    slot_id = uri[1]
-                    print(f"Slot ID: {slot_id}")
-                    found = False
-                    for device in catalog["devices"]:
-                        if device['location'] == slot_id:
-                            if device.get('status') == 'free':
-                                device['status'] = 'occupied'
-                                found = True
-                                output = f"Slot {slot_id} has been successfully booked."
-                                break
-                            else:
-                                output = "Slot is already occupied."
-                                break
-                    if not found:
-                        raise cherrypy.HTTPError(404, 'Slot not found')
-                    json.dump(catalog, open(self.catalog_address, "w"), indent=4)
-                    return output
-                except Exception as e:
-                    cherrypy.log.error(f"Failed to book slot {slot_id}: {str(e)}", traceback=True)
-                    raise cherrypy.HTTPError(500, 'Internal Server Error')
+                # Cerca il primo slot libero e prenotalo
+                for device in catalog["devices"]:
+                    if device.get('status') == 'free':
+                        booking_code = str(uuid.uuid4())  # Genera un codice di prenotazione unico
+                        device['status'] = 'occupied'  # Cambia lo stato in occupato
+                        device['booking_code'] = booking_code  # Salva il codice di prenotazione nel dispositivo
+                        json.dump(catalog, open(self.catalog_address, "w"), indent=4)
+                        output = {
+                            "message": f"Slot {device['location']} has been successfully booked.",
+                            "booking_code": booking_code  # Restituisci il codice di prenotazione
+                        }
+                        break
+                else:
+                    output = {"message": "No free slots available at the moment."}
+
+            else:
+                raise cherrypy.HTTPError(404, 'Resource not found')
+
+            return output
+
+        except json.JSONDecodeError as e:
+            cherrypy.log.error(f"JSON error: {str(e)}")
+            raise cherrypy.HTTPError(500, 'JSON PARSE ERROR')
+
+        except Exception as e:
+            cherrypy.log.error(f"Error during POST request handling: {str(e)}")
+            raise cherrypy.HTTPError(500, 'INTERNAL SERVER ERROR')
+
 
 
     def PUT(self, *uri, **params):
