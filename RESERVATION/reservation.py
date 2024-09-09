@@ -20,6 +20,8 @@ class ParkingService:
             catalog = json.load(open(self.catalog_address, "r"))
             body = cherrypy.request.body.read()
             json_body = json.loads(body.decode('utf-8')) if body else {}
+            print('URI:'+uri[0])
+        
 
             if uri[0] == 'book':
                 # Cerca il primo slot libero e prenotalo

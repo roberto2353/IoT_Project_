@@ -69,7 +69,7 @@ async def book_slot(update: Update, context: CallbackContext):
         booking_code = generate_booking_code()  # Genera il codice di prenotazione
 
         # URL per la prenotazione del posto selezionato
-        book_url = '127.0.0.1:8088/book'
+        book_url = 'http://127.0.0.1:8088'+f'/book/{slot_id}'
         headers = {'Content-Type': 'application/json'}
         book_response = requests.post(book_url, headers=headers, data=json.dumps({"status": "occupied", "booking_code": booking_code}))
         book_response.raise_for_status()
