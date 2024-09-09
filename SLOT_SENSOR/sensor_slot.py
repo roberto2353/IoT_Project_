@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 
 # Percorso assoluto alla cartella del progetto
-sys.path.append('"C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_"')
+sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
 from DATA.event_logger import EventLogger
 
