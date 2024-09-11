@@ -1,15 +1,15 @@
-from datetime import datetime  # Modifica questa riga
-from influxdb_client import InfluxDBClient, Point, WritePrecision,WriteOptions
-from pathlib import Path
-import json
+from datetime import datetime  
+from influxdb_client import InfluxDBClient, Point, WritePrecision,WriteOptions # Per connettersi a InfluxDB
+from pathlib import Path 
+import json 
 
 class EventLogger:
     def __init__(self):
         # Configura la connessione a InfluxDB
-        self.url = "http://localhost:8086"  # URL del tuo server InfluxDB
-        self.token = "jChkOn7dUi9p93q-0OnquPcZYNHEgrimJ1XwogkODbx7GTWTKA8RzArEVwa5vMs01aRZO0XABIJRwlms8fBeHA=="  # Token di autenticazione
+        self.url = "http://localhost:8086"  # URL InfluxDB
+        self.token = "jChkOn7dUi9p93q-0OnquPcZYNHEgrimJ1XwogkODbx7GTWTKA8RzArEVwa5vMs01aRZO0XABIJRwlms8fBeHA=="  # Token InfluxDB
         self.org = "Group8"  # Organizzazione
-        self.bucket = "Parking_events"  # Bucket per memorizzare i dati
+        self.bucket = "Parking_events"  # Bucket InfluxDB
         
         # Crea il client InfluxDB
         self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)

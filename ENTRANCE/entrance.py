@@ -16,7 +16,7 @@ class ParkingService:
 
     def activate(self):
         try:
-            # Ricevi i dati JSON dal corpo della richiesta
+            # Ricevi i dati JSON 
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
 

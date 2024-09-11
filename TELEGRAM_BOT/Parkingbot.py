@@ -7,7 +7,7 @@ from threading import Timer
 import sys
 import random
 import string
-# Percorso assoluto alla cartella del progetto
+# Percorso assoluto 
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
 SETTINGS_PATH = '/Users/alexbenedetti/Desktop/IoT_Project_/TAB_SLOT/settings.json'
@@ -119,9 +119,9 @@ async def book_slot(update: Update, context: CallbackContext):
         slot_id = chosen_slot['location']
         booking_code = generate_booking_code()
 
-        book_url = settings['catalog_url'] + f'/book/{slot_id}'
+        book_url = 'http://127.0.0.1:8088/book'
         headers = {'Content-Type': 'application/json'}
-        book_response = requests.post(book_url, headers=headers, data=json.dumps({"status": "occupied", "booking_code": booking_code}))
+        book_response = requests.post(book_url, headers=headers, data=json.dumps({"slot_id":slot_id,"status": "occupied", "booking_code": booking_code}))
         book_response.raise_for_status()
 
         event_logger.log_event(slot_id=booking_code, previous_status="free", current_status="reserved", duration=0.0)

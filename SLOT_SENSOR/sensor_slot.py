@@ -8,7 +8,7 @@ import random
 import sys
 from datetime import datetime
 
-# Percorso assoluto alla cartella del progetto
+# Percorso assoluto 
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
 from DATA.event_logger import EventLogger
@@ -28,7 +28,7 @@ class SlotSensor:
         self.subTopic = baseTopic + "/+"  # Subscribe to all messages under baseTopic
         self.aliveBn = "updateCatalogSlot"
         self.slotCode = slotCode
-        self.aliveTopic = "ParkingLot/alive/" + self.slotCode  # Definizione di aliveTopic
+        self.aliveTopic = "ParkingLot/alive/" + self.slotCode  
         self.simulate_occupancy = True  
         self.myPub = MyPublisher(self.sensorId + "Pub", self.pubTopic)
         self.mySub = MySubscriber(self.sensorId + "Sub1", self.subTopic)
@@ -51,7 +51,7 @@ class SlotSensor:
             self.isOccupied = new_state
             print(f"Slot {self.slotCode} stato aggiornato da: {last_state_str} a {new_state_str}")
 
-            # Pubblica lo stato corrente
+            # Pubblica il nuovo stato del sensore
             event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": new_state_str}
             out = {"bn": self.pubTopic, "e": [event]}
             self.myPub.myPublish(json.dumps(out), self.pubTopic)
@@ -59,7 +59,7 @@ class SlotSensor:
             # Aggiorna lo stato del sensore nel catalogo
             self.update_catalog_state(new_state_str)
 
-            # Pubblica il messaggio di vitalità
+            # Pubblica un messaggio di "alive" per notificare che il sensore è attivo
             eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
             outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
             self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
@@ -73,19 +73,19 @@ class SlotSensor:
             catalog_url = settings["catalog_url"]
             url = f"{catalog_url}/devices"
 
-            # Ottieni i dati attuali dal catalogo
+            # Ottieni la lista dei dispositivi dal catalogo
             response = requests.get(url)
             response.raise_for_status()
             devices = response.json().get('devices', [])
             
-            # Trova il dispositivo nel catalogo e aggiorna il suo stato
+            
             for device in devices:
                 if device["location"] == self.slotCode:
                     device["status"] = new_state
                     device["last_update"] = time.time()
                     break
 
-            # Invia la richiesta PUT per aggiornare lo stato nel catalogo
+            # Invia una richiesta PUT per aggiornare il catalogo
             response = requests.put(url, json=device)
             response.raise_for_status()
             print(f"Stato del sensore {self.slotCode} aggiornato nel catalogo a: {new_state}")
@@ -121,9 +121,9 @@ def update_sensors(sensors):
     try:
         response = requests.get(url)
         response.raise_for_status()
-        data = response.json()  # Parse JSON response
+        data = response.json()  
 
-        # Now access the 'devices' key in the JSON object
+       
         if 'devices' not in data:
             print(f"Unexpected response format: {data}")
             return
@@ -185,7 +185,7 @@ class MyPublisher:
         self._paho_mqtt.disconnect()
 
     def myPublish(self, message, topic):
-        print(f"Pubblicazione messaggio su topic {topic}: {message}")  # Debugging
+        print(f"Pubblicazione messaggio su topic {topic}: {message}")  # Debug
         self._paho_mqtt.publish(topic, message, self.qos)
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):

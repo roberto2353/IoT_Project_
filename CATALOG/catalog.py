@@ -126,22 +126,6 @@ class CatalogREST(object):
                 else:
                     raise cherrypy.HTTPError(400, 'PARKING ALREADY REGISTERED')
 
-            elif uri[0] == 'book':
-                # Cerca il primo slot libero e prenotalo
-                for device in catalog["devices"]:
-                    if device.get('status') == 'free':
-                        booking_code = str(uuid.uuid4())  # Genera un codice di prenotazione unico
-                        device['status'] = 'occupied'  # Cambia lo stato in occupato
-                        device['booking_code'] = booking_code  # Salva il codice di prenotazione nel dispositivo
-                        json.dump(catalog, open(self.catalog_address, "w"), indent=4)
-                        output = {
-                            "message": f"Slot {device['location']} has been successfully booked.",
-                            "booking_code": booking_code  # Restituisci il codice di prenotazione
-                        }
-                        break
-                else:
-                    output = {"message": "No free slots available at the moment."}
-
             else:
                 raise cherrypy.HTTPError(404, 'Resource not found')
 
@@ -181,10 +165,10 @@ class CatalogREST(object):
             json.dump(catalog, open(self.catalog_address, "w"), indent=4)
             return json_body
         except json.JSONDecodeError as e:
-            print(f"JSON error: {e}")  # Debug statement
+            print(f"JSON error: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='JSON PARSE ERROR')
         except Exception as e:
-            print(f"Error during PUT request handling: {e}")  # Debug statement
+            print(f"Error during PUT request handling: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='INTERNAL SERVER ERROR')
         
     def DELETE(self, *uri):
@@ -209,10 +193,10 @@ class CatalogREST(object):
             json.dump(catalog, open(self.catalog_address, "w"), indent=4)
             return output
         except json.JSONDecodeError as e:
-            print(f"JSON error: {e}")  # Debug statement
+            print(f"JSON error: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='JSON PARSE ERROR')
         except Exception as e:
-            print(f"Error during DELETE request handling: {e}")  # Debug statement
+            print(f"Error during DELETE request handling: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='INTERNAL SERVER ERROR')
 
 if __name__ == '__main__':

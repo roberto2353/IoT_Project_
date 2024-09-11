@@ -51,10 +51,10 @@ class ParkingExitService:
             if not result or len(result[0].records) == 0:
                 raise cherrypy.HTTPError(404, "Evento di entrata non trovato")
 
-            # Assicurati che entry_time sia aware
+            
             entry_time = result[0].records[0].get_time().replace(tzinfo=pytz.UTC)
 
-            # Assicurati che exit_time sia aware
+            
             exit_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
 
             self.event_logger.log_event(

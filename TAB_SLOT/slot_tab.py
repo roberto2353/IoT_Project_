@@ -6,7 +6,7 @@ import paho.mqtt.client as PahoMQTT
 from datetime import datetime
 import sys
 
-# Percorso assoluto alla cartella del progetto
+# Percorso assoluto 
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
 from DATA.event_logger import EventLogger
@@ -21,7 +21,7 @@ class SlotBoard:
         self.occupied_slots = 0
         self.total_slots = 0
         self.sensors_data = {}
-        self.event_logger = EventLogger()  # Istanza di EventLogger
+        self.event_logger = EventLogger()  
         self.initialize_board()
 
     def initialize_board(self):
