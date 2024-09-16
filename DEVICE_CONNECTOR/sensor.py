@@ -37,7 +37,7 @@ class SensorREST(threading.Thread):
                 for device in self.deviceInfo:
                     if 'status' in device['commands']:
                         #value changes every time i'm doing the get
-                        value = random.randint(0, 1)
+                        value = 1
                         output.append({'deviceID': device['ID'], 'status': value})
                 return json.dumps(output)
             else:
