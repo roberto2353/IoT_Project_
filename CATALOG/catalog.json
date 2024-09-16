@@ -19,9 +19,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.9094641,
-            "status": "free",
-            "booking_code": "3bc6e98d-4bcb-4074-8729-47eea7ebfc95"
+            "last_update": 1726472577.366627
         },
         {
             "ID": 2,
@@ -31,9 +29,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.88847,
-            "status": "free",
-            "booking_code": "f35dad84-2977-4fd8-bd66-5a949c189750"
+            "last_update": 1726472577.3776371
         },
         {
             "ID": 3,
@@ -43,9 +39,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.89505,
-            "status": "free",
-            "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
+            "last_update": 1726472577.384236
         },
         {
             "ID": 4,
@@ -55,9 +49,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.899743,
-            "status": "free",
-            "booking_code": "780448d8-007d-4091-89f7-dbf928d8445e"
+            "last_update": 1726472577.390065
         },
         {
             "ID": 5,
@@ -67,8 +59,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.9042912,
-            "status": "free"
+            "last_update": 1726472577.3957639
         },
         {
             "ID": 6,
@@ -78,20 +69,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004660.858804,
-            "status": "occupied",
-            "booking_code": "35c44dcc-fedf-4c29-9027-172d3dac88a4"
+            "last_update": 1726472577.4008808
         }
     ],
-    "service_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8084,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
     "users": [],
     "services": [],
     "parkings": []

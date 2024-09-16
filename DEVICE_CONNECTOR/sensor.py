@@ -10,13 +10,15 @@ class SensorREST(threading.Thread):
     devices_counter = 1
 
     def __init__(self, pi):
-        threading.Thread.__init__(self)
+        
         self.settings = json.load(open('settings.json'))
         self.catalogURL = self.settings['catalogURL']
         self.devices = self.settings['devices']
         self.pingInterval = pi
+        #self.first_insertion = True
         self.deviceInfo = []  # Initialize as a list to store multiple device infos
         self.register_devices()
+        threading.Thread.__init__(self)
         self.start()
 
     def register_devices(self):
