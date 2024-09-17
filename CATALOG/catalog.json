@@ -91,7 +91,15 @@
             "PUT"
         ]
     },
-    "users": [],
+    "users": [
+        {
+            "ID": "1f8f3203-3648-48b6-9645-85bedbceb7db",
+            "name": "Kevin",
+            "surname": "Gumina",
+            "identity": "GA38492EF",
+            "credit_card": "4950321849358943"
+        }
+    ],
     "services": [],
     "parkings": []
 }

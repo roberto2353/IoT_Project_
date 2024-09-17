@@ -18,8 +18,10 @@ def removeDevices(catalog, deviceID):
         if device['ID'] == int(deviceID):
             catalog["devices"].pop(i)
 
-def add_user(catalog, user_info):
+def add_user(catalog, user_info,catalog_a):
     catalog["users"].append(user_info)
+    with open(catalog_a, 'w') as f:
+        json.dump(catalog, f, indent=4)
 
 def update_user(catalog, user_id, user_info):
     for i in range(len(catalog["users"])):
@@ -113,11 +115,17 @@ class CatalogREST(object):
                     raise cherrypy.HTTPError(400, 'SERVICE ALREADY REGISTERED')
 
             elif uri[0] == 'users':
+                
                 if not any(d['ID'] == json_body['ID'] for d in catalog["users"]):
-                    add_user(catalog, json_body)
-                    output = f"User with ID {json_body['ID']} has been added"
-                else:
-                    raise cherrypy.HTTPError(400, 'USER ALREADY REGISTERED')
+                    user_info = {
+                        "ID": json_body.get("ID", str(uuid.uuid4())),  # If no ID provided, generate one
+                        "name": json_body['name'],
+                        "surname": json_body['surname'],
+                        "identity": json_body['identity'],
+                        "credit_card": json_body['credit_card']
+                    }
+                    add_user(catalog, user_info, self.catalog_address)
+                    output = f"User with ID {user_info['ID']} has been added"
 
             elif uri[0] == 'parkings':
                 if not any(d['ID'] == json_body['ID'] for d in catalog["parkings"]):
