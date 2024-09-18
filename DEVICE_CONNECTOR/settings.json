@@ -49,5 +49,8 @@
             "location": "P0-6"
             }
         }
-    ]
+    ],
+    "messageBroker": "localhost",
+    "brokerPort": 1883, 
+    "qos": 2
 }  

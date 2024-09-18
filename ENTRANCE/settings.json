@@ -1,10 +1,13 @@
 {
     "catalogURL": "http://127.0.0.1:8080",
-    "updateInterval": 120,
+    "updateInterval": 60,
     "serviceInfo": {
         "ID": 2,
         "name": "EntranceService",
         "last_update": "",
         "port": "8085"
-    }
+    },
+    "messageBroker": "localhost",
+    "brokerPort": 1883, 
+    "qos": 2
 }

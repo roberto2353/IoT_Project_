@@ -1,7 +1,9 @@
 import threading
+import uuid
 import cherrypy
 import json
 import time
+import paho.mqtt.client as PahoMQTT
 
 SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
 DEVICE_EXPIRATION_THRESHOLD = 120 #Every 2 minutes
@@ -34,20 +36,24 @@ class CatalogManager:
             print(f"Failed to save catalog: {e}")
 
     # Catalog manipulation methods
-    def add_device(self, devices_info):
-        if not any(d['ID'] == devices_info['ID'] for d in self.catalog["devices"]):
-            self.catalog["devices"].append(devices_info)
+    def add_device(self, device_info):
+        if not any(d['ID'] == device_info['ID'] for d in self.catalog["devices"]):
+            self.catalog["devices"].append(device_info)
             self.write_catalog()
         else:
-            raise ValueError(f"Device with ID {devices_info['ID']} already exists")
+            raise ValueError(f"Device with ID {device_info['ID']} already exists")
 
-    def update_device(self, device_id, devices_info):
+    def update_device(self, device_info):
+        device_id = int(device_info["n"])
         for device in self.catalog["devices"]:
             if device['ID'] == device_id:
-                device.update(devices_info)
+                location = device["location"]
+                device["last_update"] = device_info["t"]
+                print("Device at location " +location+ " updated correctly!")
                 self.write_catalog()
                 return
         raise ValueError(f"Device with ID {device_id} not found")
+        
 
     def remove_device(self, device_id):
         for i, device in enumerate(self.catalog["devices"]):
@@ -67,11 +73,13 @@ class CatalogManager:
         return f"Service with ID {service_info['ID']} added successfully."
 
 
-    def update_service(self, service_id, service_info):
+    def update_service(self, service_info):
     # Check if the service exists before updating
-        for i, service in enumerate(self.catalog["services"]):
+        service_id = int(service_info["n"])
+        for service in self.catalog["services"]:
             if service['ID'] == service_id:
-                self.catalog["services"][i] = service_info
+                service["last_update"] = time.time()
+                print("aggiornato")
                 self.write_catalog()
                 return f"Service with ID {service_id} updated successfully."
     
@@ -90,8 +98,18 @@ class CatalogManager:
 
 
     def add_user(self, user_info):
-        self.catalog["users"].append(user_info)
-        self.write_catalog()
+        if not any(d['ID'] == user_info['ID'] for d in self.catalog["users"]):
+                    new_user = {
+                        "ID": user_info.get("ID", str(uuid.uuid4())),  # If no ID provided, generate one
+                        "name": user_info["name"],
+                        "surname": user_info['surname'],
+                        "identity": user_info['identity'],
+                        "credit_card": user_info['credit_card']
+                    }
+                    self.catalog["users"].append(new_user)
+                    self.write_catalog()
+                    return
+        raise ValueError(f"User already registered")
 
     def update_user(self, user_id, user_info):
         for i, user in enumerate(self.catalog["users"]):
@@ -120,18 +138,18 @@ class CatalogManager:
         self.write_catalog()
 
     def check_service_expiration(self):
-        """Remove services that have expired based on their 'last_updated' timestamp."""
+        """Remove services that have expired based on their 'last_update' timestamp."""
         current_time = time.time()
         updated_services = [
             s for s in self.catalog["services"]
-            if s.get("last_updated") and (current_time - float(s["last_updated"]) <= SERVICE_EXPIRATION_THRESHOLD)
+            if s.get("last_update") and (current_time - float(s["last_update"]) <= SERVICE_EXPIRATION_THRESHOLD)
         ]
         self.catalog["services"] = updated_services
         self.write_catalog()
     
 
     def check_device_expiration(self):
-        """Remove devices that have expired based on their 'last_updated' timestamp."""
+        """Remove devices that have expired based on their 'last_update' timestamp."""
         current_time = time.time()
         updated_devices = [
         d for d in self.catalog["devices"]
@@ -186,7 +204,6 @@ class CatalogREST(object):
                 self.catalog_manager.add_device(json_body)
                 return f"Device with ID {json_body['ID']} added"
             elif uri[0] == 'services':
-                print("pippo")
                 self.catalog_manager.add_service(json_body)
                 return f"Service with ID {json_body['ID']} added"
             elif uri[0] == 'users':
@@ -208,7 +225,7 @@ class CatalogREST(object):
             json_body = json.loads(body.decode('utf-8'))
 
             if uri[0] == 'devices':
-                self.catalog_manager.update_device(json_body['ID'], json_body)
+                self.catalog_manager.update_device(json_body)
                 return f"Device with ID {json_body['ID']} updated"
             elif uri[0] == 'services':
                 self.catalog_manager.update_service(json_body['ID'], json_body)
@@ -246,10 +263,51 @@ class CatalogREST(object):
             print(f"Error in DELETE: {e}")
             raise cherrypy.HTTPError(500, 'Internal Server Error')
 
+class MySubscriber:
+        def __init__(self, clientID, topic, broker, port, catalog_manager):
+            self.clientID = clientID
+			# create an instance of paho.mqtt.client
+            self._paho_mqtt = PahoMQTT.Client(client_id=clientID) 
+            
+			# register the callback
+            self._paho_mqtt.on_connect = self.myOnConnect
+            self._paho_mqtt.on_message = self.myOnMessageReceived 
+            self.topic = topic
+            self.messageBroker = broker
+            self.port = port
+            self.catalog_manager = catalog_manager
+
+        def start (self):
+            #manage connection to broker
+            self._paho_mqtt.connect(self.messageBroker, self.port)
+            self._paho_mqtt.loop_start()
+            # subscribe for a topic
+            self._paho_mqtt.subscribe(self.topic, 2)
+
+        def stop (self):
+            self._paho_mqtt.unsubscribe(self.topic)
+            self._paho_mqtt.loop_stop()
+            self._paho_mqtt.disconnect()
+
+        def myOnConnect (self, paho_mqtt, userdata, flags, rc):
+            print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
+
+        def myOnMessageReceived (self, paho_mqtt , userdata, msg):
+            message = json.loads(msg.payload.decode("utf-8")) #{"bn": updateCatalog<>, "e": [{...}]}
+            #self.catalog = CatalogREST(self.catalog_manager)
+            if message['bn'] == "updateCatalogSlot":            
+                self.catalog_manager.update_device(message['e'][0])# {"n": Code/deviceName, "t": time.time(), "v": "", "u": IP}
+                print("Device updated")
+            if message['bn'] == "updateCatalogService":            
+                self.catalog_manager.update_service(message['e'][0])# {"n": serviceName, "t": time.time(), "v": "", "u": IP}
+                print("Service updated")
 
 if __name__ == '__main__':
     catalog_manager = CatalogManager("catalog.json")
     catalog_rest = CatalogREST(catalog_manager)
+
+    mqtt_subscriber = MySubscriber(clientID="CatalogSubscriber", topic="ParkingLot/alive/#", broker="localhost", port=1883, catalog_manager=catalog_manager)
+    mqtt_subscriber.start()
 
     conf = {
         '/': {

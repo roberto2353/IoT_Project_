@@ -10,69 +10,32 @@
             "PUT"
         ]
     },
-    "devices": [
+    "devices": [],
+    "service_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8084,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "users": [
         {
-            "ID": 1,
-            "name": "sensor1",
-            "type": "photocell",
-            "location": "P0-1",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726472577.366627
-        },
-        {
-            "ID": 2,
-            "name": "sensor2",
-            "type": "photocell",
-            "location": "P0-2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726472577.3776371
-        },
-        {
-            "ID": 3,
-            "name": "sensor3",
-            "type": "photocell",
-            "location": "P0-3",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726472577.384236
-        },
-        {
-            "ID": 4,
-            "name": "sensor4",
-            "type": "photocell",
-            "location": "P0-4",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726472577.390065
-        },
-        {
-            "ID": 5,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P0-5",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726472577.3957639
-        },
-        {
-            "ID": 6,
-            "name": "sensor6",
-            "type": "photocell",
-            "location": "P0-6",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726472577.4008808
+            "ID": "1f8f3203-3648-48b6-9645-85bedbceb7db",
+            "name": "Kevin",
+            "surname": "Gumina",
+            "identity": "GA38492EF",
+            "credit_card": "4950321849358943"
         }
     ],
-    "users": [],
-    "services": [],
+    "services": [
+        {
+            "ID": 2,
+            "name": "EntranceService",
+            "last_update": 1726644413.401369,
+            "port": "8085"
+        }
+    ],
     "parkings": []
 }
