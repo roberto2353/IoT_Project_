@@ -2,9 +2,8 @@ import cherrypy
 import sys
 import pytz
 from datetime import datetime, timedelta, timezone
-
-
-sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+import os
+sys.path.append(os.path.abspath(r'C:\Users\fabio\Documents\GitHub\IoT_Project_\DATA'))
 
 from DATA.event_logger import EventLogger
 from datetime import datetime, timedelta

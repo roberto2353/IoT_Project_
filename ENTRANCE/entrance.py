@@ -1,6 +1,7 @@
 import cherrypy
 import sys
-sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+import os
+sys.path.append(os.path.abspath(r'C:\Users\fabio\Documents\GitHub\IoT_Project_\DATA'))
 
 from DATA.event_logger import EventLogger
 import json

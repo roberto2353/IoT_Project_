@@ -19,9 +19,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.9094641,
+            "last_update": 1726676718.5880787,
             "status": "free",
-            "booking_code": "3bc6e98d-4bcb-4074-8729-47eea7ebfc95"
+            "booking_code": ""
         },
         {
             "ID": 2,
@@ -31,9 +31,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.88847,
-            "status": "free",
-            "booking_code": "f35dad84-2977-4fd8-bd66-5a949c189750"
+            "last_update": 1726676720.6279655,
+            "status": "occupied",
+            "booking_code": "455e0c17-3670-453b-88b0-e6326850e40f"
         },
         {
             "ID": 3,
@@ -43,9 +43,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.89505,
+            "last_update": 1726676722.6649554,
             "status": "free",
-            "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
+            "booking_code": ""
         },
         {
             "ID": 4,
@@ -55,9 +55,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.899743,
-            "status": "free",
-            "booking_code": "780448d8-007d-4091-89f7-dbf928d8445e"
+            "last_update": 1726676724.6964273,
+            "status": "occupied",
+            "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
         },
         {
             "ID": 5,
@@ -67,8 +67,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004665.9042912,
-            "status": "free"
+            "last_update": 1726676726.7523124,
+            "status": "free",
+            "booking_code": ""
         },
         {
             "ID": 6,
@@ -78,9 +79,33 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726004660.858804,
+            "last_update": 1726676728.7802625,
+            "status": "free",
+            "booking_code": ""
+        },
+        {
+            "ID": 7,
+            "name": "sensor7",
+            "type": "photocell",
+            "location": "P0-7",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726676711.5546496,
+            "status": "free",
+            "booking_code": ""
+        },
+        {
+            "ID": 8,
+            "name": "sensor8",
+            "type": "photocell",
+            "location": "P1-4",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726676070.6447544,
             "status": "occupied",
-            "booking_code": "35c44dcc-fedf-4c29-9027-172d3dac88a4"
+            "booking_code": "82547567-5f36-4g16-8337-94894b5f477c"
         }
     ],
     "service_catalog": {
