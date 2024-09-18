@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from collections import defaultdict
 import os
@@ -76,12 +76,12 @@ class Algorithm:
         print(f"total occupied parking slots: {self.tot_occupied}")
 
     def arrival_time(self):
-        current_hour = datetime.datetime.now().hour
+        current_hour = datetime.now().hour
         if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev:
-            self.arrival_time = datetime.now() + datetime.timedelta(seconds=random.randint(5, self.t_hold_time))
+            self.arrival_time = datetime.now() + timedelta(seconds=random.randint(5, self.t_hold_time))
             self.arrivals.append(self.arrival_time)
         elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev:
-            self.arrival_time = datetime.now() + datetime.timedelta(seconds=random.randint(3, int(self.t_hold_time/2)))
+            self.arrival_time = datetime.now() + timedelta(seconds=random.randint(3, int(self.t_hold_time/2)))
             self.arrivals.append(self.arrival_time)
         self.arrivals.sort()
 
