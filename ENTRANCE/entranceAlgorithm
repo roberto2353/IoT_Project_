@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import json
 from collections import defaultdict
 import os
@@ -78,10 +78,10 @@ class Algorithm:
     def arrival_time(self):
         current_hour = datetime.datetime.now().hour
         if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev:
-            self.arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(5, self.t_hold_time))
+            self.arrival_time = datetime.now() + datetime.timedelta(seconds=random.randint(5, self.t_hold_time))
             self.arrivals.append(self.arrival_time)
         elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev:
-            self.arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(3, int(self.t_hold_time/2)))
+            self.arrival_time = datetime.now() + datetime.timedelta(seconds=random.randint(3, int(self.t_hold_time/2)))
             self.arrivals.append(self.arrival_time)
         self.arrivals.sort()
 
@@ -101,7 +101,7 @@ class Algorithm:
 
     def routeArrivals(self):
         flag = 0
-        time = datetime.datetime.now()
+        time = datetime.now()
         if self.arrivals and time >= self.arrivals[0]:
             self.arrivals.pop(0)
             for floor in range(self.n_floors):
@@ -132,7 +132,7 @@ class Algorithm:
             
     def handle_departures(self,catalog_path):
         departure_probability = 0.1  # 10% chance for any parked car to leave (JUST FOR SIMULATION, WE SHOULD HAVE 0.5)
-        current_time = datetime.datetime.now()
+        current_time = datetime.now()
 
         for device in self.devices:
             if device['status'] == 'occupied':
