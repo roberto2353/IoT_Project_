@@ -130,7 +130,7 @@ class Algorithm:
         with open(catalog_path, 'w') as file:
             json.dump({"devices": self.devices}, file, indent=4)
             
-    def handle_departures(self):
+    def handle_departures(self,catalog_path):
         departure_probability = 0.1  # 10% chance for any parked car to leave (JUST FOR SIMULATION, WE SHOULD HAVE 0.5)
         current_time = datetime.datetime.now()
 
@@ -142,7 +142,7 @@ class Algorithm:
                     device['booking_code'] = None # OR ""
                     
                     print(f"Device {device['ID']} at {device['location']} is now free. Car has departed.")
-        self.update_catalog()
+        self.update_catalog(catalog_path)
         
         
         
@@ -188,17 +188,21 @@ if __name__ == '__main__':
     algorithm.totalOccupied()
 
     # Loop for car arrivals and assignments, also handling departures
-    while True:
-        # Load the latest catalog (in case it was updated externally by departures)
-        with open(catalog_path, 'r') as file:
-            catalog = json.load(file)
-        devices = catalog['devices']
-        algorithm.devices = devices  # Update the devices in the algorithm
+    try:
+        while True:
+            # Load the latest catalog (in case it was updated externally by departures)
+            with open(catalog_path, 'r') as file:
+                catalog = json.load(file)
+            devices = catalog['devices']
+            algorithm.devices = devices  # Update the devices in the algorithm
         
-        # Recalculate the occupancy per floor based on the updated catalog
-        algorithm.occDevPerFloorList()  # This will check the current occupied status
-        algorithm.handle_departures()  
-        algorithm.arrival_time()
-        algorithm.routeArrivals()
-        algorithm.update_catalog(catalog_path)
-        time.sleep(1)
+            # Recalculate the occupancy per floor based on the updated catalog
+            algorithm.occDevPerFloorList()  # This will check the current occupied status
+            algorithm.handle_departures(catalog_path)  
+            algorithm.arrival_time()
+            algorithm.routeArrivals()
+            algorithm.update_catalog(catalog_path)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        False
+        

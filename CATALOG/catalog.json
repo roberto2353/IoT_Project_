@@ -1,15 +1,4 @@
 {
-    "project_name": "IoT4SmartParking",
-    "project_owner": "IoT_Group8",
-    "device_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8080,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
     "devices": [
         {
             "ID": 1,
@@ -19,7 +8,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678033.5573792,
+            "last_update": 1726678574.9706314,
             "status": "free",
             "booking_code": ""
         },
@@ -31,9 +20,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678016.2507875,
-            "status": "occupied",
-            "booking_code": "455e0c17-3670-453b-88b0-e6326850e40f"
+            "last_update": 1726678577.0231066,
+            "status": "free",
+            "booking_code": null
         },
         {
             "ID": 3,
@@ -43,7 +32,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678018.2812362,
+            "last_update": 1726678559.7447846,
             "status": "free",
             "booking_code": ""
         },
@@ -55,9 +44,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678020.3386364,
-            "status": "occupied",
-            "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
+            "last_update": 1726678561.7932022,
+            "status": "free",
+            "booking_code": null
         },
         {
             "ID": 5,
@@ -67,7 +56,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678022.4073822,
+            "last_update": 1726678563.840692,
             "status": "free",
             "booking_code": ""
         },
@@ -79,7 +68,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678024.4421864,
+            "last_update": 1726678565.8801405,
             "status": "free",
             "booking_code": ""
         },
@@ -91,7 +80,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678026.4950006,
+            "last_update": 1726678567.9257743,
             "status": "free",
             "booking_code": ""
         },
@@ -103,21 +92,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726676070.6447544,
-            "status": "occupied",
-            "booking_code": "82547567-5f36-4g16-8337-94894b5f477c"
+            "last_update": 1726678140.507624,
+            "status": "free",
+            "booking_code": null
         }
-    ],
-    "service_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8084,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
-    "users": [],
-    "services": [],
-    "parkings": []
+    ]
 }
