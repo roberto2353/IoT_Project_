@@ -53,7 +53,15 @@ class CatalogManager:
                 self.write_catalog()
                 return
         raise ValueError(f"Device with ID {device_id} not found")
-        
+    
+    def update_device_state(self, device_info):
+        device_id = device_info["ID"]
+        for device in self.catalog["devices"]:
+            if device['ID'] == device_id:
+                device.update(device_info)
+                self.write_catalog()
+                return
+        raise ValueError(f"Device with ID {device_id} not found")
 
     def remove_device(self, device_id):
         for i, device in enumerate(self.catalog["devices"]):
@@ -225,7 +233,7 @@ class CatalogREST(object):
             json_body = json.loads(body.decode('utf-8'))
 
             if uri[0] == 'devices':
-                self.catalog_manager.update_device(json_body)
+                self.catalog_manager.update_device_state(json_body)
                 return f"Device with ID {json_body['ID']} updated"
             elif uri[0] == 'services':
                 self.catalog_manager.update_service(json_body['ID'], json_body)
@@ -296,7 +304,7 @@ class MySubscriber:
             message = json.loads(msg.payload.decode("utf-8")) #{"bn": updateCatalog<>, "e": [{...}]}
             #self.catalog = CatalogREST(self.catalog_manager)
             if message['bn'] == "updateCatalogSlot":            
-                self.catalog_manager.update_device(message['e'][0])# {"n": Code/deviceName, "t": time.time(), "v": "", "u": IP}
+                self.catalog_manager.update_device(message['e'][0])# {"n": ID, "t": time.time(), "v": "", "u": IP}
                 print("Device updated")
             if message['bn'] == "updateCatalogService":            
                 self.catalog_manager.update_service(message['e'][0])# {"n": serviceName, "t": time.time(), "v": "", "u": IP}

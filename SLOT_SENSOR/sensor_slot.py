@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 
 # Percorso assoluto 
-sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+sys.path.append('/Users/robertobratu/Desktop/IoT_Project_')
 
 from DATA.event_logger import EventLogger
 

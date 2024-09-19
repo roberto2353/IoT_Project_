@@ -10,7 +10,74 @@
             "PUT"
         ]
     },
-    "devices": [],
+    "devices": [
+        {
+            "ID": 1,
+            "name": "sensor1",
+            "type": "photocell",
+            "location": "P0-1",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726763591.443539,
+            "status": "free"
+        },
+        {
+            "ID": 2,
+            "name": "sensor2",
+            "type": "photocell",
+            "location": "P0-2",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726763591.462986,
+            "status": "free"
+        },
+        {
+            "ID": 3,
+            "name": "sensor3",
+            "type": "photocell",
+            "location": "P0-3",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726763626.517309,
+            "status": "occupied"
+        },
+        {
+            "ID": 4,
+            "name": "sensor4",
+            "type": "photocell",
+            "location": "P0-4",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726763556.397779,
+            "status": "free"
+        },
+        {
+            "ID": 5,
+            "name": "sensor5",
+            "type": "photocell",
+            "location": "P0-5",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726763556.414158,
+            "status": "free"
+        },
+        {
+            "ID": 6,
+            "name": "sensor6",
+            "type": "photocell",
+            "location": "P0-6",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1726763521.352407,
+            "status": "free"
+        }
+    ],
     "service_catalog": {
         "ip": "127.0.0.1",
         "port": 8084,
@@ -33,8 +100,20 @@
         {
             "ID": 2,
             "name": "EntranceService",
-            "last_update": 1726644413.401369,
+            "last_update": 1726763402.284794,
             "port": "8085"
+        },
+        {
+            "ID": 3,
+            "name": "ExitService",
+            "last_update": 1726763410.8766022,
+            "port": "8087"
+        },
+        {
+            "ID": 4,
+            "name": "ReservationService",
+            "last_update": 1726763382.4114711,
+            "port": "8088"
         }
     ],
     "parkings": []
