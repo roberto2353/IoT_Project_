@@ -8,7 +8,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834759.525648,
+            "last_update": 1726834856.2934577,
             "status": "free",
             "booking_code": ""
         },
@@ -20,7 +20,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834761.5664485,
+            "last_update": 1726834858.3528528,
             "status": "free",
             "booking_code": null
         },
@@ -32,7 +32,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834763.6191108,
+            "last_update": 1726834860.4000058,
             "status": "free",
             "booking_code": ""
         },
@@ -44,7 +44,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834765.6617525,
+            "last_update": 1726834862.4399457,
             "status": "free",
             "booking_code": null
         },
@@ -52,11 +52,11 @@
             "ID": 5,
             "name": "sensor5",
             "type": "photocell",
-            "location": "P0-5",
+            "location": "P1-1",
             "commands": [
                 "status"
             ],
-            "last_update": 1726834767.7007937,
+            "last_update": 1726834864.4844325,
             "status": "free",
             "booking_code": ""
         },
@@ -64,11 +64,11 @@
             "ID": 6,
             "name": "sensor6",
             "type": "photocell",
-            "location": "P0-6",
+            "location": "P1-2",
             "commands": [
                 "status"
             ],
-            "last_update": 1726834769.7418432,
+            "last_update": 1726834866.5378618,
             "status": "free",
             "booking_code": ""
         },
@@ -76,7 +76,7 @@
             "ID": 7,
             "name": "sensor7",
             "type": "photocell",
-            "location": "P0-7",
+            "location": "P1-3",
             "commands": [
                 "status"
             ],
