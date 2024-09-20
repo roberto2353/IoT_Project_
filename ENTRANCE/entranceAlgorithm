@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+import datetime
 import json
 from collections import defaultdict
 import os
@@ -37,9 +37,8 @@ class Algorithm:
         self.n_occ_dev_per_floor = []
         self.floors = []
         self.tot_occupied = 0
-        self.arrival_rate = 0
         self.arrivals = []
-        self.t_hold_time = 60
+        self.t_hold_time = 5
 
     def countFloors(self):
         for device in self.devices:
@@ -76,12 +75,12 @@ class Algorithm:
         print(f"total occupied parking slots: {self.tot_occupied}")
 
     def arrival_time(self):
-        current_hour = datetime.now().hour
+        current_hour = datetime.datetime.now().hour
         if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev:
-            self.arrival_time = datetime.now() + timedelta(seconds=random.randint(5, self.t_hold_time))
+            self.arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(0, self.t_hold_time))
             self.arrivals.append(self.arrival_time)
         elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev:
-            self.arrival_time = datetime.now() + timedelta(seconds=random.randint(3, int(self.t_hold_time/2)))
+            self.arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(0, int(self.t_hold_time/2)))
             self.arrivals.append(self.arrival_time)
         self.arrivals.sort()
 
@@ -90,6 +89,7 @@ class Algorithm:
             device['status'] = 'occupied'
             device['last_update'] = time.timestamp()
             device['booking_code'] = 'new_code'  # TODO: generate a unique code
+            #TODO: USE MQTT TO UPDATE 
             return True
         return False
 
@@ -101,7 +101,7 @@ class Algorithm:
 
     def routeArrivals(self):
         flag = 0
-        time = datetime.now()
+        time = datetime.datetime.now()
         if self.arrivals and time >= self.arrivals[0]:
             self.arrivals.pop(0)
             for floor in range(self.n_floors):
@@ -120,6 +120,8 @@ class Algorithm:
                     device['status'] = 'occupied'
                     device['last_update'] = time.timestamp()
                     device['booking_code'] = 'new_code'  # TODO: generate a unique code
+                    #TODO: USE MQTT TO UPDATE
+                    print(f"all floors have more than 80% of parkings occupied.\n")
                     print(f"Device {device['ID']} has changed state to {device['status']}")
                     print(f"device {device['ID']} has changed last update time to {device['last_update']}! \n")
                     print(f"device {device['ID']} has changed booking code to {device['booking_code']}! \n")
@@ -132,7 +134,8 @@ class Algorithm:
             
     def handle_departures(self,catalog_path):
         departure_probability = 0.1  # 10% chance for any parked car to leave (JUST FOR SIMULATION, WE SHOULD HAVE 0.5)
-        current_time = datetime.now()
+        current_time = datetime.datetime.now()
+        #POSSIBILITY TO DO A NEW BUCKET ON DB WHERE WE PUT DURATION, TIMESTAMP, FEE, FLOOR FOR CALCULATION OF STATISTICS FOR PROPETARY OF PARKING
 
         for device in self.devices:
             if device['status'] == 'occupied':
@@ -140,8 +143,9 @@ class Algorithm:
                     device['status'] = 'free'
                     device['last_update'] = current_time.timestamp()
                     device['booking_code'] = None # OR ""
-                    
+                    #ADD FUNCTION TO CALCLAUTE FEE AND POST ON DB
                     print(f"Device {device['ID']} at {device['location']} is now free. Car has departed.")
+                    #device oriented with topic to be received by adaptor who publishes on db
         self.update_catalog(catalog_path)
         
         
@@ -178,31 +182,36 @@ if __name__ == '__main__':
 
     print("\nTotal devices per floor:")
     print(devices_count_by_floor)
-    algorithm = Algorithm(devices)
 
-    # Initialize the parking environment
-    algorithm.countFloors()
-    algorithm.countDev()
-    algorithm.devPerFloorList()
-    algorithm.occDevPerFloorList()
-    algorithm.totalOccupied()
 
     # Loop for car arrivals and assignments, also handling departures
     try:
         while True:
             # Load the latest catalog (in case it was updated externally by departures)
+            
+            #TODO: DO IT WITH A GET TO ADAPTOR TO GET DEVICE LIST
             with open(catalog_path, 'r') as file:
                 catalog = json.load(file)
             devices = catalog['devices']
-            algorithm.devices = devices  # Update the devices in the algorithm
-        
+            algorithm = Algorithm(devices)
+
+            # Initialize the parking environment
+            algorithm.countFloors()
+            algorithm.countDev()
+            algorithm.devPerFloorList()
+            algorithm.occDevPerFloorList()
+            algorithm.totalOccupied()
             # Recalculate the occupancy per floor based on the updated catalog
-            algorithm.occDevPerFloorList()  # This will check the current occupied status
             algorithm.handle_departures(catalog_path)  
             algorithm.arrival_time()
             algorithm.routeArrivals()
             algorithm.update_catalog(catalog_path)
-            time.sleep(1)
+            time.sleep(5)
     except KeyboardInterrupt:
         False
         
+        
+#calcolo sordi
+#booking code
+#handling prenotati
+#mettere db

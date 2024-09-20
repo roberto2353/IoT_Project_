@@ -36,12 +36,6 @@ class SlotSensor:
 
         self.client = MyMQTT(self.sensorID, broker, port, None)
 
-    def sendDataAlive(self):
-        while self.active:
-            eventAlive = {"n": f"{self.slotCode}/status", "u": "IP", "t": str(time.time()), "v": ""}
-            aliveMessage = {"bn": "updateCatalogSlot", "e": [eventAlive]}
-            self.client.myPublish(self.aliveTopic, json.dumps(aliveMessage))  # Publish alive message
-            time.sleep(5)  # Send alive message every 5 seconds
 
     def updateState(self):
         while self.active:

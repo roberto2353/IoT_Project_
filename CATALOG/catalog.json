@@ -8,9 +8,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834856.2934577,
+            "last_update": 1726838922.180127,
             "status": "free",
-            "booking_code": ""
+            "booking_code": null
         },
         {
             "ID": 2,
@@ -20,9 +20,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834858.3528528,
-            "status": "free",
-            "booking_code": null
+            "last_update": 1726838897.158015,
+            "status": "occupied",
+            "booking_code": "new_code"
         },
         {
             "ID": 3,
@@ -32,9 +32,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834860.4000058,
-            "status": "free",
-            "booking_code": ""
+            "last_update": 1726838902.161868,
+            "status": "occupied",
+            "booking_code": "new_code"
         },
         {
             "ID": 4,
@@ -44,9 +44,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834862.4399457,
-            "status": "free",
-            "booking_code": null
+            "last_update": 1726838852.119529,
+            "status": "occupied",
+            "booking_code": "new_code"
         },
         {
             "ID": 5,
@@ -56,9 +56,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834864.4844325,
+            "last_update": 1726838887.150242,
             "status": "free",
-            "booking_code": ""
+            "booking_code": null
         },
         {
             "ID": 6,
@@ -68,9 +68,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834866.5378618,
-            "status": "free",
-            "booking_code": ""
+            "last_update": 1726838847.114726,
+            "status": "occupied",
+            "booking_code": "new_code"
         },
         {
             "ID": 7,
@@ -80,9 +80,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726834771.794161,
+            "last_update": 1726838902.159379,
             "status": "free",
-            "booking_code": ""
+            "booking_code": null
         },
         {
             "ID": 8,
@@ -92,7 +92,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726678140.507624,
+            "last_update": 1726837405.80965,
             "status": "free",
             "booking_code": null
         }
