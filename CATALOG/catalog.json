@@ -8,7 +8,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726679058.0946064,
+            "last_update": 1726679116.1209645,
             "status": "free",
             "booking_code": ""
         },
@@ -20,7 +20,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726679060.1465666,
+            "last_update": 1726679118.1836092,
             "status": "free",
             "booking_code": null
         },
@@ -32,7 +32,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726679062.173562,
+            "last_update": 1726679120.2100542,
             "status": "free",
             "booking_code": ""
         },
@@ -44,7 +44,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726679064.220413,
+            "last_update": 1726679122.2684186,
             "status": "free",
             "booking_code": null
         },
@@ -52,11 +52,11 @@
             "ID": 5,
             "name": "sensor5",
             "type": "photocell",
-            "location": "P0-5",
+            "location": "P1-1",
             "commands": [
                 "status"
             ],
-            "last_update": 1726679046.9398887,
+            "last_update": 1726679104.934074,
             "status": "free",
             "booking_code": ""
         },
@@ -64,11 +64,11 @@
             "ID": 6,
             "name": "sensor6",
             "type": "photocell",
-            "location": "P0-6",
+            "location": "P1-2",
             "commands": [
                 "status"
             ],
-            "last_update": 1726679048.99285,
+            "last_update": 1726679106.9894896,
             "status": "free",
             "booking_code": ""
         },
@@ -76,11 +76,11 @@
             "ID": 7,
             "name": "sensor7",
             "type": "photocell",
-            "location": "P0-7",
+            "location": "P1-3",
             "commands": [
                 "status"
             ],
-            "last_update": 1726679051.0368726,
+            "last_update": 1726679109.0499773,
             "status": "free",
             "booking_code": ""
         },
