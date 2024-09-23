@@ -54,7 +54,7 @@ class SlotBoard:
             self.display_board()
 
         except Exception as e:
-            print(f"Errore nell'inizializzazione del tabellone: {e}")
+            print(f"Errore nell'inizializzazione del tabellon: {e}")
 
 
     def update_slot(self, slot_id, status):
