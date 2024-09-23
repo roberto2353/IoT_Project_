@@ -1,15 +1,4 @@
 {
-    "project_name": "IoT4SmartParking",
-    "project_owner": "IoT_Group8",
-    "device_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8080,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
     "devices": [
         {
             "ID": 1,
@@ -19,9 +8,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1727099483.3013537,
-            "status": "occupied",
-            "booking_code": "3bc6e98d-4bcb-4074-8729-47eea7ebfc95"
+            "last_update": 1727101621.274373,
+            "status": "free",
+            "booking_code": "new_code"
         },
         {
             "ID": 2,
@@ -31,9 +20,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1727099615.0625722,
-            "status": "occupied",
-            "booking_code": "f35dad84-2977-4fd8-bd66-5a949c189750"
+            "last_update": 1727101636.297113,
+            "status": "free",
+            "booking_code": "new_code"
         },
         {
             "ID": 3,
@@ -43,9 +32,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1727099825.1437616,
-            "status": "occupied",
-            "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
+            "last_update": 1727101641.301339,
+            "status": "free",
+            "booking_code": "new_code"
         },
         {
             "ID": 4,
@@ -55,44 +44,57 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1727100568.1176114,
-            "status": "occupied",
-            "booking_code": "780448d8-007d-4091-89f7-dbf928d8445e"
+            "last_update": 1727101651.323547,
+            "status": "free",
+            "booking_code": "new_code"
         },
         {
             "ID": 5,
             "name": "sensor5",
             "type": "photocell",
-            "location": "P0-5",
+            "location": "P1-1",
             "commands": [
                 "status"
             ],
-            "last_update": 1727099029.6006975,
-            "status": "free"
+            "last_update": 1727101661.33218,
+            "status": "free",
+            "booking_code": "new_code"
         },
         {
             "ID": 6,
             "name": "sensor6",
             "type": "photocell",
-            "location": "P0-6",
+            "location": "P1-2",
             "commands": [
                 "status"
             ],
-            "last_update": 1727099120.328971,
+            "last_update": 1727101681.348415,
             "status": "free",
-            "booking_code": "35c44dcc-fedf-4c29-9027-172d3dac88a4"
+            "booking_code": "new_code"
+        },
+        {
+            "ID": 7,
+            "name": "sensor7",
+            "type": "photocell",
+            "location": "P1-3",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1727101686.350951,
+            "status": "free",
+            "booking_code": "new_code"
+        },
+        {
+            "ID": 8,
+            "name": "sensor8",
+            "type": "photocell",
+            "location": "P1-4",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1727101691.361379,
+            "status": "occupied",
+            "booking_code": "new_code"
         }
-    ],
-    "service_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8084,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
-    "users": [],
-    "services": [],
-    "parkings": []
+    ]
 }

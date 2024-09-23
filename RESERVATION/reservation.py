@@ -5,8 +5,10 @@ import requests
 import time
 from pathlib import Path
 import json
-
 from MyMQTT import MyMQTT
+
+# Import the Algorithm class from the entranceAlgorithm file
+from entranceAlgorithm import Algorithm  
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -25,34 +27,49 @@ class ParkingService:
     @cherrypy.tools.json_out()
     def book(self):
         try:
+            # Carica il catalogo
             catalog = json.load(open(self.catalog_address, "r"))
-            body = cherrypy.request.body.read()
-            json_body = json.loads(body.decode('utf-8')) if body else {}
 
-            for device in catalog["devices"]:
-                if device.get('status') == 'free':
-                    booking_code = str(uuid.uuid4())
-                    device['status'] = 'occupied'
-                    device['booking_code'] = booking_code
+            # Inizializza l'algoritmo con la lista di dispositivi (devices)
+            devices = catalog["devices"]
+            algorithm = Algorithm(devices)
 
-                    # Crea e pubblica un messaggio MQTT
-                    event = {
-                        "n": f"{str(device['ID'])}/status", "u": "boolean", "t": str(time.time()), "v": 'occupied'
-                    }
-                    message = {"bn": self.pubTopic, "e": [event]}
-                    print(f"Messaggio creato: {json.dumps(message)}")
+            # Aggiorna le informazioni sui dispositivi (occupazione per piano, ecc.)
+            algorithm.countFloors()
+            algorithm.countDev()
+            algorithm.devPerFloorList()
+            algorithm.occDevPerFloorList()
+            algorithm.totalOccupied()
 
-                    # Pubblica il messaggio con MQTT
-                    self.client.myPublish(self.pubTopic+'/'+str(device['ID'])+'/status', message)
-                    print(f"Messaggio pubblicato su topic {self.pubTopic}/{str(device['ID'])}/status")
+            # Usa routeArrivals per selezionare un dispositivo da occupare
+            selected_device = algorithm.routeArrivals()
+            if selected_device:
+                # Crea un codice di prenotazione
+                booking_code = str(uuid.uuid4())
+                selected_device['status'] = 'occupied'
+                selected_device['booking_code'] = booking_code
+                selected_device['last_update'] = time.time()
 
-                    self.update_catalog_state('occupied', device["ID"])
-                    return {
-                        "message": f"Slot {device['location']} has been successfully booked.",
-                        "booking_code": booking_code
-                    }
+                # Crea e pubblica il messaggio MQTT
+                event = {
+                    "n": f"{str(selected_device['ID'])}/status", "u": "boolean", "t": str(time.time()), "v": 'occupied'
+                }
+                message = {"bn": self.pubTopic, "e": [event]}
+                print(f"Messaggio creato: {json.dumps(message)}")
 
-            return {"message": "No free slots available at the moment."}
+                self.client.myPublish(self.pubTopic + '/' + str(selected_device['ID']) + '/status', message)
+                print(f"Messaggio pubblicato su topic {self.pubTopic}/{str(selected_device['ID'])}/status")
+
+                # Aggiorna il catalogo dopo aver prenotato lo slot
+                with open(self.catalog_address, 'w') as f:
+                    json.dump(catalog, f, indent=4)
+
+                return {
+                    "message": f"Slot {selected_device['location']} has been successfully booked.",
+                    "booking_code": booking_code
+                }
+            else:
+                return {"message": "No free slots available at the moment."}
 
         except json.JSONDecodeError as e:
             cherrypy.log.error(f"JSON error: {str(e)}")
@@ -62,34 +79,14 @@ class ParkingService:
             cherrypy.log.error(f"Error during POST request handling: {str(e)}")
             raise cherrypy.HTTPError(500, 'INTERNAL SERVER ERROR')
 
-    def update_catalog_state(self, new_state, sensorId):
-        conf = json.load(open(SETTINGS))
-        catalog_url = conf['catalog_url'] + "/devices"
-        try:
-            response = requests.get(catalog_url)
-            response.raise_for_status()
-            devices = response.json().get('devices', [])
-
-            for device in devices:
-                if device.get("ID") == sensorId:
-                    device["status"] = new_state
-                    device["last_update"] = time.time()
-                    break
-
-            response = requests.put(catalog_url, json=device)
-            response.raise_for_status()
-            print(f"Stato del sensore {sensorId} aggiornato nel catalogo a: {new_state}")
-        except Exception as e:
-            print(f"Errore durante l'aggiornamento del catalogo per il sensore {sensorId}: {e}")
-
     def start(self):
-        """Avvia il client MQTT."""
-        self.client.start()  # Avvia la connessione MQTT
+        """Start the MQTT client."""
+        self.client.start()  # Start MQTT client connection
         print(f"Publisher connesso al broker {self.messageBroker}:{self.port}")
 
     def stop(self):
-        """Ferma il client MQTT."""
-        self.client.stop()
+        """Stop the MQTT client."""
+        self.client.stop()  # Stop MQTT client connection
 
 if __name__ == '__main__':
     conf = json.load(open(SETTINGS))
