@@ -23,13 +23,12 @@ class SlotSensor(MyPublisher):
         # Passaggio dell'ID corretto al costruttore del parent
         super().__init__(clientID, baseTopic + "/status", broker, port)
         self.sensorID = sensorID
-        self.sensorID = sensorID
         self.slotCode = slotCode
         self.isOccupied = False  # True if occupied, False if free
         self.last_state = False
         self.last_change_time = datetime.now()
         self.active = True
-        self.pubTopic = f"{baseTopic}/status"
+        self.pubTopic = f"{baseTopic}/{self.slotCode}/status"
         self.aliveTopic = f"ParkingLot/alive/{self.slotCode}"
         self.simulate_occupancy = True
 

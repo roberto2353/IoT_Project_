@@ -18,10 +18,8 @@ def removeDevices(catalog, deviceID):
         if device['ID'] == int(deviceID):
             catalog["devices"].pop(i)
 
-def add_user(catalog, user_info,catalog_a):
+def add_user(catalog, user_info):
     catalog["users"].append(user_info)
-    with open(catalog_a, 'w') as f:
-        json.dump(catalog, f, indent=4)
 
 def update_user(catalog, user_id, user_info):
     for i in range(len(catalog["users"])):
@@ -115,17 +113,11 @@ class CatalogREST(object):
                     raise cherrypy.HTTPError(400, 'SERVICE ALREADY REGISTERED')
 
             elif uri[0] == 'users':
-                
                 if not any(d['ID'] == json_body['ID'] for d in catalog["users"]):
-                    user_info = {
-                        "ID": json_body.get("ID", str(uuid.uuid4())),  # If no ID provided, generate one
-                        "name": json_body['name'],
-                        "surname": json_body['surname'],
-                        "identity": json_body['identity'],
-                        "credit_card": json_body['credit_card']
-                    }
-                    add_user(catalog, user_info, self.catalog_address)
-                    output = f"User with ID {user_info['ID']} has been added"
+                    add_user(catalog, json_body)
+                    output = f"User with ID {json_body['ID']} has been added"
+                else:
+                    raise cherrypy.HTTPError(400, 'USER ALREADY REGISTERED')
 
             elif uri[0] == 'parkings':
                 if not any(d['ID'] == json_body['ID'] for d in catalog["parkings"]):
@@ -133,22 +125,6 @@ class CatalogREST(object):
                     output = f"Parking with ID {json_body['ID']} has been added"
                 else:
                     raise cherrypy.HTTPError(400, 'PARKING ALREADY REGISTERED')
-
-            elif uri[0] == 'book':
-                # Cerca il primo slot libero e prenotalo
-                for device in catalog["devices"]:
-                    if device.get('status') == 'free':
-                        booking_code = str(uuid.uuid4())  # Genera un codice di prenotazione unico
-                        device['status'] = 'occupied'  # Cambia lo stato in occupato
-                        device['booking_code'] = booking_code  # Salva il codice di prenotazione nel dispositivo
-                        json.dump(catalog, open(self.catalog_address, "w"), indent=4)
-                        output = {
-                            "message": f"Slot {device['location']} has been successfully booked.",
-                            "booking_code": booking_code  # Restituisci il codice di prenotazione
-                        }
-                        break
-                else:
-                    output = {"message": "No free slots available at the moment."}
 
             else:
                 raise cherrypy.HTTPError(404, 'Resource not found')
@@ -189,10 +165,10 @@ class CatalogREST(object):
             json.dump(catalog, open(self.catalog_address, "w"), indent=4)
             return json_body
         except json.JSONDecodeError as e:
-            print(f"JSON error: {e}")  # Debug statement
+            print(f"JSON error: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='JSON PARSE ERROR')
         except Exception as e:
-            print(f"Error during PUT request handling: {e}")  # Debug statement
+            print(f"Error during PUT request handling: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='INTERNAL SERVER ERROR')
         
     def DELETE(self, *uri):
@@ -217,10 +193,10 @@ class CatalogREST(object):
             json.dump(catalog, open(self.catalog_address, "w"), indent=4)
             return output
         except json.JSONDecodeError as e:
-            print(f"JSON error: {e}")  # Debug statement
+            print(f"JSON error: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='JSON PARSE ERROR')
         except Exception as e:
-            print(f"Error during DELETE request handling: {e}")  # Debug statement
+            print(f"Error during DELETE request handling: {e}")  # Debug 
             raise cherrypy.HTTPError(status=500, message='INTERNAL SERVER ERROR')
 
 if __name__ == '__main__':

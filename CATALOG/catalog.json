@@ -19,9 +19,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726494466.9024282,
-            "status": "free",
-            "booking_code": "31041555-9fba-4361-8196-5ad025de34a2"
+            "last_update": 1727099483.3013537,
+            "status": "occupied",
+            "booking_code": "3bc6e98d-4bcb-4074-8729-47eea7ebfc95"
         },
         {
             "ID": 2,
@@ -31,9 +31,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726494468.9503372,
+            "last_update": 1727099615.0625722,
             "status": "occupied",
-            "booking_code": "455e0c17-3670-453b-88b0-e6326850e40f"
+            "booking_code": "f35dad84-2977-4fd8-bd66-5a949c189750"
         },
         {
             "ID": 3,
@@ -43,8 +43,8 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726494451.655465,
-            "status": "free",
+            "last_update": 1727099825.1437616,
+            "status": "occupied",
             "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
         },
         {
@@ -55,8 +55,9 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726494457.7760355,
-            "status": "occupied"
+            "last_update": 1727100568.1176114,
+            "status": "occupied",
+            "booking_code": "780448d8-007d-4091-89f7-dbf928d8445e"
         },
         {
             "ID": 5,
@@ -66,7 +67,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726494455.7546813,
+            "last_update": 1727099029.6006975,
             "status": "free"
         },
         {
@@ -77,7 +78,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1726494463.863309,
+            "last_update": 1727099120.328971,
             "status": "free",
             "booking_code": "35c44dcc-fedf-4c29-9027-172d3dac88a4"
         }
@@ -91,15 +92,7 @@
             "PUT"
         ]
     },
-    "users": [
-        {
-            "ID": "1f8f3203-3648-48b6-9645-85bedbceb7db",
-            "name": "Kevin",
-            "surname": "Gumina",
-            "identity": "GA38492EF",
-            "credit_card": "4950321849358943"
-        }
-    ],
+    "users": [],
     "services": [],
     "parkings": []
 }

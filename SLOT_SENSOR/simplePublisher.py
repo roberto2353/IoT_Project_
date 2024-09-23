@@ -1,4 +1,5 @@
 import paho.mqtt.client as PahoMQTT
+import json
 
 class MyPublisher:
     def __init__(self, clientID, topic, broker, port):
@@ -19,8 +20,10 @@ class MyPublisher:
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
-    def myPublish(self, message):
-        self._paho_mqtt.publish(self.topic, message, 2)
+    def myPublish(self, topic, message):
+        print(f"Sto pubblicando su topic: {topic}")
+        self._paho_mqtt.publish(topic, json.dumps(message), qos=2)
+
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print("Connected to %s with result code: %d" % (self.messageBroker, rc))
