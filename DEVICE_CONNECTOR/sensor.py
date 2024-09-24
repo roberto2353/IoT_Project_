@@ -37,7 +37,7 @@ class SensorREST(threading.Thread):
                 for device in self.deviceInfo:
                     if 'status' in device['commands']:
                         #value changes every time i'm doing the get
-                        value = 1
+                        value = random.randint(0, 1)
                         output.append({'deviceID': device['ID'], 'status': value})
                 return json.dumps(output)
             else:
@@ -72,4 +72,3 @@ if __name__ == '__main__':
     cherrypy.tree.mount(s, '/', conf)
     cherrypy.engine.start()
     cherrypy.engine.block()
-

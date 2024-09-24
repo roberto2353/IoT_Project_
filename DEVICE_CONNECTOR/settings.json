@@ -1,5 +1,5 @@
 {
-    "catalogURL": "http://localhost:8080",
+    "catalogURL": "http://localhost:8090",
     "devices":[
         {
             "deviceInfo":{
