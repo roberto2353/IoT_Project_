@@ -45,52 +45,83 @@ class dbAdaptor:
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print(f"Connected to {self.messageBroker} with result code: {rc}")
 
+
+    def recursive_json_decode(self, data):
+        # Prova a decodificare fino a ottenere un dizionario o una lista
+        while isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                break
+        return data
+
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # Un nuovo messaggio viene ricevuto
         print(f"Topic: '{msg.topic}', QoS: '{msg.qos}', Message: '{msg.payload.decode()}'")
         
         try:
-            # Decodifica del payload JSON
-            data = json.loads(msg.payload.decode())
-            
-            # Estrai le informazioni dal messaggio ricevuto
-            event = data.get('e', [])[0]
-            sensor_id = event.get('sensor_id', '')
-            status = event.get('v', 'unknown')  # Recupera il valore 'v' che rappresenta lo stato (es. 'occupied')
-            location = event.get('location', 'unknown')
-            sensor_type = event.get('type', 'unknown')
-            booking_code = event.get('booking_code', '')
+            # Decodifica del payload JSON una prima volta
+            decoded_message = msg.payload.decode()
+            print(f"Decoded message (first decode): {decoded_message}")
 
-            # Controlla se un sensore con lo stesso ID esiste già nel database
-            check_query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
-            result = self.client.query(check_query)
-            
-            if list(result.get_points()):
-                # Se il sensore esiste, aggiorna lo stato nel database InfluxDB
-                json_body = [
-                    {
-                        "measurement": 'status',
-                        "tags": {
-                            "ID": sensor_id,
-                            "type": sensor_type,
-                            "location": location
-                        },
-                        "time": int(time.time()),  # Timestamp corrente
-                        "fields": {
-                            "name": data['bn'],  # Nome del sensore o dispositivo
-                            "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
-                            "booking_code": booking_code  # Codice di prenotazione
+            # Decodifica ricorsiva fino a ottenere un dizionario o una lista
+            final_data = self.recursive_json_decode(decoded_message)
+            print(f"Final decoded message: {final_data}")
+            print(f"Data type after final decode: {type(final_data)}")
+
+            # Assicurati che 'final_data' sia un dizionario
+            if isinstance(final_data, dict):
+                data = final_data
+                event = data.get('e', [])[0]
+                print(f"Extracted event: {event}")
+
+                # Estrai i dettagli dell'evento
+                sensor_id = event.get('sensor_id', '')
+                status = event.get('v', 'unknown')  # Recupera lo stato
+                location = event.get('location', 'unknown')
+                sensor_type = event.get('type', 'unknown')
+                booking_code = event.get('booking_code', '')
+
+                # Controlla se un sensore con lo stesso ID esiste già nel database
+                check_query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
+                result = self.client.query(check_query)
+                
+                if list(result.get_points()):
+                    # Se il sensore esiste, aggiorna lo stato nel database InfluxDB
+                    json_body = [
+                        {
+                            "measurement": 'status',
+                            "tags": {
+                                "ID": sensor_id,
+                                "type": sensor_type,
+                                "location": location
+                            },
+                            "time": int(time.time()),  # Timestamp corrente
+                            "fields": {
+                                "name": data['bn'],  # Nome del sensore o dispositivo
+                                "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
+                                "booking_code": booking_code  # Codice di prenotazione
+                            }
                         }
-                    }
-                ]
-                # Scrivi l'aggiornamento su InfluxDB
-                self.client.write_points(json_body, time_precision='s')
-                print(f"Updated sensor {sensor_id} status to {status}.")
+                    ]
+                    # Scrivi l'aggiornamento su InfluxDB
+                    self.client.write_points(json_body, time_precision='s')
+                    print(f"Updated sensor {sensor_id} status to {status}.")
+                else:
+                    print(f"Sensor with ID {sensor_id} not found in the database.")
             else:
-                print(f"Sensor with ID {sensor_id} not found in the database.")
+                print(f"Final data is not a dictionary: {type(final_data)}")
+        
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
         
         except Exception as e:
             print(f"Error processing message: {e}")
+
+
+
+
 
 
 
@@ -200,7 +231,7 @@ class dbAdaptor:
         if len(uri) == 0:
             try:
                 # Esegui una query per ottenere tutti i sensori dal database
-                query = query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "booking_code" FROM "status" GROUP BY "ID"'
+                query = query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code" FROM "status" GROUP BY "ID"'
                 result = self.client.query(query)
                 
                 # Converti il risultato in un formato JSON-friendly
@@ -212,6 +243,7 @@ class dbAdaptor:
                         'location': sensor['location'],
                         'name': sensor['name'],
                         'status': sensor['status'],
+                        'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', '')
                     })
                 
