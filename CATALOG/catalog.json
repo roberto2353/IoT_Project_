@@ -1,105 +1,67 @@
 {
-    "project_name": "IoT4SmartParking",
-    "project_owner": "IoT_Group8",
-    "device_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8080,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
     "devices": [
         {
-            "ID": 1,
-            "name": "sensor1",
+            "ID": "1",
             "type": "photocell",
             "location": "P0-1",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1727188342.3984802
+            "name": "sensor1",
+            "status": "occupied",
+            "booking_code": "new_code",
+            "last_update": 1727777467.971031
         },
         {
-            "ID": 2,
-            "name": "sensor2",
+            "ID": "2",
             "type": "photocell",
             "location": "P0-2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1727188342.4040196
+            "name": "sensor2",
+            "status": "occupied",
+            "booking_code": "new_code",
+            "last_update": 1727777477.987773
         },
         {
-            "ID": 3,
-            "name": "sensor3",
+            "ID": "3",
             "type": "photocell",
             "location": "P0-3",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1727188342.407332
+            "name": "sensor3",
+            "status": "occupied",
+            "booking_code": "new_code",
+            "last_update": 1727777487.998742
         },
         {
-            "ID": 4,
-            "name": "sensor4",
+            "ID": "4",
             "type": "photocell",
             "location": "P0-4",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1727188342.41008
+            "name": "sensor4",
+            "status": "occupied",
+            "booking_code": "new_code",
+            "last_update": 1727777498.013949
         },
         {
-            "ID": 5,
-            "name": "sensor5",
+            "ID": "5",
             "type": "photocell",
             "location": "P0-5",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1727188342.4121912
+            "name": "sensor5",
+            "status": "occupied",
+            "booking_code": "new_code",
+            "last_update": 1727777503.019341
         },
         {
-            "ID": 6,
-            "name": "sensor6",
+            "ID": "6",
             "type": "photocell",
             "location": "P0-6",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1727188342.4150555
+            "name": "sensor6",
+            "status": "occupied",
+            "booking_code": "new_code",
+            "last_update": 1727777508.028206
         },
         {
-            "ID": 7,
-            "name": "sensor7",
+            "ID": "7",
             "type": "photocell",
             "location": "P0-7",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1727188342.4171708
+            "name": "sensor7",
+            "status": "occupied",
+            "booking_code": "new_code",
+            "last_update": 1727777518.042198
         }
-    ],
-    "service_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8084,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
-    "users": [
-        {
-            "ID": "1f8f3203-3648-48b6-9645-85bedbceb7db",
-            "name": "Kevin",
-            "surname": "Gumina",
-            "identity": "GA38492EF",
-            "credit_card": "4950321849358943"
-        }
-    ],
-    "services": [],
-    "parkings": []
+    ]
 }

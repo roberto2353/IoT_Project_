@@ -13,10 +13,9 @@ class ParkingService:
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out() 
-
     def activate(self):
         try:
-            # Ricevi i dati JSON dal corpo della richiesta
+
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
 

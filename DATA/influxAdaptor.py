@@ -4,7 +4,7 @@ import json
 from influxdb import InfluxDBClient
 import sys
 import cherrypy
-import requests  # Assicurati di avere importato requests
+import requests  
 
 class dbAdaptor:
     exposed = True  # Esponi la classe per CherryPy
@@ -47,28 +47,53 @@ class dbAdaptor:
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # Un nuovo messaggio viene ricevuto
-        print(f"Topic:'{msg.topic}', QoS: '{msg.qos}' Message: '{msg.payload.decode()}'")
+        print(f"Topic: '{msg.topic}', QoS: '{msg.qos}', Message: '{msg.payload.decode()}'")
+        
         try:
+            # Decodifica del payload JSON
             data = json.loads(msg.payload.decode())
-            json_body = [
-                {
-                    "measurement": 'status',
-                    "tags": {
-                        "slotID": data['id'],
-                        "type": data['type'],
-                        "location": data['location']
-                    },
-                    "time": int(time.time()),
-                    "fields": {
-                        "name": data['name'],
-                        "status": data.get('status', 'unknown'),
-                        "booking_code": data.get('booking_code', '')
+            
+            # Estrai le informazioni dal messaggio ricevuto
+            event = data.get('e', [])[0]
+            sensor_id = event.get('sensor_id', '')
+            status = event.get('v', 'unknown')  # Recupera il valore 'v' che rappresenta lo stato (es. 'occupied')
+            location = event.get('location', 'unknown')
+            sensor_type = event.get('type', 'unknown')
+            booking_code = event.get('booking_code', '')
+
+            # Controlla se un sensore con lo stesso ID esiste già nel database
+            check_query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
+            result = self.client.query(check_query)
+            
+            if list(result.get_points()):
+                # Se il sensore esiste, aggiorna lo stato nel database InfluxDB
+                json_body = [
+                    {
+                        "measurement": 'status',
+                        "tags": {
+                            "ID": sensor_id,
+                            "type": sensor_type,
+                            "location": location
+                        },
+                        "time": int(time.time()),  # Timestamp corrente
+                        "fields": {
+                            "name": data['bn'],  # Nome del sensore o dispositivo
+                            "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
+                            "booking_code": booking_code  # Codice di prenotazione
+                        }
                     }
-                }
-            ]
-            self.client.write_points(json_body, time_precision='s')
+                ]
+                # Scrivi l'aggiornamento su InfluxDB
+                self.client.write_points(json_body, time_precision='s')
+                print(f"Updated sensor {sensor_id} status to {status}.")
+            else:
+                print(f"Sensor with ID {sensor_id} not found in the database.")
+        
         except Exception as e:
-            print(e)
+            print(f"Error processing message: {e}")
+
+
+
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -80,10 +105,21 @@ class dbAdaptor:
             try:
                 device_info = cherrypy.request.json
                 required_fields = ['ID', 'name', 'type', 'location']
+                
+                # Verifica che tutti i campi richiesti siano presenti
                 for field in required_fields:
                     if field not in device_info:
                         return {"error": f"Missing field: {field}"}, 400
                 
+                # Controlla se un sensore con lo stesso ID esiste già
+                check_query = f'SELECT * FROM "status" WHERE "ID" = \'{device_info["ID"]}\''
+                result = self.client.query(check_query)
+                
+                # Se il risultato non è vuoto, significa che il dispositivo esiste già
+                if list(result.get_points()):
+                    return {"message": f"Device with ID {device_info['ID']} already exists."}, 409  # Conflict
+                
+                # Se non esiste, inserisci il nuovo dispositivo
                 json_body = [
                     {
                         "measurement": 'status',
@@ -95,24 +131,103 @@ class dbAdaptor:
                         "time": int(time.time()),  # Timestamp corrente
                         "fields": {
                             "name": device_info['name'],
-                            "status": device_info.get('status', 'unknown'),
+                            "status": "free",  # Lo stato è forzato a "free"
                             "booking_code": device_info.get('booking_code', '')
                         }
                     }
                 ]
-                self.client.write_points(json_body)  # Correggi l'attributo
+                # Scrivi i dati su InfluxDB
+                self.client.write_points(json_body)
                 print(f"Registered device with ID {device_info['ID']} on InfluxDB.")
                 return {"message": f"Device with ID {device_info['ID']} registered successfully."}, 201
             
             except Exception as e:
                 print(f"Error registering device: {e}")
                 return {"error": str(e)}, 500
+            
+        if uri[0] == 'reservation':
+            try:
+                device_info = cherrypy.request.json
+                required_fields = ['ID', 'name', 'type', 'location']
+                
+                # Verifica che tutti i campi richiesti siano presenti
+                for field in required_fields:
+                    if field not in device_info:
+                        return {"error": f"Missing field: {field}"}, 400
+                
+                # Controlla se un sensore con lo stesso ID esiste già
+                check_query = f'SELECT * FROM "status" WHERE "ID" = \'{device_info["ID"]}\''
+                result = self.client.query(check_query)
+                
+                # Se il risultato non è vuoto, significa che il dispositivo esiste già
+                if not list(result.get_points()):
+                    return {"message": f"Device with ID {device_info['ID']} doesn't exist."}, 409  # Conflict
+                
+            
+                json_body = [
+                    {
+                        "measurement": 'status',
+                        "tags": {
+                            "ID": str(device_info['ID']),
+                            "type": device_info['type'],
+                            "location": device_info['location']
+                        },
+                        "time": int(time.time()),  # Timestamp corrente
+                        "fields": {
+                            "name": device_info['name'],
+                            "status": "reserved",  # Lo stato è forzato a "free"
+                            "booking_code": device_info.get('booking_code', '')
+                        }
+                    }
+                ]
+                # Scrivi i dati su InfluxDB
+                self.client.write_points(json_body)
+                print(f"Device with ID {device_info['ID']} is reserved on InfluxDB.")
+                return {"message": f"Device with ID {device_info['ID']} is reserved."}, 201
+            
+            except Exception as e:
+                print(f"Error registering device: {e}")
+                return {"error": str(e)}, 500
+            
+        else:
+            raise cherrypy.HTTPError(404, "Endpoint not found")
+        
+
+
+
+
+    def GET(self, *uri, **params):
+        if len(uri) == 0:
+            try:
+                # Esegui una query per ottenere tutti i sensori dal database
+                query = query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "booking_code" FROM "status" GROUP BY "ID"'
+                result = self.client.query(query)
+                
+                # Converti il risultato in un formato JSON-friendly
+                sensors = []
+                for sensor in result.get_points():
+                    sensors.append({
+                        'ID': sensor['ID'],
+                        'type': sensor['type'],
+                        'location': sensor['location'],
+                        'name': sensor['name'],
+                        'status': sensor['status'],
+                        'booking_code': sensor.get('booking_code', '')
+                    })
+                
+                if not sensors:
+                    sensors = {"message": "No sensors found in the database"}
+                
+                # Converti la lista in una stringa JSON
+                return json.dumps(sensors).encode('utf-8')
+            
+            except Exception as e:
+                error_message = {"error": str(e)}
+                return json.dumps(error_message).encode('utf-8')
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")
 
-    def GET(self, *uri, **params):
-        # Implementa eventualmente un metodo GET per verificare lo stato
-        raise cherrypy.HTTPError(405, "Method not allowed")
+
 
 if __name__ == "__main__":
     test = dbAdaptor('IoT_Smart_Parking')

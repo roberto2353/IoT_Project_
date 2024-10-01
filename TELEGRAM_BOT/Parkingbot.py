@@ -151,12 +151,22 @@ def send_user_data_to_catalog(user_data):
 
 def check_free_slots(msg):
     chat_id = msg['chat']['id']
-    url = settings['catalog_url'] + '/devices'
+    url = 'http://127.0.0.1:5000/'  # URL dell'adaptor esposto da CherryPy
+
     try:
+        # Effettua una richiesta GET all'adaptor per ottenere i dispositivi
         response = requests.get(url)
         response.raise_for_status()
-        slots = response.json().get('devices', [])
+        
+        # Decodifica la risposta come stringa JSON
+        slots = json.loads(response.text)
+
+        print(response.text)
+
+        
+        # Filtra i dispositivi con stato 'free'
         free_slots = [slot for slot in slots if slot.get('status') == 'free']
+        
         if free_slots:
             slots_info = "\n".join([f"ID: {slot['location']}, Nome: {slot['name']}" for slot in free_slots])
             bot.sendMessage(chat_id, f'Posti liberi:\n{slots_info}')
@@ -165,35 +175,38 @@ def check_free_slots(msg):
     except Exception as e:
         bot.sendMessage(chat_id, f'Errore nel recupero dei dati dei posti: {e}')
 
+
 def book_slot(msg):
     chat_id = msg['chat']['id']
-    url = settings['catalog_url'] + '/devices'
+    
+    # URL del metodo CherryPy per la prenotazione
+    book_url = 'http://127.0.0.1:8098/book'
+    
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        slots = response.json().get('devices', [])
-        free_slots = [slot for slot in slots if slot.get('status') == 'free']
-
-        if not free_slots:
-            bot.sendMessage(chat_id, 'Nessun posto libero al momento.')
-            return
-
-        chosen_slot = free_slots[0]
-        slot_id = chosen_slot['location']
-        booking_code = generate_booking_code()
-
-        book_url = 'http://127.0.0.1:8088/book'
+        # Effettua una richiesta POST al metodo CherryPy 'book'
         headers = {'Content-Type': 'application/json'}
-        book_response = requests.post(book_url, headers=headers, data=json.dumps({"slot_id": slot_id, "status": "occupied", "booking_code": booking_code}))
+        book_response = requests.post(book_url, headers=headers)
         book_response.raise_for_status()
 
-        #event_logger.log_event(slot_id=booking_code, previous_status="free", current_status="reserved", duration=0.0)
+        # Ottieni i dati della risposta
+        r = book_response.json()
+
+        # Prendi i dati dalla risposta
+        slot_id = r.get('slot_id', 'bho')
+        booking_code = r.get('booking_code', 'no code')
+
+        if 'message' in r:
+            print(f"Messaggio ricevuto dal server: {r['message']}")
+        
+        # Invia il messaggio di conferma prenotazione all'utente tramite bot
         bot.sendMessage(chat_id, f'Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {booking_code}. La prenotazione è valida per 2 minuti.')
 
+        # Imposta un timer per scadere la prenotazione dopo 2 minuti
         Timer(120, expire_reservation, args=[slot_id, booking_code]).start()
 
     except Exception as e:
         bot.sendMessage(chat_id, f'Errore durante la prenotazione: {e}')
+
 
 def expire_reservation(slot_id, booking_code):
     url = settings['catalog_url'] + f'/expire/{slot_id}'

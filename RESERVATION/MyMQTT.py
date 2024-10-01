@@ -9,7 +9,7 @@ class MyMQTT:
         self.clientID = str(clientID)
         self._topic = ""
         self._isSubscriber = False
-        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2) 
+        self._paho_mqtt = PahoMQTT.Client(clientID, True) 
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
