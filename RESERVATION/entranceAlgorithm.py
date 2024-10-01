@@ -60,7 +60,7 @@ class Algorithm:
             print(f"number of parking per floor {floor}: {count}")
 
     def occDevPerFloorList(self):
-        print(self.devices)
+        #print(self.devices)
         for floor in self.floors:
             count = sum(1 for dev in self.devices if self.extract_floor(dev['location']) == floor and dev['status'] in ("occupied", "reserved"))
             self.n_occ_dev_per_floor.append(count)
@@ -102,43 +102,41 @@ class Algorithm:
         return None
 
     def routeArrivals(self):
-        for device in self.devices:
-            if device['status'] == 'free':
-                return device
-        # print("1")
-        # flag = 0
-        # time = datetime.datetime.now()
-        # print(self.arrivals[0], " ", time)
-        # if self.arrivals and time >= self.arrivals[0]:
-        #     self.arrivals.pop(0)
-        #     print("3")
-        #     for floor in range(self.n_floors):
-        #         print("4")
-        #         if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
-        #             device = self.get_free_device_on_floor(floor)
-        #             if device and self.changeDevState(device, floor, time):
-        #                 print(f"Device {device['ID']} has changed state to {device['status']}")
-        #                 print(f"device {device['ID']} has changed last update time to {device['last_update']}! \n")
-        #                 print(f"device {device['ID']} has changed booking code to {device['booking_code']}! \n")
-        #                 flag = 1
-        #                 print(device)
-        #                 return device
-        #                 #break
+        # for device in self.devices:
+        #     if device['status'] == 'free':
+        #         return device
+        print("1111111111111111111111111")
+        flag = 0
+        time = datetime.datetime.now()
+        print(self.arrivals[0], " ", time)
+        if self.arrivals and time >= self.arrivals[0]:
+            self.arrivals.pop(0)
+            for floor in range(self.n_floors):
+                if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
+                    device = self.get_free_device_on_floor(floor)
+                    if device and self.changeDevState(device, floor, time):
+                        print(f"Device {device['ID']} has changed state to {device['status']}")
+                        print(f"device {device['ID']} has changed last update time to {device['last_update']}! \n")
+                        print(f"device {device['ID']} has changed booking code to {device['booking_code']}! \n")
+                        flag = 1
+                        print(device)
+                        return device
+                        #break
 
 
-        #     if flag == 0:
-        #         device = next((d for d in self.devices if d['status'] == 'free'), None)
-        #         if device:
-        #             device['status'] = 'occupied'
-        #             device['last_update'] = time.timestamp()
-        #             device['booking_code'] = 'new_code'  # TODO: generate a unique code
-        #             #TODO: USE MQTT TO UPDATE
-        #             print(f"all floors have more than 80% of parkings occupied.\n")
-        #             print(f"Device {device['ID']} has changed state to {device['status']}")
-        #             print(f"device {device['ID']} has changed last update time to {device['last_update']}! \n")
-        #             print(f"device {device['ID']} has changed booking code to {device['booking_code']}! \n")
-        #             print(device)
-        #             return device
+            if flag == 0:
+                device = next((d for d in self.devices if d['status'] == 'free'), None)
+                if device:
+                    device['status'] = 'occupied'
+                    device['last_update'] = time.timestamp()
+                    device['booking_code'] = 'new_code'  # TODO: generate a unique code
+                    #TODO: USE MQTT TO UPDATE
+                    print(f"all floors have more than 80% of parkings occupied.\n")
+                    print(f"Device {device['ID']} has changed state to {device['status']}")
+                    print(f"device {device['ID']} has changed last update time to {device['last_update']}! \n")
+                    print(f"device {device['ID']} has changed booking code to {device['booking_code']}! \n")
+                    print(device)
+                    return device
                     
         #for booked
         
@@ -209,34 +207,42 @@ if __name__ == '__main__':
     print(devices_count_by_floor)
 
 
-    # Loop for car arrivals and assignments, also handling departures
-    # try:
-    #     while True:
-    #         # Load the latest catalog (in case it was updated externally by departures)
-            
-    #         #TODO: DO IT WITH A GET TO ADAPTOR TO GET DEVICE LIST
-    #         with open(catalog_path, 'r') as file:
-    #             catalog = json.load(file)
-    #         #devices = catalog['devices']
-    #         algorithm = Algorithm(devices)
+    #Loop for car arrivals and assignments, also handling departures
+    try:
+        while True:
 
-    #         # Initialize the parking environment
-    #         algorithm.countFloors()
-    #         algorithm.countDev()
-    #         algorithm.devPerFloorList()
-    #         algorithm.occDevPerFloorList()
-    #         algorithm.totalOccupied()
-    #         # Recalculate the occupancy per floor based on the updated catalog
-    #         algorithm.handle_departures(catalog_path)  
-    #         algorithm.arrival_time()
-    #         algorithm.routeArrivals()
-    #         algorithm.update_catalog(catalog_path)
-    #         time.sleep(5)
-    # except KeyboardInterrupt:
-    #    False
+            url = 'http://127.0.0.1:5000/'  # URL dell'adaptor esposto da CherryPy
+
+    
+            # Effettua una richiesta GET all'adaptor per ottenere i dispositivi
+            response = requests.get(url)
+            response.raise_for_status()
+            
+            # Decodifica la risposta come stringa JSON
+            devices = json.loads(response.text)
+            # Load the latest catalog (in case it was updated externally by departures)
+            
+            #TODO: DO IT WITH A GET TO ADAPTOR TO GET DEVICE LIST
+
+            algorithm = Algorithm(devices)
+
+            # Initialize the parking environment
+            algorithm.countFloors()
+            algorithm.countDev()
+            algorithm.devPerFloorList()
+            algorithm.occDevPerFloorList()
+            algorithm.totalOccupied()
+            # Recalculate the occupancy per floor based on the updated catalog
+            algorithm.handle_departures(catalog_path)  
+            algorithm.arrival_time()
+            algorithm.routeArrivals()
+            algorithm.update_catalog(catalog_path)
+            time.sleep(5)
+    except KeyboardInterrupt:
+       False
         
         
 #calcolo sordi
 #booking code
 #handling prenotati
-#mettere db
+#mettere db#

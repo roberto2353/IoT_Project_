@@ -56,6 +56,62 @@
             "type": "photocell",
             "location": "P0-7"
             }
+        },
+        {
+            "deviceInfo":{
+            "ID": 8,
+            "type": "photocell",
+            "location": "P1-1",
+            "name": "sensor8"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 9,
+            "type": "photocell",
+            "location": "P1-2",
+            "name": "sensor9"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 10,
+            "type": "photocell",
+            "location": "P1-3",
+            "name": "sensor10"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 11,
+            "type": "photocell",
+            "location": "P1-4",
+            "name": "sensor11"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 12,
+            "type": "photocell",
+            "location": "P1-5",
+            "name": "sensor12"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 13,
+            "type": "photocell",
+            "location": "P1-6",
+            "name": "sensor13"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 14,
+            "type": "photocell",
+            "location": "P1-7",
+            "name": "sensor14"
+            }
         }
     ]
 }  

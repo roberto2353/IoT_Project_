@@ -40,16 +40,15 @@ class ParkingService:
             algorithm = Algorithm(devices)
 
             # Aggiorna le informazioni sui dispositivi (occupazione per piano, ecc.)
-            algorithm.countFloors()
-            algorithm.countDev()
-            algorithm.devPerFloorList()
-            algorithm.occDevPerFloorList()
-            algorithm.totalOccupied()
+            # algorithm.countFloors()
+            # algorithm.countDev()
+            # algorithm.devPerFloorList()
+            # algorithm.occDevPerFloorList()
+            # algorithm.totalOccupied()
 
-            # Recalculate the occupancy per floor based on the updated catalog
-            #algorithm.handle_departures(catalog_path)  
-            algorithm.arrival_time()
-            algorithm.routeArrivals()
+            # # Recalculate the occupancy per floor based on the updated catalog
+            # #algorithm.handle_departures(catalog_path)  
+            # algorithm.arrival_time()
 
             # Usa routeArrivals per selezionare un dispositivo da occupare
             selected_device = algorithm.routeArrivals()
