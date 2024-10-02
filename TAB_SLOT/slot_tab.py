@@ -6,10 +6,15 @@ import paho.mqtt.client as PahoMQTT
 from datetime import datetime
 import sys
 
+<<<<<<< HEAD
 # Percorso assoluto 
 sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+=======
+# Percorso assoluto alla cartella del progetto
+#sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
-from DATA.event_logger import EventLogger
+#from DATA.event_logger import EventLogger
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -21,10 +26,15 @@ class SlotBoard:
         self.occupied_slots = 0
         self.total_slots = 0
         self.sensors_data = {}
+<<<<<<< HEAD
         self.event_logger = EventLogger()  
+=======
+        #self.event_logger = EventLogger()  # Istanza di EventLogger
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
         self.initialize_board()
 
     def initialize_board(self):
+        """Inizializza il tabellone con il numero di posti totali, liberi e occupati."""
         try:
             with open(SETTINGS, "r") as fs:
                 settings = json.loads(fs.read())
@@ -34,29 +44,52 @@ class SlotBoard:
             slots = response.json().get('devices', [])
             self.total_slots = len(slots)
             print(f"Tabellone inizializzato: {self.total_slots} posti totali")
+
+            # Inizializza il numero di posti liberi e occupati
+            for slot in slots:
+                slot_id = slot["ID"]
+                status = slot.get("status", "unknown")
+                self.sensors_data[slot_id] = status
+                
+                # Debug: Stampa lo stato di ogni slot per la verifica
+                print(f"Inizializzazione slot {slot_id} con stato: {status}")
+                
+                if status == "free":
+                    self.free_slots += 1
+                elif status == "occupied":
+                    self.occupied_slots += 1
+
+            # Visualizza lo stato iniziale del tabellone
+            self.display_board()
+
         except Exception as e:
-            print(f"Errore nell'inizializzazione del tabellone: {e}")
+            print(f"Errore nell'inizializzazione del tabellon: {e}")
+
 
     def update_slot(self, slot_id, status):
-        previous_status = self.sensors_data.get(slot_id, "unknown")
-        if previous_status == status:
-            return
-
-        self.sensors_data[slot_id] = status
+        """Aggiorna solo i conteggi dei posti liberi e occupati."""
+        
+        # Debug: stampa lo stato nuovo e il conteggio attuale
+        print(f"Aggiornamento slot {slot_id}: Stato nuovo={status}")
+        
+        # Se lo slot diventa libero, decrementa i posti occupati e incrementa i posti liberi
         if status == "free":
-            if previous_status == "occupied":
-                self.occupied_slots -= 1
+            self.occupied_slots -= 1
             self.free_slots += 1
+
+        # Se lo slot diventa occupato, decrementa i posti liberi e incrementa i posti occupati
         elif status == "occupied":
-            if previous_status == "free":
-                self.free_slots -= 1
+            self.free_slots -= 1
             self.occupied_slots += 1
 
-        print(f"Slot aggiornato: {slot_id} - Stato: {status}")
-        print(f"Posti liberi: {self.free_slots}, Posti occupati: {self.occupied_slots}")
+        # Debug: stampa i nuovi conteggi
+        print(f"Posti liberi aggiornati: {self.free_slots}, Posti occupati aggiornati: {self.occupied_slots}")
         self.display_board()
 
+
+
     def display_board(self):
+        """Visualizza il tabellone con lo stato aggiornato."""
         print(f"Posti Liberi: {self.free_slots} | Posti Occupati: {self.occupied_slots} | Totale: {self.total_slots}")
 
 class MySubscriber:
@@ -64,7 +97,7 @@ class MySubscriber:
         self.clientID = clientID
         self.topic = topic
         self.message_callback = message_callback
-        self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID, clean_session=False)
+        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
@@ -89,13 +122,15 @@ class MySubscriber:
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
-    def myOnConnect(self, client, userdata, flags, rc):
+    def myOnConnect(self, client, userdata, flags, rc, properties=None):
         print(f"Connesso a {self.messageBroker} con codice di risultato: {rc}")
         if rc == 0:
             print("Sottoscrizione al topic...")
             self._paho_mqtt.subscribe(self.topic, self.qos)
+            print(f"Sottoscritto al topic: {self.topic}")
         else:
             print("Errore nella connessione!")
+
 
     def myOnMessageReceived(self, client, userdata, msg):
         print(f"Messaggio ricevuto: Topic={msg.topic}, Payload={msg.payload.decode()}")
@@ -105,6 +140,9 @@ def main():
     slot_board = SlotBoard()
 
     def on_message_received(msg):
+        """Callback per l'elaborazione dei messaggi MQTT ricevuti."""
+        print(f"Messaggio ricevuto: Topic={msg.topic}, Payload={msg.payload.decode()}")
+
         try:
             data = json.loads(msg.payload.decode())
             print(f"Payload decodificato: {data}")
@@ -118,16 +156,20 @@ def main():
             last_change_time = slot_board.sensors_data.get(slot_id + "_time", current_time)
             duration = (current_time - last_change_time).total_seconds() if last_change_time else 0
             
+            # Aggiorna lo stato del tabellone
             slot_board.update_slot(slot_id, slot_status)
             
-            slot_board.event_logger.log_event(slot_id, previous_status, slot_status, duration)
+            # Registra l'evento nel logger
+            #slot_board.event_logger.log_event(slot_id, previous_status, slot_status, duration)
             
+            # Aggiorna il tempo dell'ultimo cambiamento
             slot_board.sensors_data[slot_id + "_time"] = current_time
             
         except Exception as e:
             print(f"Errore nel processare il messaggio: {e}")
 
-    subscriber = MySubscriber("SlotTabSubscriber", "ParkingLot/+/+/status", on_message_received)
+    # Inizializza il subscriber MQTT e inizia a ricevere aggiornamenti
+    subscriber = MySubscriber("SlotTabSubscriber", "ParkingLot/+/status", on_message_received)
     subscriber.start()
 
     try:

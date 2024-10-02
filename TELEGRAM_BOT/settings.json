@@ -1,5 +1,5 @@
 {
-    "messageBroker": "mqtt.eclipseprojects.io",
+    "messageBroker": "localhost",
     "brokerPort": 1883, 
     "qos": 2,
     "catalog_url": "http://localhost:8080"

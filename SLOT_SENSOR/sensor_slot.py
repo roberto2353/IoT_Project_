@@ -1,29 +1,41 @@
 from pathlib import Path
-import paho.mqtt.client as PahoMQTT
 import time
-from queue import Queue
 import json
-import requests
 import random
-import sys
 from datetime import datetime
+import requests
 
+<<<<<<< HEAD
 # Percorso assoluto 
 sys.path.append('/Users/robertobratu/Desktop/IoT_Project_')
 
 from DATA.event_logger import EventLogger
+=======
+# Import MyPublisher and MyMQTT (assuming MyMQTT is a class that handles MQTT client management)
+from simplePublisher import MyPublisher
+from MyMQTT import MyMQTT
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
-class SlotSensor:
+class SlotSensor(MyPublisher):
     """Parking slot sensor simulator that listens to occupancy status."""
-    def __init__(self, sensorId, baseTopic, slotCode):
-        self.sensorId = sensorId
+
+    def __init__(self, sensorID, baseTopic, slotCode, broker, port):
+        clientID = str(sensorID) + "Pub"
+        if len(clientID) > 23:
+            clientID = clientID[:23]  # Troncamento se necessario
+
+        # Passaggio dell'ID corretto al costruttore del parent
+        super().__init__(clientID, baseTopic + "/status", broker, port)
+        self.sensorID = sensorID
+        self.slotCode = slotCode
         self.isOccupied = False  # True if occupied, False if free
         self.last_state = False
         self.last_change_time = datetime.now()
         self.active = True
+<<<<<<< HEAD
         self.pubTopic = baseTopic + "/status"
         self.subTopic = baseTopic + "/+"  # Subscribe to all messages under baseTopic
         self.aliveBn = "updateCatalogSlot"
@@ -38,61 +50,109 @@ class SlotSensor:
 
     def update_state(self):
         new_state = random.choice([True, False])  # True if occupied, False if free
+=======
+        self.pubTopic = f"{baseTopic}/{self.slotCode}/status"
+        self.aliveTopic = f"ParkingLot/alive/{self.slotCode}"
+        self.simulate_occupancy = True
 
+        # Initialize the MyMQTT client for managing MQTT connections
+        self.client = MyMQTT(self.sensorID, broker, port, None)
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
+
+        # Event logger to track state changes
+        #self.event_logger = EventLogger()
+
+    def sendDataAlive(self):
+            # Send alive message to indicate the sensor is still active
+            eventAlive = {"n": f"{self.slotCode}/status", "u": "IP", "t": str(time.time()), "v": ""}
+            aliveMessage = {"bn": "updateCatalogSlot", "e": [eventAlive]}
+            self.client.myPublish(self.aliveTopic, json.dumps(aliveMessage))  # Publish alive message
+    
+    def updateState(self):
+        """Simulates state change and sends the data via MQTT."""
+        new_state = random.choice([True, False])  # True if occupied, False if free
         new_state_str = "occupied" if new_state else "free"
         last_state_str = "occupied" if self.last_state else "free"
 
+        # Check if there's a state change
         if new_state != self.isOccupied:
             current_time = datetime.now()
-            duration = (current_time - self.last_change_time).total_seconds()  # Duration in seconds
-            self.event_logger.log_event(self.slotCode, last_state_str, new_state_str, duration)
+            duration = (current_time - self.last_change_time).total_seconds()
+            #self.event_logger.log_event(self.slotCode, last_state_str, new_state_str, duration)
             self.last_change_time = current_time
             self.last_state = new_state
             self.isOccupied = new_state
             print(f"Slot {self.slotCode} stato aggiornato da: {last_state_str} a {new_state_str}")
 
+<<<<<<< HEAD
             # Pubblica il nuovo stato del sensore
             event = {"n": self.slotCode + "/status", "u": "boolean", "t": str(time.time()), "v": new_state_str}
             out = {"bn": self.pubTopic, "e": [event]}
             self.myPub.myPublish(json.dumps(out), self.pubTopic)
+=======
+            # Create and publish MQTT message
+            event = {
+                "n": f"{self.slotCode}/status", "u": "boolean", "t": str(time.time()), "v": new_state_str
+            }
+            message = {"bn": self.pubTopic, "e": [event]}
+            self.client.myPublish(self.pubTopic, json.dumps(message))  # Using self.client to publish message
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
-            # Aggiorna lo stato del sensore nel catalogo
-            self.update_catalog_state(new_state_str)
+            # Update sensor state in the catalog
+            self.update_catalog_state(new_state_str,self.sensorID)
 
+<<<<<<< HEAD
             # Pubblica un messaggio di "alive" per notificare che il sensore è attivo
             eventAlive = {"n": self.slotCode + "/status", "u": "IP", "t": str(time.time()), "v": ""}
             outAlive = {"bn": self.aliveBn, "e": [eventAlive]}
             self.myPub.myPublish(json.dumps(outAlive), self.aliveTopic)
+=======
+    
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
-    def update_catalog_state(self, new_state):
-        """Invia una richiesta PUT per aggiornare lo stato del sensore nel catalogo."""
+    def update_catalog_state(self, new_state, sensorId):
+        """Update sensor state in the catalog."""
         try:
             with open(SETTINGS, "r") as fs:
                 settings = json.loads(fs.read())
-            
-            catalog_url = settings["catalog_url"]
-            url = f"{catalog_url}/devices"
 
+<<<<<<< HEAD
             # Ottieni la lista dei dispositivi dal catalogo
             response = requests.get(url)
             response.raise_for_status()
             devices = response.json().get('devices', [])
             
             
+=======
+            catalog_url = f"{settings['catalog_url']}/devices"
+
+            # Get current devices from the catalog
+            response = requests.get(catalog_url)
+            response.raise_for_status()
+            devices = response.json().get('devices', [])
+
+            # Find and update the device in the catalog
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
             for device in devices:
-                if device["location"] == self.slotCode:
+                if(device.get("ID") == sensorId):
                     device["status"] = new_state
                     device["last_update"] = time.time()
                     break
 
+<<<<<<< HEAD
             # Invia una richiesta PUT per aggiornare il catalogo
             response = requests.put(url, json=device)
+=======
+            # Send PUT request to update the catalog
+            response = requests.put(catalog_url, json=device)
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
             response.raise_for_status()
             print(f"Stato del sensore {self.slotCode} aggiornato nel catalogo a: {new_state}")
         
         except Exception as e:
             print(f"Errore durante l'aggiornamento del catalogo per il sensore {self.slotCode}: {e}")
 
+<<<<<<< HEAD
     def toggle_simulation(self):
         self.simulate_occupancy = not self.simulate_occupancy
     
@@ -176,11 +236,14 @@ class MyPublisher:
         self.port = self.settings["brokerPort"]
         self.qos = self.settings["qos"]
 
+=======
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
     def start(self):
-        self._paho_mqtt.connect(self.messageBroker, self.port)
-        self._paho_mqtt.loop_start()
+        """Start the MQTT client."""
+        self.client.start()  # Start MQTT client connection
 
     def stop(self):
+<<<<<<< HEAD
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
@@ -190,60 +253,43 @@ class MyPublisher:
 
     def myOnConnect(self, paho_mqtt, userdata, flags, rc):
         print(f"Connected to {self.messageBroker} with result code: {rc}")
+=======
+        """Stop the MQTT client."""
+        self.client.stop()  # Stop MQTT client connection
+>>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
 
-class MySubscriber:
-    def __init__(self, clientID, topic):
-        self.clientID = clientID + "slotsub"
-        self.q = Queue()
-        self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID, clean_session=False, userdata=None, protocol=PahoMQTT.MQTTv311, transport="tcp")
-        self._paho_mqtt.on_connect = self.myOnConnect
-        self._paho_mqtt.on_message = self.myOnMessageReceived
-        self.topic = topic
-
-        try:
-            with open(SETTINGS, "r") as fs:                
-                self.settings = json.loads(fs.read())            
-        except Exception:
-            print("Problem in loading settings")
-            return
-        self.messageBroker = self.settings["messageBroker"]
-        self.port = self.settings["brokerPort"]
-        self.qos = self.settings["qos"]
-
-    def start(self):
-        self._paho_mqtt.connect(self.messageBroker, self.port)
-        self._paho_mqtt.loop_start()
-        self._paho_mqtt.subscribe(self.topic, self.qos)
-
-    def stop(self):
-        self._paho_mqtt.unsubscribe(self.topic)
-        self._paho_mqtt.loop_stop()
-        self._paho_mqtt.disconnect()
-
-    def myOnConnect(self, paho_mqtt, userdata, flags, rc):
-        print(f"Connected to {self.messageBroker} with result code: {rc}")
-
-    def myOnMessageReceived(self, paho_mqtt, userdata, msg):
-        if msg.topic.split("/")[3] in ["occupancy"]:
-            self.q.put(msg)
-            print(f"Topic: '{msg.topic}', QoS:'{msg.qos}' Message: '{msg.payload}'")
-
-
-def main():
-    """Funzione principale che esegue continuamente il processamento dei dati dei sensori di parcheggio."""
-    sensors = []
-
-    for sens in sensors:
-        sens.toggle_simulation()  
-
-    while True:
-        update_sensors(sensors)  
-        for sens in sensors:
-            sens.update_state()  
-            
-        time.sleep(35) 
-
-
+# Main function to initialize and run SlotSensors
 if __name__ == '__main__':
-    main()
+    conf = json.load(open(SETTINGS))
+    owner = input("Enter your name ")
+    baseTopic = conf["baseTopic"]
+    broker = conf["messageBroker"]
+    port = conf["brokerPort"]
+    catalog_url = conf["catalog_url"]
+
+    sensors = []
+    sensorID = 0
+
+    response = requests.get(catalog_url+"/devices")
+    response.raise_for_status()
+    devices = response.json().get('devices', [])
+
+    for device in devices: 
+        sensorID = device.get("ID") 
+        slotCode = device.get("location")
+        sensor = SlotSensor(sensorID, baseTopic, slotCode, broker, port)
+        sensors.append(sensor)
+
+    for sensor in sensors:
+        sensor.start()
+
+    try:
+        while True:
+            for sensor in sensors:
+                sensor.sendDataAlive()
+                time.sleep(1)
+
+    except KeyboardInterrupt:
+        for sensor in sensors:
+            sensor.stop()

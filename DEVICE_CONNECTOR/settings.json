@@ -1,5 +1,5 @@
 {
-    "catalogURL": "http://localhost:8080",
+    "catalogURL": "http://localhost:8090",
     "devices":[
         {
             "deviceInfo":{
@@ -47,6 +47,14 @@
             "name": "sensor6",
             "type": "photocell",
             "location": "P0-6"
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 7,
+            "name": "sensor7",
+            "type": "photocell",
+            "location": "P0-7"
             }
         }
     ],

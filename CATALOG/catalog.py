@@ -4,6 +4,16 @@ import cherrypy
 import json
 import time
 import paho.mqtt.client as PahoMQTT
+import requests
+import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.path.join(current_dir, '..', 'DATA')
+if data_dir not in sys.path:
+    sys.path.insert(0, data_dir)
+
+from influxAdaptor import dbAdaptor
 
 SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
 DEVICE_EXPIRATION_THRESHOLD = 120 #Every 2 minutes
@@ -182,8 +192,9 @@ class CatalogManager:
 class CatalogREST(object):
     exposed = True
 
-    def __init__(self, catalog_manager):
+    def __init__(self, catalog_manager, db_adaptor):
         self.catalog_manager = catalog_manager
+        self.db_adaptor = db_adaptor
 
     def GET(self, *uri, **params):
         """Handle GET requests."""
@@ -210,6 +221,14 @@ class CatalogREST(object):
 
             if uri[0] == 'devices':
                 self.catalog_manager.add_device(json_body)
+                try:
+                        response = requests.post(self.db_adaptor, json=json_body, timeout=5)
+                        if response.status_code == 200:
+                            output = f"Device with ID {json_body['ID']} has been added and registered on InfluxDB."
+                        else:
+                            raise cherrypy.HTTPError(status=500, message=f"Failed to register device on InfluxDB: error_msg")
+                except requests.exceptions.RequestException as e:
+                        raise cherrypy.HTTPError(status=500, message=f"Failed to communicate with dbAdaptor: {e}")
                 return f"Device with ID {json_body['ID']} added"
             elif uri[0] == 'services':
                 self.catalog_manager.add_service(json_body)
@@ -312,7 +331,8 @@ class MySubscriber:
 
 if __name__ == '__main__':
     catalog_manager = CatalogManager("catalog.json")
-    catalog_rest = CatalogREST(catalog_manager)
+    db_adaptor_url = 'http://localhost:5000/register_device'
+    catalog_rest = CatalogREST(catalog_manager, db_adaptor_url)
 
     mqtt_subscriber = MySubscriber(clientID="CatalogSubscriber", topic="ParkingLot/alive/#", broker="localhost", port=1883, catalog_manager=catalog_manager)
     mqtt_subscriber.start()
@@ -324,13 +344,7 @@ if __name__ == '__main__':
         }
     }
 
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8080})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8090})
     cherrypy.tree.mount(catalog_rest, '/', conf)
     cherrypy.engine.start()
     cherrypy.engine.block()
-
-
-
-
-
-
