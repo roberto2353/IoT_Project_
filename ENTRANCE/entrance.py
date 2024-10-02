@@ -8,7 +8,6 @@ from pathlib import Path
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
-SETTINGS = P / 'settings.json'
 
 
 class Entrance:
@@ -46,7 +45,7 @@ class Entrance:
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
 
-            right_slot = [slot for slot in devices if slot.get('booking_code') == booking_code]
+            right_slot = [slot for slot in reserved_slots if slot.get('booking_code') == booking_code]
 
             if not right_slot:
                 raise cherrypy.HTTPError(400, "Slot does not reserved in the system")

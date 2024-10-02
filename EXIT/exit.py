@@ -1,84 +1,117 @@
 import cherrypy
 import sys
-import pytz
-from datetime import datetime, timedelta, timezone
-
-
-sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
-
-from DATA.event_logger import EventLogger
-from datetime import datetime, timedelta
+import requests
 import json
+import time
+from MyMQTT import MyMQTT
+from pathlib import Path
 
-class ParkingExitService:
+P = Path(__file__).parent.absolute()
+SETTINGS = P / 'settings.json'
 
-    def __init__(self):
-        self.event_logger = EventLogger()
 
-    def calculate_parking_fee(self, parking_duration):
-        hourly_rate = 2.0
-        reduced_rate = 12.0 
-        daily_rate = 20.0 
+class Exit:
+    def __init__(self, baseTopic, broker, port):
+        self.pubTopic = f"{baseTopic}"
+        self.client = MyMQTT("Exit", broker, port, None)
+        self.messageBroker = broker
+        self.port = port
 
-        if parking_duration > timedelta(hours=12):
-            return daily_rate
-        elif parking_duration > timedelta(hours=6):
-            return reduced_rate
-        else:
-            hours_parked = parking_duration.total_seconds() / 3600
-            return round(hours_parked * hourly_rate, 2)
+    def start(self):
+        """Start the MQTT client."""
+        self.client.start()  # Start MQTT client connection
+        print(f"Publisher connesso al broker {self.messageBroker}:{self.port}")
+
+    def stop(self):
+        """Stop the MQTT client."""
+        self.client.stop()  # Stop MQTT client connection
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
-    @cherrypy.tools.json_out()
+    @cherrypy.tools.json_out() 
     def exit(self):
         try:
+
+            adaptor_url = 'http://127.0.0.1:5000/'  # URL dell'adaptor
+            response = requests.get(adaptor_url)
+            response.raise_for_status()  # Controlla se la risposta è corretta
+            
+            # Ottieni la lista dei dispositivi dall'adaptor
+            devices = response.json()
+
+            # Filtra i dispositivi con stato 'free'
+            occupied_slots = [slot for slot in devices if slot.get('status') == 'occupied']
+
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
 
-            if not booking_code:
-                raise cherrypy.HTTPError(400, "Codice di prenotazione mancante")
+            right_slot = [slot for slot in occupied_slots if slot.get('booking_code') == booking_code]
 
-            query = f'''
-            from(bucket: "{self.event_logger.bucket}")
-              |> range(start: -24h)  // Puoi modificare l'intervallo di tempo se necessario
-              |> filter(fn: (r) => r._measurement == "parking_slot_state" and r.slot_id == "{booking_code}" and r._field == "current_status" and r._value == "occupied")
-              |> last()
-            '''
+            if not right_slot:
+                raise cherrypy.HTTPError(400, "Slot does not reserved in the system")
+            
+            selected_device = right_slot[0]  # Assumendo che il booking code sia unico
 
-            result = self.event_logger.client.query_api().query(org=self.event_logger.org, query=query)
+            # # Verifica che il tempo non sia maggiore di 20 minuti (1200 secondi)
+            # current_time = int(time.time())
+            # reservation_time = selected_device.get('time', 0)
+            # print(reservation_time, " ", current_time)
+            # if current_time - reservation_time > 1200:
+            #     raise cherrypy.HTTPError(400, "Reservation expired, more than 20 minutes have passed.")
 
-            if not result or len(result[0].records) == 0:
-                raise cherrypy.HTTPError(404, "Evento di entrata non trovato")
+            # Aggiorna lo stato del dispositivo su MQTT e cambia da 'reserved' a 'occupied'
+            sensor_id = selected_device['ID']
+            location = selected_device.get('location', 'unknown')
+            sensor_type = selected_device.get('type', 'unknown')
 
-            # Assicurati che entry_time sia aware
-            entry_time = result[0].records[0].get_time().replace(tzinfo=pytz.UTC)
+            # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
+            event = {
+                "n": f"{sensor_id}/status", 
+                "u": "boolean", 
+                "t": int(time.time()), 
+                "v": 'free', 
+                "sensor_id": sensor_id,
+                "location": location,
+                "type": sensor_type,
+                "booking_code": booking_code
+            }
+            message = {"bn": "Parking System", "e": [event]}
+            mqtt_topic = f"{self.pubTopic}/{sensor_id}/status"
 
-            # Assicurati che exit_time sia aware
-            exit_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
+            # Invio del messaggio MQTT all'adaptor
+            self.client.myPublish(mqtt_topic, json.dumps(message))
+            print(f"Messaggio pubblicato su topic {mqtt_topic}")
 
-            self.event_logger.log_event(
-                slot_id=booking_code,
-                previous_status="occupied",
-                current_status="available",
-                duration=(exit_time - entry_time).total_seconds()
-            )
-
-            parking_duration = exit_time - entry_time
-            parking_fee = self.calculate_parking_fee(parking_duration)
-
+            # Risposta di successo al frontend
             return {
-                "message": f"Codice {booking_code} elaborato con successo!",
-                "parking_duration": str(parking_duration),
-                "parking_fee": parking_fee
+                "message": f"Slot {location} has been successfully  became free.",
+                "slot_id": sensor_id
             }
 
-        except cherrypy.HTTPError as e:
-            raise e
+        except requests.exceptions.RequestException as e:
+            cherrypy.log.error(f"Error during GET request to adaptor: {str(e)}")
+            raise cherrypy.HTTPError(500, 'Error communicating with adaptor')
+
+        except json.JSONDecodeError as e:
+            cherrypy.log.error(f"JSON error: {str(e)}")
+            raise cherrypy.HTTPError(500, 'Error parsing response from adaptor')
+
         except Exception as e:
-            cherrypy.response.status = 500
-            return {"error": str(e)}
+            cherrypy.log.error(f"Error during activation process: {str(e)}")
+            return {"error": str(e)}, 500
+                
+                
+
 
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8087})
-    cherrypy.quickstart(ParkingExitService())
+
+    conf = json.load(open(SETTINGS))
+    baseTopic = conf["baseTopic"]
+    broker = conf["messageBroker"]
+    port = conf["brokerPort"]
+    catalog_url = conf["catalog_url"]
+
+    ex = Exit(baseTopic, broker, port)
+    ex.start()
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8055})
+    cherrypy.quickstart(ex)
