@@ -10,18 +10,14 @@ import string
 from pathlib import Path
 import uuid
 
-#sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
-
 P = Path(__file__).parent.absolute()
 SETTINGS_PATH = P / 'settings.json'
 
 with open(SETTINGS_PATH, 'r') as file:
     settings = json.load(file)
 
-#from DATA.event_logger import EventLogger
 
-TOKEN = '7501377611:AAFjyciB61TVr_b5y9Bc3PAER4MeavWCP7c'
-#event_logger = EventLogger()
+TOKEN = '7501377611:AAGhXNYizRlkdl3V_BGtiIK-Slb76WcxzZ8'
 
 # States for the conversation
 NAME, SURNAME, IDENTITY, CREDIT_CARD = range(4)

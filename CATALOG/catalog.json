@@ -1,67 +1,74 @@
 {
     "devices": [
         {
-            "ID": "1",
+            "ID": 1,
+            "name": "sensor1",
             "type": "photocell",
             "location": "P0-1",
-            "name": "sensor1",
-            "status": "occupied",
-            "booking_code": "new_code",
-            "last_update": 1727777467.971031
+            "commands": [
+                "status"
+            ],
+            "last_update": 1728144642.0776412
         },
         {
-            "ID": "2",
+            "ID": 2,
+            "name": "sensor2",
             "type": "photocell",
             "location": "P0-2",
-            "name": "sensor2",
-            "status": "occupied",
-            "booking_code": "new_code",
-            "last_update": 1727777477.987773
+            "commands": [
+                "status"
+            ],
+            "last_update": 1728144642.0890155
         },
         {
-            "ID": "3",
+            "ID": 3,
+            "name": "sensor3",
             "type": "photocell",
             "location": "P0-3",
-            "name": "sensor3",
-            "status": "occupied",
-            "booking_code": "new_code",
-            "last_update": 1727777487.998742
+            "commands": [
+                "status"
+            ],
+            "last_update": 1728144642.0976455
         },
         {
-            "ID": "4",
+            "ID": 4,
+            "name": "sensor4",
             "type": "photocell",
             "location": "P0-4",
-            "name": "sensor4",
-            "status": "occupied",
-            "booking_code": "new_code",
-            "last_update": 1727777498.013949
+            "commands": [
+                "status"
+            ],
+            "last_update": 1728144642.1056077
         },
         {
-            "ID": "5",
+            "ID": 5,
+            "name": "sensor5",
             "type": "photocell",
             "location": "P0-5",
-            "name": "sensor5",
-            "status": "occupied",
-            "booking_code": "new_code",
-            "last_update": 1727777503.019341
+            "commands": [
+                "status"
+            ],
+            "last_update": 1728144642.1295545
         },
         {
-            "ID": "6",
+            "ID": 6,
+            "name": "sensor6",
             "type": "photocell",
             "location": "P0-6",
-            "name": "sensor6",
-            "status": "occupied",
-            "booking_code": "new_code",
-            "last_update": 1727777508.028206
+            "commands": [
+                "status"
+            ],
+            "last_update": 1728144642.1433713
         },
         {
-            "ID": "7",
+            "ID": 7,
+            "name": "sensor7",
             "type": "photocell",
             "location": "P0-7",
-            "name": "sensor7",
-            "status": "occupied",
-            "booking_code": "new_code",
-            "last_update": 1727777518.042198
+            "commands": [
+                "status"
+            ],
+            "last_update": 1728144642.1770682
         }
     ]
 }
