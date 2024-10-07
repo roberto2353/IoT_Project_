@@ -4,14 +4,14 @@ import uuid
 import time
 import json
 from MyMQTT import MyMQTT
+from datetime import datetime
 
-API_URL = 'http://127.0.0.1:8000'  # FastAPI service running entranceAlgorithm
 
 class ParkingService:
     def __init__(self, baseTopic, broker, port):
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT("Reservation", broker, port, None)
-        self.entrance_algorithm_url = "http://127.0.0.1:8081/
+        self.client = MyMQTT("Reservation_Fabio", broker, port, None)
+        self.entrance_algorithm_url = "http://127.0.0.1:8081/get_best_parking"
     @cherrypy.expose
     @cherrypy.tools.allow(methods=['POST'])
     @cherrypy.tools.json_out()
@@ -21,12 +21,14 @@ class ParkingService:
             response = requests.get(self.entrance_algorithm_url)
             if response.status_code == 200:
                 selected_device = response.json().get("parking")
+                print(f"selected device for current booking: {selected_device['ID']}")
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if selected_device:
                     # Create a booking code
                     booking_code = str(uuid.uuid4())
                     selected_device['status'] = 'reserved'
                     selected_device['booking_code'] = booking_code
-                    selected_device['last_update'] = time.time()
+                    selected_device['last_update'] = str(current_time)
 
                     # Send reservation data to adaptor
                     reservation_url = 'http://127.0.0.1:5000/reservation'
@@ -43,13 +45,13 @@ class ParkingService:
                     # Publish MQTT message
                     event = {
                         "n": f"{str(selected_device['ID'])}/status", "u": "boolean", 
-                        "t": str(time.time()), "v": 'reserved',
+                        "t": str(datetime.now()), "v": 'reserved',
                         "sensor_id": selected_device['ID'],
                         "location": selected_device.get('location', 'unknown'),
                         "type": selected_device.get('type', 'unknown'),
                         "booking_code": booking_code
                     }
-                    message = {"bn": self.pubTopic, "e": [event]}
+                    message = {"bn": selected_device['name'], "e": [event]}
                     self.client.myPublish(f"{self.pubTopic}/{selected_device['ID']}/status", message)
 
                     return {

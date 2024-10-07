@@ -2,11 +2,11 @@ import requests
 import json
 
 # URL del server CherryPy
-url = 'http://127.0.0.1:8085/activate'
+url = 'http://127.0.0.1:8056/exit'
 
 # Dati da inviare nella richiesta
 data = {
-    "booking_code": "323f42ea-2f1b-4a77-a22f-5d6adac7d7d5"
+    "booking_code": "7e931151-ee52-4c1d-abf1-6f1179a12722"
 }
 
 # Invio della richiesta POST

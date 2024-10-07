@@ -6,11 +6,20 @@ import random
 import time
 import cherrypy
 import requests
-
+from MyMQTT import MyMQTT
 import threading
+from pathlib import Path
+
+P = Path(__file__).parent.absolute()
+SETTINGS = P / 'settings.json'
+SETTINGS = P / 'settings.json'
 
 class Algorithm:
-    def __init__(self, devices):
+    def __init__(self, devices, baseTopic, broker, port):
+        self.pubTopic = f"{baseTopic}"
+        self.client = MyMQTT("Simulation", broker, port, None)
+        self.messageBroker = broker
+        self.port = port
         self.devices = devices
         self.n_floors = 0
         self.n_tot_dev = 0
@@ -19,9 +28,20 @@ class Algorithm:
         self.floors = []
         self.tot_occupied = 0
         self.arrivals = []
-        self.t_hold_time = 5
+        self.t_hold_time = 15
+
+    def start(self):
+        """Start the MQTT client."""
+        self.client.start()  # Start MQTT client connection
+        print(f"Publisher connesso al broker {self.messageBroker}:{self.port}")
+
+    def stop(self):
+        """Stop the MQTT client."""
+        self.client.stop()  # Stop MQTT client connection
+
 
     def countFloors(self):
+        self.floors=[]
         for device in self.devices:
             floor = self.extract_floor(device['location'])
             if floor not in self.floors:
@@ -34,30 +54,43 @@ class Algorithm:
         print(f"total parkings: {self.n_tot_dev}")
 
     def devPerFloorList(self):
+        self.n_dev_per_floor=[]
         for floor in self.floors:
             count = sum(1 for dev in self.devices if self.extract_floor(dev['location']) == floor)
             self.n_dev_per_floor.append(count)
             print(f"number of parking per floor {floor}: {count}")
 
     def occDevPerFloorList(self):
-        print(self.devices)
+        self.n_occ_dev_per_floor=[]
         for floor in self.floors:
             count = sum(1 for dev in self.devices if self.extract_floor(dev['location']) == floor and dev['status'] in ("occupied", "reserved"))
             self.n_occ_dev_per_floor.append(count)
             print(f"number of occupied/booked parking for floor {floor}: {count}")
 
     def update_device_status(self, device):
-        update_url = f"http://localhost:5000/update_device"
-        data = {
-            "ID": device['ID'],
-            "status": device['status'],
-            "last_update": device['last_update'],
-            "booking_code": device['booking_code']
-        }
-        response = requests.post(update_url, json=data)
+        
+        event = {
+                "n": f"{device['ID']}/status", 
+                "u": "boolean", 
+                "t": str(datetime.datetime.now()), 
+                "v": device['status'],  # Cambiamo lo stato in 'occupied'
+                "sensor_id": device['ID'],
+                "location": device['location'],
+                "type": device['type'],
+                "booking_code": device['booking_code']
+            }
+        message = {"bn": device['name'], "e": [event]}
+        mqtt_topic = f"{self.pubTopic}/{device['ID']}/status"
 
-        response.raise_for_status()  # Ensure the request was successful
-        print(f"Updated status for device {device['ID']} !")
+        # Invio del messaggio MQTT all'adaptor
+        self.client.myPublish(mqtt_topic, json.dumps(message))
+        print(f"Messaggio pubblicato su topic {mqtt_topic}")
+
+        # Risposta di successo al frontend
+        return {
+                "message": f"Slot {device['location']} has been successfully  occupied.",
+                "slot_id": device['ID']
+            }
 
 
 
@@ -65,6 +98,7 @@ class Algorithm:
     @staticmethod
     def extract_floor(location):
         if location.startswith("P"):
+            # print(f"{location[1]}")
             return location[1]
         return None
 
@@ -84,9 +118,10 @@ class Algorithm:
 
 
     def changeDevState(self, device, floor, time):
-        if device['status'] == 'free' and self.extract_floor(device['location']) == floor:
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if device['status'] == 'free' and int(self.extract_floor(device['location'])) == int(floor):
             device['status'] = 'occupied'
-            device['last_update'] = time.timestamp()
+            device['last_update'] = str(current_time)
             device['booking_code'] = 'new_code'  # TODO: generate a unique code for non logged users
             self.update_device_status(device)  # Send update to adaptor
             return True
@@ -94,7 +129,10 @@ class Algorithm:
 
     def get_free_device_on_floor(self, floor):
         for device in self.devices:
-            if device['status'] == 'free' and self.extract_floor(device['location']) == floor:
+            print(f"{device['status']},{floor}")
+            print(f"{self.extract_floor(device['location'])}")
+            if device['status'] == 'free' and int(self.extract_floor(device['location'])) == int(floor):
+                print("device found")
                 return device
         return None
 
@@ -102,8 +140,12 @@ class Algorithm:
         flag = 0
         time = datetime.datetime.now()
         if self.arrivals and time >= self.arrivals[0] and get == 'False':
+            print()
             self.arrivals.pop(0)
             for floor in range(self.n_floors):
+                print(f"current floor:{floor}")
+                print(f"posti occupati per piano prova:{self.n_occ_dev_per_floor}")
+                print(f"posti occupati:{self.n_occ_dev_per_floor[floor]}; thold posti occupati:{int(0.8 * self.n_dev_per_floor[floor])}")
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
                     device = self.get_free_device_on_floor(floor)
                     if device and self.changeDevState(device, floor, time):
@@ -113,9 +155,10 @@ class Algorithm:
 
             if flag == 0:
                 device = next((d for d in self.devices if d['status'] == 'free'), None)
+                current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if device:
                     device['status'] = 'occupied'
-                    device['last_update'] = time.timestamp()
+                    device['last_update'] = str(current_time)
                     device['booking_code'] = 'new_code'
                     print(f"all floors have more than 80% of parkings occupied.")
                     print(f"Device {device['ID']} has changed state to {device['status']}")
@@ -126,6 +169,7 @@ class Algorithm:
                     device = self.get_free_device_on_floor(floor)
                     if device and device['status'] == 'free':
                         flag=1
+                        print("device found for the registration in route arrivals")
                         return {"message": "Parking found", "parking": device}
                     
 
@@ -141,12 +185,13 @@ class Algorithm:
         current_time = datetime.datetime.now()
 
         for device in self.devices:
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if device['status'] == 'occupied':
                 if random.random() < departure_probability:
                     device['status'] = 'free'
-                    device['last_update'] = current_time.timestamp()
+                    device['last_update'] = str(current_time)
                     device['booking_code'] = ""
-                    self.update_device_status(device, 'free')  # Send update to adaptor
+                    self.update_device_status(device)  # Send update to adaptor
                     print(f"Device {device['ID']} at {device['location']} is now free. Car has departed.")
 
     def refreshDevices(self):
@@ -176,7 +221,12 @@ class EntranceAlgorithmService:
         response = requests.get(adaptor_url)
         response.raise_for_status()  # Check if response is correct
         devices = response.json()  # Fetch devices from adaptor
-        self.algorithm = Algorithm(devices)  # Create Algorithm instance
+        conf = json.load(open(SETTINGS))
+        baseTopic = conf["baseTopic"]
+        broker = conf["messageBroker"]
+        port = conf["brokerPort"]
+        catalog_url = conf["catalog_url"]
+        self.algorithm = Algorithm(devices,baseTopic, broker, port)  # Create Algorithm instance
 
     def sim_loop_start(self):
         threading.Thread(target=self.algorithm.simulate_arrivals_loop, daemon=True).start()
@@ -192,6 +242,7 @@ class EntranceAlgorithmService:
 if __name__ == '__main__':
     
     entranceAlgorithmService = EntranceAlgorithmService()
+    entranceAlgorithmService.algorithm.start()
     entranceAlgorithmService.sim_loop_start()
     cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
     cherrypy.quickstart(entranceAlgorithmService)

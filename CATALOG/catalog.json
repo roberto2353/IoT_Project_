@@ -1,4 +1,15 @@
 {
+    "project_name": "IoT4SmartParking",
+    "project_owner": "IoT_Group8",
+    "device_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8080,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
     "devices": [
         {
             "ID": 1,
@@ -8,7 +19,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728144642.0776412
+            "last_update": 1728316726.1912568
         },
         {
             "ID": 2,
@@ -18,7 +29,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728144642.0890155
+            "last_update": 1728316726.1954534
         },
         {
             "ID": 3,
@@ -28,7 +39,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728144642.0976455
+            "last_update": 1728316726.200941
         },
         {
             "ID": 4,
@@ -38,7 +49,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728144642.1056077
+            "last_update": 1728316726.2091181
         },
         {
             "ID": 5,
@@ -48,7 +59,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728144642.1295545
+            "last_update": 1728316726.213648
         },
         {
             "ID": 6,
@@ -58,7 +69,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728144642.1433713
+            "last_update": 1728316726.2233427
         },
         {
             "ID": 7,
@@ -68,7 +79,19 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728144642.1770682
+            "last_update": 1728316726.227144
         }
-    ]
+    ],
+    "service_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8084,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "users": [],
+    "services": [],
+    "parkings": []
 }

@@ -1,6 +1,7 @@
 import paho.mqtt.client as PahoMQTT
 import time
 import json
+from datetime import datetime
 from influxdb import InfluxDBClient
 import sys
 import cherrypy
@@ -12,7 +13,7 @@ class dbAdaptor:
     def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', influx_db='IoT_Smart_Parking'):
         self.clientID = clientID
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client(clientID, True)
+        self._paho_mqtt = PahoMQTT.Client("fabio", True)
 
         # Registra i callback
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -89,6 +90,7 @@ class dbAdaptor:
                 
                 if list(result.get_points()):
                     # Se il sensore esiste, aggiorna lo stato nel database InfluxDB
+                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     json_body = [
                         {
                             "measurement": 'status',
@@ -97,7 +99,7 @@ class dbAdaptor:
                                 "type": sensor_type,
                                 "location": location
                             },
-                            "time": int(time.time()),  # Timestamp corrente
+                            "time": str(current_time),  # Timestamp corrente
                             "fields": {
                                 "name": data['bn'],  # Nome del sensore o dispositivo
                                 "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
@@ -151,6 +153,7 @@ class dbAdaptor:
                     return {"message": f"Device with ID {device_info['ID']} already exists."}, 409  # Conflict
                 
                 # Se non esiste, inserisci il nuovo dispositivo
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 json_body = [
                     {
                         "measurement": 'status',
@@ -159,7 +162,7 @@ class dbAdaptor:
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
-                        "time": int(time.time()),  # Timestamp corrente
+                        "time": str(current_time),  # Timestamp corrente
                         "fields": {
                             "name": device_info['name'],
                             "status": "free",  # Lo stato è forzato a "free"
@@ -194,7 +197,7 @@ class dbAdaptor:
                 if not list(result.get_points()):
                     return {"message": f"Device with ID {device_info['ID']} doesn't exist."}, 409  # Conflict
                 
-            
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 json_body = [
                     {
                         "measurement": 'status',
@@ -203,7 +206,7 @@ class dbAdaptor:
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
-                        "time": int(time.time()),  # Timestamp corrente
+                        "time": str(current_time),  # Timestamp corrente
                         "fields": {
                             "name": device_info['name'],
                             "status": "reserved",  # Lo stato è forzato da "free"
