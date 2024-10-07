@@ -74,6 +74,8 @@ class SlotSensor(MyPublisher):
 
     def update_catalog_state(self, new_state, sensorId):
         """Update sensor state in the catalog."""
+    def update_catalog_state(self, new_state, sensorId):
+        """Update sensor state in the catalog."""
         try:
             with open(SETTINGS, "r") as fs:
                 settings = json.loads(fs.read())
@@ -95,10 +97,10 @@ class SlotSensor(MyPublisher):
             # Send PUT request to update the catalog
             response = requests.put(catalog_url, json=device)
             response.raise_for_status()
-            print(f"Stato del sensore {self.slotCode} aggiornato nel catalogo a: {new_state}")
+            print(f"Sensor {self.slotCode} status updated in catalog to: {new_state}")
         
         except Exception as e:
-            print(f"Errore durante l'aggiornamento del catalogo per il sensore {self.slotCode}: {e}")
+            print(f"Error updating catalog for sensor {self.slotCode}: {e}")
 
     def start(self):
         """Start the MQTT client."""
