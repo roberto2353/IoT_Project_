@@ -12,12 +12,11 @@ from pathlib import Path
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
-SETTINGS = P / 'settings.json'
 
 class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT("Simulation", broker, port, None)
+        self.client = MyMQTT(clientID="Simulation", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
         self.port = port
         self.devices = devices
@@ -191,6 +190,8 @@ class Algorithm:
                     device['booking_code'] = ""
                     self.update_device_status(device)  # Send update to adaptor
                     print(f"Device {device['ID']} at {device['location']} is now free. Car has departed.")
+                    #TODO: ONLY REGISTERED USERS AND RANDOM USERS WILL DEPARTURE WITH THIS METHOD. 
+                    # NON REGISTERED USERS BUT USERS THAT MADE A RESERVATION REQUEST WILL BE HANDLED BY EXIT FILE.
 
     def refreshDevices(self):
         adaptor_url = 'http://127.0.0.1:5000/'  # URL for adaptor

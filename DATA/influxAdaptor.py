@@ -13,7 +13,9 @@ class dbAdaptor:
     def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', influx_db='IoT_Smart_Parking'):
         self.clientID = clientID
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client("fabio", True)
+        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
+
+
 
         # Registra i callback
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -43,8 +45,8 @@ class dbAdaptor:
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
-    def myOnConnect(self, paho_mqtt, userdata, flags, rc):
-        print(f"Connected to {self.messageBroker} with result code: {rc}")
+    def myOnConnect(self, paho_mqtt, userdata, flags, reasonCode, properties=None):
+        print(f"Connected to {self.messageBroker} with result code: {reasonCode}")
 
 
     def recursive_json_decode(self, data):

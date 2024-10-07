@@ -5,6 +5,7 @@ import random
 import time
 import threading
 
+
 class SensorREST(threading.Thread):
     exposed = True
     devices_counter = 1
