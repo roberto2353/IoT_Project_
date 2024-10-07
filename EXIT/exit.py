@@ -39,16 +39,22 @@ class Exit:
             # Ottieni la lista dei dispositivi dall'adaptor
             devices = response.json()
 
+            print("AS: ", devices)
+
             # Filtra i dispositivi con stato 'free'
             occupied_slots = [slot for slot in devices if slot.get('status') == 'occupied']
+
+            print("OS: ", occupied_slots)
 
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
 
+
+
             right_slot = [slot for slot in occupied_slots if slot.get('booking_code') == booking_code]
 
             if not right_slot:
-                raise cherrypy.HTTPError(400, "Slot does not reserved in the system")
+                raise cherrypy.HTTPError(400, "Slot does not occupied in the system")
             
             selected_device = right_slot[0]  # Assumendo che il booking code sia unico
 
@@ -63,6 +69,8 @@ class Exit:
             sensor_id = selected_device['ID']
             location = selected_device.get('location', 'unknown')
             sensor_type = selected_device.get('type', 'unknown')
+            sensor_name = selected_device.get('name', 'unknown')
+            print(sensor_name)
 
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
@@ -75,7 +83,7 @@ class Exit:
                 "type": sensor_type,
                 "booking_code": booking_code
             }
-            message = {"bn": "Parking System", "e": [event]}
+            message = {"bn": sensor_name, "e": [event]}
             mqtt_topic = f"{self.pubTopic}/{sensor_id}/status"
 
             # Invio del messaggio MQTT all'adaptor
@@ -113,5 +121,5 @@ if __name__ == '__main__':
 
     ex = Exit(baseTopic, broker, port)
     ex.start()
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8055})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8056})
     cherrypy.quickstart(ex)

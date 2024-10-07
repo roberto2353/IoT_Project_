@@ -20,7 +20,7 @@ with open(SETTINGS_PATH, 'r') as file:
 
 #from DATA.event_logger import EventLogger
 
-TOKEN = '7501377611:AAFjyciB61TVr_b5y9Bc3PAER4MeavWCP7c'
+TOKEN = '7501377611:AAGhXNYizRlkdl3V_BGtiIK-Slb76WcxzZ8'
 #event_logger = EventLogger()
 
 # States for the conversation

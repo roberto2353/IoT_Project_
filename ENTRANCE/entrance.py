@@ -39,6 +39,8 @@ class Entrance:
             # Ottieni la lista dei dispositivi dall'adaptor
             devices = response.json()
 
+            print("AD: ", devices)
+
             # Filtra i dispositivi con stato 'free'
             reserved_slots = [slot for slot in devices if slot.get('status') == 'reserved']
 
@@ -63,6 +65,8 @@ class Entrance:
             sensor_id = selected_device['ID']
             location = selected_device.get('location', 'unknown')
             sensor_type = selected_device.get('type', 'unknown')
+            sensor_name = selected_device.get('name', 'unknown')
+            print(sensor_name)
 
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
@@ -75,7 +79,7 @@ class Entrance:
                 "type": sensor_type,
                 "booking_code": booking_code
             }
-            message = {"bn": "Parking System", "e": [event]}
+            message = {"bn": sensor_name, "e": [event]}
             mqtt_topic = f"{self.pubTopic}/{sensor_id}/status"
 
             # Invio del messaggio MQTT all'adaptor

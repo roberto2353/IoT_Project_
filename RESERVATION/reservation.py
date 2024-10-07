@@ -80,7 +80,7 @@ class ParkingService:
                     "type": selected_device.get('type', 'unknown'),
                     "booking_code": booking_code
                 }
-                message = {"bn": self.pubTopic, "e": [event]}
+                message = {"bn": selected_device.get('name', 'unknown'), "e": [event]}
                 print(f"Messaggio creato: {json.dumps(message, indent=4)}")
 
                 # Pubblica il messaggio MQTT
