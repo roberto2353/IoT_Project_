@@ -156,12 +156,10 @@ class Algorithm:
             if flag == 0:
                 device = next((d for d in self.devices if d['status'] == 'free'), None)
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                if device:
-                    device['status'] = 'occupied'
-                    device['last_update'] = str(current_time)
-                    device['booking_code'] = 'new_code'
-                    print(f"all floors have more than 80% of parkings occupied.")
+                if device and self.changeDevState(device, floor, time):
+                    print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
                     print(f"Device {device['ID']} has changed state to {device['status']}")
+                    flag=1
                     return device
         if get == 'True':
             for floor in range(self.n_floors):
