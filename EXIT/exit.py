@@ -2,9 +2,11 @@ import cherrypy
 import sys
 import requests
 import json
+from datetime import datetime
 import time
 from MyMQTT import MyMQTT
 from pathlib import Path
+import pytz
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -58,19 +60,39 @@ class Exit:
             
             selected_device = right_slot[0]  # Assumendo che il booking code sia unico
 
-            # # Verifica che il tempo non sia maggiore di 20 minuti (1200 secondi)
-            # current_time = int(time.time())
-            # reservation_time = selected_device.get('time', 0)
-            # print(reservation_time, " ", current_time)
-            # if current_time - reservation_time > 1200:
-            #     raise cherrypy.HTTPError(400, "Reservation expired, more than 20 minutes have passed.")
 
             # Aggiorna lo stato del dispositivo su MQTT e cambia da 'reserved' a 'occupied'
             sensor_id = selected_device['ID']
             location = selected_device.get('location', 'unknown')
             sensor_type = selected_device.get('type', 'unknown')
             sensor_name = selected_device.get('name', 'unknown')
-            print(sensor_name)
+            booking_start_time_str = selected_device.get('time', None)
+            
+            if booking_start_time_str is None:
+                raise cherrypy.HTTPError(500, 'Booking start time not found')
+            
+            booking_start_time = datetime.strptime(booking_start_time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)
+
+            
+            #booking_start_timestamp = int(booking_start_time.timestamp())
+
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            current_time_ok = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.UTC)
+            
+            print("current_time: ", current_time_ok, "booking_start_time: " ,booking_start_time)
+            parking_duration_seconds = (current_time_ok - booking_start_time).total_seconds()
+            parking_duration_hours = parking_duration_seconds / 3600 # Converti i secondi in ore
+
+            print("parking_duration_hours :", parking_duration_hours)
+
+            if parking_duration_hours <= 10:
+                fee = parking_duration_hours * 2  # 2 euro per ora
+            else:
+                # Se supera le 10 ore, calcola 20 euro ogni 24 ore (giorno intero)
+                full_days = int(parking_duration_hours // 24)  # Numero di giorni interi
+                remaining_hours = parking_duration_hours % 24  # Ore rimanenti dopo giorni interi
+                fee = full_days * 20 + (remaining_hours * 2 if remaining_hours <= 10 else 20)
 
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
@@ -93,7 +115,9 @@ class Exit:
             # Risposta di successo al frontend
             return {
                 "message": f"Slot {location} has been successfully  became free.",
-                "slot_id": sensor_id
+                "slot_id": sensor_id,
+                "parking_duration": str(parking_duration_hours),
+                "parking_fee": fee
             }
 
         except requests.exceptions.RequestException as e:
