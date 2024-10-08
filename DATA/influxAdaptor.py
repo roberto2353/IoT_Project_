@@ -1,6 +1,7 @@
 import paho.mqtt.client as PahoMQTT
 import time
 import json
+from datetime import datetime
 from influxdb import InfluxDBClient
 import sys
 import cherrypy
@@ -12,7 +13,7 @@ class dbAdaptor:
     def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', influx_db='IoT_Smart_Parking'):
         self.clientID = clientID
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client("Adaptor", True)
+        self._paho_mqtt = PahoMQTT.Client("fabio", True)
 
         # Registra i callback
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -89,6 +90,7 @@ class dbAdaptor:
                 
                 if list(result.get_points()):
                     # Se il sensore esiste, aggiorna lo stato nel database InfluxDB
+                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     json_body = [
                         {
                             "measurement": 'status',
@@ -97,7 +99,7 @@ class dbAdaptor:
                                 "type": sensor_type,
                                 "location": location
                             },
-                            "time": int(time.time()),  # Timestamp corrente
+                            "time": str(current_time),  # Timestamp corrente
                             "fields": {
                                 "name": data['bn'],  # Nome del sensore o dispositivo
                                 "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
@@ -151,6 +153,7 @@ class dbAdaptor:
                     return {"message": f"Device with ID {device_info['ID']} already exists."}, 409  # Conflict
                 
                 # Se non esiste, inserisci il nuovo dispositivo
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 json_body = [
                     {
                         "measurement": 'status',
@@ -159,7 +162,7 @@ class dbAdaptor:
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
-                        "time": int(time.time()),  # Timestamp corrente
+                        "time": str(current_time),  # Timestamp corrente
                         "fields": {
                             "name": device_info['name'],
                             "status": "free",  # Lo stato è forzato a "free"
@@ -194,7 +197,7 @@ class dbAdaptor:
                 if not list(result.get_points()):
                     return {"message": f"Device with ID {device_info['ID']} doesn't exist."}, 409  # Conflict
                 
-            
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 json_body = [
                     {
                         "measurement": 'status',
@@ -203,10 +206,10 @@ class dbAdaptor:
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
-                        "time": int(time.time()),  # Timestamp corrente
+                        "time": str(current_time),  # Timestamp corrente
                         "fields": {
                             "name": device_info['name'],
-                            "status": "reserved",  # Lo stato è forzato a "free"
+                            "status": "reserved",  # Lo stato è forzato da "free"
                             "booking_code": device_info.get('booking_code', '')
                         }
                     }
@@ -219,10 +222,49 @@ class dbAdaptor:
             except Exception as e:
                 print(f"Error registering device: {e}")
                 return {"error": str(e)}, 500
+
+        if uri[0] == 'update_device':
+            try:
+                device_info = cherrypy.request.json
+                required_fields = ['ID', 'status', 'last_update', 'booking_code']
+
+                # Check for required fields
+                for field in required_fields:
+                    if field not in device_info:
+                        return {"error": f"Missing field: {field}"}, 400
+
+                sensor_id = device_info['ID']
+                status = device_info['status']
+                last_update = device_info['last_update']
+                booking_code = device_info['booking_code']
+
+                # Update or insert the device status in InfluxDB
+                json_body = [
+                    {
+                        "measurement": 'status',
+                        "tags": {
+                            "ID": sensor_id
+                        },
+                        "time": last_update,  # Use the provided timestamp
+                        "fields": {
+                            "status": status,
+                            "booking_code": booking_code
+                        }
+                    }
+                ]
+                # Write the update to InfluxDB
+                self.client.write_points(json_body)
+                print(f"Updated device {sensor_id} status to {status}.")
+                return {"message": f"Device {sensor_id} updated successfully."}, 200
             
+            except Exception as e:
+                print(f"Error updating device: {e}")
+                return {"error": str(e)}, 500
+
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")
         
+
 
 
 
@@ -241,7 +283,7 @@ class dbAdaptor:
                         'ID': sensor['ID'],
                         'type': sensor['type'],
                         'location': sensor['location'],
-                        'name': sensor.get('name', ''),
+                        'name': sensor['name'],
                         'status': sensor['status'],
                         'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', '')
@@ -259,6 +301,7 @@ class dbAdaptor:
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")
 
+    
 
 
 if __name__ == "__main__":

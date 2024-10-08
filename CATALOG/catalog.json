@@ -8,7 +8,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.6532893
+            "last_update": 1726838932.196004
         },
         {
             "ID": 2,
@@ -18,7 +18,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.6666543
+            "last_update": 1726838897.158015
         },
         {
             "ID": 3,
@@ -28,7 +28,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.674617
+            "last_update": 1726843383.05054
         },
         {
             "ID": 4,
@@ -38,107 +38,47 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.6784234
+            "last_update": 1726838852.119529
         },
         {
             "ID": 5,
             "name": "sensor5",
             "type": "photocell",
-            "location": "P0-5",
+            "location": "P1-1",
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.68156
+            "last_update": 1726843403.06868
         },
         {
             "ID": 6,
             "name": "sensor6",
             "type": "photocell",
-            "location": "P0-6",
+            "location": "P1-2",
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.684666
+            "last_update": 1726843418.0875
         },
         {
             "ID": 7,
             "name": "sensor7",
             "type": "photocell",
-            "location": "P0-7",
+            "location": "P1-3",
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.6872082
+            "last_update": 1726843423.093521
         },
         {
             "ID": 8,
-            "type": "photocell",
-            "location": "P1-1",
             "name": "sensor8",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6906736
-        },
-        {
-            "ID": 9,
-            "type": "photocell",
-            "location": "P1-2",
-            "name": "sensor9",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6935313
-        },
-        {
-            "ID": 10,
-            "type": "photocell",
-            "location": "P1-3",
-            "name": "sensor10",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.696509
-        },
-        {
-            "ID": 11,
             "type": "photocell",
             "location": "P1-4",
-            "name": "sensor11",
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.6992521
-        },
-        {
-            "ID": 12,
-            "type": "photocell",
-            "location": "P1-5",
-            "name": "sensor12",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.7018497
-        },
-        {
-            "ID": 13,
-            "type": "photocell",
-            "location": "P1-6",
-            "name": "sensor13",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.7055233
-        },
-        {
-            "ID": 14,
-            "type": "photocell",
-            "location": "P1-7",
-            "name": "sensor14",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.7107704
+            "last_update": 1726843501.813125
         }
     ]
 }

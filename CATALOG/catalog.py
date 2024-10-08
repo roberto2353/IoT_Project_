@@ -237,8 +237,12 @@ class CatalogREST(object):
                 self.catalog_manager.add_user(json_body)
                 return f"User with ID {json_body['ID']} added"
             elif uri[0] == 'parkings':
-                self.catalog_manager.add_parking(json_body)
-                return f"Parking with ID {json_body['ID']} added"
+                if not any(d['ID'] == json_body['ID'] for d in catalog["parkings"]):
+                    add_parking(catalog, json_body)
+                    output = f"Parking with ID {json_body['ID']} has been added"
+                else:
+                    raise cherrypy.HTTPError(400, 'PARKING ALREADY REGISTERED')
+
             else:
                 raise cherrypy.HTTPError(status=404, message='Resource not found')
         except Exception as e:
@@ -264,11 +268,17 @@ class CatalogREST(object):
                 self.catalog_manager.update_parking(json_body['ID'], json_body)
                 return f"Parking with ID {json_body['ID']} updated"
             else:
-                raise cherrypy.HTTPError(status=404, message='Resource not found')
+                raise cherrypy.HTTPError(status=404, message='RESOURCE NOT FOUND')
+            
+            json.dump(catalog, open(self.catalog_address, "w"), indent=4)
+            return json_body
+        except json.JSONDecodeError as e:
+            print(f"JSON error: {e}")  # Debug 
+            raise cherrypy.HTTPError(status=500, message='JSON PARSE ERROR')
         except Exception as e:
-            print(f"Error in PUT: {e}")
-            raise cherrypy.HTTPError(500, 'Internal Server Error')
-
+            print(f"Error during PUT request handling: {e}")  # Debug 
+            raise cherrypy.HTTPError(status=500, message='INTERNAL SERVER ERROR')
+        
     def DELETE(self, *uri):
         """Handle DELETE requests to remove entries."""
         try:
@@ -285,49 +295,16 @@ class CatalogREST(object):
                 self.catalog_manager.remove_parking(uri[1])
                 return f"Parking with ID {uri[1]} removed"
             else:
-                raise cherrypy.HTTPError(status=404, message='Resource not found')
-        except Exception as e:
-            print(f"Error in DELETE: {e}")
-            raise cherrypy.HTTPError(500, 'Internal Server Error')
-
-class MySubscriber:
-        def __init__(self, clientID, topic, broker, port, catalog_manager):
-            self.clientID = clientID
-			# create an instance of paho.mqtt.client
-            self._paho_mqtt = PahoMQTT.Client(client_id=clientID) 
+                raise cherrypy.HTTPError(status=404, message='RESOURCE NOT FOUND')
             
-			# register the callback
-            self._paho_mqtt.on_connect = self.myOnConnect
-            self._paho_mqtt.on_message = self.myOnMessageReceived 
-            self.topic = topic
-            self.messageBroker = broker
-            self.port = port
-            self.catalog_manager = catalog_manager
-
-        def start (self):
-            #manage connection to broker
-            self._paho_mqtt.connect(self.messageBroker, self.port)
-            self._paho_mqtt.loop_start()
-            # subscribe for a topic
-            self._paho_mqtt.subscribe(self.topic, 2)
-
-        def stop (self):
-            self._paho_mqtt.unsubscribe(self.topic)
-            self._paho_mqtt.loop_stop()
-            self._paho_mqtt.disconnect()
-
-        def myOnConnect (self, paho_mqtt, userdata, flags, rc):
-            print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
-
-        def myOnMessageReceived (self, paho_mqtt , userdata, msg):
-            message = json.loads(msg.payload.decode("utf-8")) #{"bn": updateCatalog<>, "e": [{...}]}
-            #self.catalog = CatalogREST(self.catalog_manager)
-            if message['bn'] == "updateCatalogSlot":            
-                self.catalog_manager.update_device(message['e'][0])# {"n": ID, "t": time.time(), "v": "", "u": IP}
-                print("Device updated")
-            if message['bn'] == "updateCatalogService":            
-                self.catalog_manager.update_service(message['e'][0])# {"n": serviceName, "t": time.time(), "v": "", "u": IP}
-                print("Service updated")
+            json.dump(catalog, open(self.catalog_address, "w"), indent=4)
+            return output
+        except json.JSONDecodeError as e:
+            print(f"JSON error: {e}")  # Debug 
+            raise cherrypy.HTTPError(status=500, message='JSON PARSE ERROR')
+        except Exception as e:
+            print(f"Error during DELETE request handling: {e}")  # Debug 
+            raise cherrypy.HTTPError(status=500, message='INTERNAL SERVER ERROR')
 
 if __name__ == '__main__':
     catalog_manager = CatalogManager("catalog.json")

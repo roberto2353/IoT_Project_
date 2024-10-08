@@ -6,7 +6,7 @@ url = 'http://127.0.0.1:8056/exit'
 
 # Dati da inviare nella richiesta
 data = {
-    "booking_code": "119b8001-9ca5-48ff-841a-a93d21b9106b"
+    "booking_code": "85f410f7-25c0-4a33-962b-2a936d33d7ee"
 }
 
 # Invio della richiesta POST
