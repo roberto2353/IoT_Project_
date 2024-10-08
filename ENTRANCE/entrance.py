@@ -8,7 +8,6 @@ from pathlib import Path
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
-SETTINGS = P / 'settings.json'
 
 
 class Entrance:
@@ -40,13 +39,15 @@ class Entrance:
             # Ottieni la lista dei dispositivi dall'adaptor
             devices = response.json()
 
+            print("AD: ", devices)
+
             # Filtra i dispositivi con stato 'free'
             reserved_slots = [slot for slot in devices if slot.get('status') == 'reserved']
 
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
 
-            right_slot = [slot for slot in devices if slot.get('booking_code') == booking_code]
+            right_slot = [slot for slot in reserved_slots if slot.get('booking_code') == booking_code]
 
             if not right_slot:
                 raise cherrypy.HTTPError(400, "Slot does not reserved in the system")
@@ -64,6 +65,8 @@ class Entrance:
             sensor_id = selected_device['ID']
             location = selected_device.get('location', 'unknown')
             sensor_type = selected_device.get('type', 'unknown')
+            sensor_name = selected_device.get('name', 'unknown')
+            print(sensor_name)
 
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
@@ -76,7 +79,7 @@ class Entrance:
                 "type": sensor_type,
                 "booking_code": booking_code
             }
-            message = {"bn": "Parking System", "e": [event]}
+            message = {"bn": sensor_name, "e": [event]}
             mqtt_topic = f"{self.pubTopic}/{sensor_id}/status"
 
             # Invio del messaggio MQTT all'adaptor
