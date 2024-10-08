@@ -1,84 +1,26 @@
 {
-    "devices": [
-        {
-            "ID": 1,
-            "name": "sensor1",
-            "type": "photocell",
-            "location": "P0-1",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726838932.196004
-        },
-        {
-            "ID": 2,
-            "name": "sensor2",
-            "type": "photocell",
-            "location": "P0-2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726838897.158015
-        },
-        {
-            "ID": 3,
-            "name": "sensor3",
-            "type": "photocell",
-            "location": "P0-3",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726843383.05054
-        },
-        {
-            "ID": 4,
-            "name": "sensor4",
-            "type": "photocell",
-            "location": "P0-4",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726838852.119529
-        },
-        {
-            "ID": 5,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P1-1",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726843403.06868
-        },
-        {
-            "ID": 6,
-            "name": "sensor6",
-            "type": "photocell",
-            "location": "P1-2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726843418.0875
-        },
-        {
-            "ID": 7,
-            "name": "sensor7",
-            "type": "photocell",
-            "location": "P1-3",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726843423.093521
-        },
-        {
-            "ID": 8,
-            "name": "sensor8",
-            "type": "photocell",
-            "location": "P1-4",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1726843501.813125
-        }
-    ]
+    "project_name": "IoT4SmartParking",
+    "project_owner": "IoT_Group8",
+    "device_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8080,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "devices": [],
+    "service_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8084,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "users": [],
+    "services": [],
+    "parkings": []
 }
