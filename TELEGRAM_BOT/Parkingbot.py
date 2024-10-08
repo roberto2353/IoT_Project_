@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-from telegram import Update
-from telegram.ext import CommandHandler, CallbackContext, ApplicationBuilder, MessageHandler, ConversationHandler
-=======
+import logging
 import telepot
 from telepot.loop import MessageLoop
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 import requests
 import json
 import time
@@ -12,30 +8,25 @@ from threading import Timer
 import sys
 import random
 import string
-<<<<<<< HEAD
-# Percorso assoluto 
-sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
-=======
 from pathlib import Path
 import uuid
 
 #sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+logging.basicConfig(level=logging.INFO)
+
 P = Path(__file__).parent.absolute()
 SETTINGS_PATH = P / 'settings.json'
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
 with open(SETTINGS_PATH, 'r') as file:
     settings = json.load(file)
 
 #from DATA.event_logger import EventLogger
 
-TOKEN = '7501377611:AAFjyciB61TVr_b5y9Bc3PAER4MeavWCP7c'
-<<<<<<< HEAD
-event_logger = EventLogger()
-
-NAME, SURNAME, IDENTITY, CREDIT_CARD = range(4)  # Stati per la conversazione
-=======
+TOKEN = '7501377611:AAGhXNYizRlkdl3V_BGtiIK-Slb76WcxzZ8'
 #event_logger = EventLogger()
 
 # States for the conversation
@@ -43,7 +34,6 @@ NAME, SURNAME, IDENTITY, CREDIT_CARD = range(4)
 
 # User data tracking
 user_data = {}
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
 def generate_booking_code():
     letters = ''.join(random.choices(string.ascii_uppercase, k=3))
@@ -51,11 +41,7 @@ def generate_booking_code():
     return letters + numbers
 
 booking_code = generate_booking_code()
-<<<<<<< HEAD
-print(booking_code)
-=======
 #print(booking_code)
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 
 def is_valid_name(name):
     return name.isalpha()
@@ -66,61 +52,6 @@ def is_valid_identity(id_number):
 def is_valid_credit_card(card_number):
     return card_number.isdigit() and len(card_number) == 16
 
-<<<<<<< HEAD
-async def start(update: Update, context: CallbackContext):
-    await update.message.reply_text('Benvenuto al sistema di prenotazione del parcheggio!\nUsa /check per vedere i posti liberi e /book per prenotare un posto.\nUsa /register per iniziare il processo di registrazione.')
-
-async def register(update: Update, context: CallbackContext):
-    await update.message.reply_text("Inserisci il tuo nome:")
-    return NAME
-
-async def input_name(update: Update, context: CallbackContext):
-    name = update.message.text
-    if is_valid_name(name):
-        context.user_data['name'] = name
-        await update.message.reply_text("Inserisci il tuo cognome:")
-        return SURNAME
-    else:
-        await update.message.reply_text("C'è qualcosa di errato, reinserisci il tuo nome (solo lettere):")
-        return NAME
-
-async def input_surname(update: Update, context: CallbackContext):
-    surname = update.message.text
-    if is_valid_name(surname):
-        context.user_data['surname'] = surname
-        await update.message.reply_text("Inserisci il numero della tua carta di identità (es. AAAA55555):")
-        return IDENTITY
-    else:
-        await update.message.reply_text("C'è qualcosa di errato, reinserisci il tuo cognome (solo lettere):")
-        return SURNAME
-
-async def input_identity(update: Update, context: CallbackContext):
-    id_number = update.message.text
-    if is_valid_identity(id_number):
-        context.user_data['identity'] = id_number
-        await update.message.reply_text("Inserisci il numero della tua carta di credito (16 cifre):")
-        return CREDIT_CARD
-    else:
-        await update.message.reply_text("C'è qualcosa di errato, reinserisci il numero della tua carta di identità (9 caratteri alfanumerici):")
-        return IDENTITY
-
-async def input_credit_card(update: Update, context: CallbackContext):
-    card_number = update.message.text
-    if is_valid_credit_card(card_number):
-        context.user_data['credit_card'] = card_number
-        await update.message.reply_text("Registrazione completata!")
-        return ConversationHandler.END
-    else:
-        await update.message.reply_text("C'è qualcosa di errato, reinserisci il numero della tua carta di credito (16 cifre numeriche):")
-        return CREDIT_CARD
-
-async def cancel(update: Update, context: CallbackContext):
-    await update.message.reply_text('Registrazione annullata.')
-    return ConversationHandler.END
-
-async def check_free_slots(update: Update, context: CallbackContext):
-    url = settings['catalog_url'] + '/devices'
-=======
 def start(msg):
     chat_id = msg['chat']['id']
     bot.sendMessage(chat_id, 'Benvenuto al sistema di prenotazione del parcheggio!\nUsa /check per vedere i posti liberi e /book per prenotare un posto.\nUsa /register per iniziare il processo di registrazione.')
@@ -197,7 +128,6 @@ def send_user_data_to_catalog(user_data):
         "credit_card": user_data['credit_card']
     }
 
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
     try:
         # Send the POST request
         response = requests.post(url, headers=headers, json=user_info)
@@ -223,17 +153,12 @@ def send_user_data_to_catalog(user_data):
     except json.JSONDecodeError as json_err:
         print(f"Error decoding the JSON response: {json_err}")
 
-<<<<<<< HEAD
-async def book_slot(update: Update, context: CallbackContext):
-    url = settings['catalog_url'] + '/devices'
-=======
 
 
 def check_free_slots(msg):
     chat_id = msg['chat']['id']
-    url = 'http://127.0.0.1:5000/'  # URL dell'adaptor esposto da CherryPy
+    url = 'http://127.0.0.1:5001/'  # URL dell'adaptor esposto da CherryPy
 
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
     try:
         # Effettua una richiesta GET all'adaptor per ottenere i dispositivi
         response = requests.get(url)
@@ -244,20 +169,6 @@ def check_free_slots(msg):
 
         print(response.text)
 
-<<<<<<< HEAD
-        chosen_slot = free_slots[0]
-        slot_id = chosen_slot['location']
-        booking_code = generate_booking_code()
-
-        book_url = 'http://127.0.0.1:8088/book'
-        headers = {'Content-Type': 'application/json'}
-        book_response = requests.post(book_url, headers=headers, data=json.dumps({"slot_id":slot_id,"status": "occupied", "booking_code": booking_code}))
-        book_response.raise_for_status()
-
-        event_logger.log_event(slot_id=booking_code, previous_status="free", current_status="reserved", duration=0.0)
-        await update.message.reply_text(f'Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {booking_code}. La prenotazione è valida per 2 minuti.')
-
-=======
         
         # Filtra i dispositivi con stato 'free'
         free_slots = [slot for slot in slots if slot.get('status') == 'free']
@@ -297,16 +208,11 @@ def book_slot(msg):
         bot.sendMessage(chat_id, f'Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {booking_code}. La prenotazione è valida per 2 minuti.')
 
         # Imposta un timer per scadere la prenotazione dopo 2 minuti
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
         Timer(120, expire_reservation, args=[slot_id, booking_code]).start()
 
     except Exception as e:
         bot.sendMessage(chat_id, f'Errore durante la prenotazione: {e}')
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709
 def expire_reservation(slot_id, booking_code):
     url = settings['catalog_url'] + f'/expire/{slot_id}'
     headers = {'Content-Type': 'application/json'}
@@ -318,28 +224,7 @@ def expire_reservation(slot_id, booking_code):
     except Exception as e:
         print(f'Errore nel scadere la prenotazione per il posto {slot_id} con codice {booking_code}: {e}')
 
-<<<<<<< HEAD
-def main():
-    application = ApplicationBuilder().token(TOKEN).build()
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('register', register)],
-        states={
-            NAME: [MessageHandler(None, input_name)],
-            SURNAME: [MessageHandler(None, input_surname)],
-            IDENTITY: [MessageHandler(None, input_identity)],
-            CREDIT_CARD: [MessageHandler(None, input_credit_card)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)]
-    )
-    application.add_handler(conv_handler)
-    application.add_handler(CommandHandler('start', start))
-    application.add_handler(CommandHandler('check', check_free_slots))
-    application.add_handler(CommandHandler('book', book_slot))
-    application.run_polling()
 
-if __name__ == '__main__':
-    main()
-=======
 bot = telepot.Bot(TOKEN)
 
 MessageLoop(bot, {
@@ -354,4 +239,3 @@ MessageLoop(bot, {
 
 while True:
     time.sleep(10)
->>>>>>> 9f245e5cf528035f86a09f89934ea97dad5d3709

@@ -1,3 +1,4 @@
+from datetime import datetime
 import paho.mqtt.client as PahoMQTT
 import time
 import json
@@ -194,7 +195,8 @@ class dbAdaptor:
                 if not list(result.get_points()):
                     return {"message": f"Device with ID {device_info['ID']} doesn't exist."}, 409  # Conflict
                 
-            
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
                 json_body = [
                     {
                         "measurement": 'status',
@@ -203,7 +205,7 @@ class dbAdaptor:
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
-                        "time": int(time.time()),  # Timestamp corrente
+                        "time": str(current_time),  # Timestamp corrente
                         "fields": {
                             "name": device_info['name'],
                             "status": "reserved",  # Lo stato è forzato a "free"
@@ -277,7 +279,7 @@ if __name__ == "__main__":
 
     cherrypy.config.update({
         'server.socket_host': '127.0.0.1',
-        'server.socket_port': 5000,
+        'server.socket_port': 5001,
         'engine.autoreload.on': False
     })
 

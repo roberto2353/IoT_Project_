@@ -89,7 +89,8 @@ class Algorithm:
     def changeDevState(self, device, floor, time):
         if device['status'] == 'free' and self.extract_floor(device['location']) == floor:
             device['status'] = 'occupied'
-            device['last_update'] = time.timestamp()
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            device['last_update'] = str(current_time)
             device['booking_code'] = 'new_code'  # TODO: generate a unique code da levare
             #TODO: USE MQTT TO UPDATE 
             return True
@@ -154,9 +155,11 @@ class Algorithm:
 
         for device in self.devices:
             if device['status'] == 'occupied' and (device['booking_code']== "" or device['booking_code']== None):
+
                 if random.random() < departure_probability:
+                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     device['status'] = 'free'
-                    device['last_update'] = current_time.timestamp()
+                    device['last_update'] = str(current_time)
                     device['booking_code'] = "" # OR ""
                     #ADD FUNCTION TO CALCULATE FEE AND POST ON DB
                     print(f"Device {device['ID']} at {device['location']} is now free. Car has departed.")

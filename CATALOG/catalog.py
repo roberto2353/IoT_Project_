@@ -331,7 +331,7 @@ class MySubscriber:
 
 if __name__ == '__main__':
     catalog_manager = CatalogManager("catalog.json")
-    db_adaptor_url = 'http://localhost:5000/register_device'
+    db_adaptor_url = 'http://localhost:5001/register_device'
     catalog_rest = CatalogREST(catalog_manager, db_adaptor_url)
 
     mqtt_subscriber = MySubscriber(clientID="CatalogSubscriber", topic="ParkingLot/alive/#", broker="localhost", port=1883, catalog_manager=catalog_manager)
