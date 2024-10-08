@@ -8,6 +8,7 @@ import cherrypy
 import requests
 from MyMQTT import MyMQTT
 import threading
+import uuid
 from pathlib import Path
 
 P = Path(__file__).parent.absolute()
@@ -118,10 +119,12 @@ class Algorithm:
 
     def changeDevState(self, device, floor, time):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        booking_code_ = str(uuid.uuid4())
+        booking_code = booking_code[:6]
         if device['status'] == 'free' and int(self.extract_floor(device['location'])) == int(floor):
             device['status'] = 'occupied'
             device['last_update'] = str(current_time)
-            device['booking_code'] = 'new_code'  # TODO: generate a unique code for non logged users
+            device['booking_code'] = booking_code
             self.update_device_status(device)  # Send update to adaptor
             return True
         return False
