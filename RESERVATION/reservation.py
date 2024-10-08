@@ -25,7 +25,8 @@ class ParkingService:
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if selected_device:
                     # Create a booking code
-                    booking_code = str(uuid.uuid4())
+                    booking_code_ = str(uuid.uuid4())
+                    booking_code = booking_code[:6]
                     selected_device['status'] = 'reserved'
                     selected_device['booking_code'] = booking_code
                     selected_device['last_update'] = str(current_time)
