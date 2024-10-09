@@ -21,18 +21,15 @@ class SlotBoard:
         self.occupied_slots = 0
         self.total_slots = 0
         self.sensors_data = {}
-        #self.event_logger = EventLogger()  # Istanza di EventLogger
         self.initialize_board()
 
     def initialize_board(self):
         """Inizializza il tabellone con il numero di posti totali, liberi e occupati."""
         try:
-            with open(SETTINGS, "r") as fs:
-                settings = json.loads(fs.read())
-            url = settings["catalog_url"] + "/devices"
-            response = requests.get(url)
-            response.raise_for_status()
-            slots = response.json().get('devices', [])
+            adaptor_url = 'http://127.0.0.1:5000/'  # URL for adaptor
+            response = requests.get(adaptor_url)
+            response.raise_for_status()  # Check if response is correct
+            slots = response.json()
             self.total_slots = len(slots)
             print(f"Tabellone inizializzato: {self.total_slots} posti totali")
 
@@ -88,7 +85,7 @@ class MySubscriber:
         self.clientID = clientID
         self.topic = topic
         self.message_callback = message_callback
-        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
+        self._paho_mqtt = PahoMQTT.Client("Tab_service",True)
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
@@ -130,12 +127,28 @@ class MySubscriber:
 def main():
     slot_board = SlotBoard()
 
+    def recursive_json_decode(data):
+        # Prova a decodificare fino a ottenere un dizionario o una lista
+        while isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                break
+        return data
+
     def on_message_received(msg):
         """Callback per l'elaborazione dei messaggi MQTT ricevuti."""
         print(f"Messaggio ricevuto: Topic={msg.topic}, Payload={msg.payload.decode()}")
 
         try:
-            data = json.loads(msg.payload.decode())
+            decoded_message = msg.payload.decode()
+            print(f"Decoded message (first decode): {decoded_message}")
+
+            # Decodifica ricorsiva fino a ottenere un dizionario o una lista
+            data = recursive_json_decode(decoded_message)
+            print(f"Final decoded message: {data}")
+            print(f"Data type after final decode: {type(data)}")
             print(f"Payload decodificato: {data}")
             event = data.get("e", [])[0]
             slot_status = event.get("v")

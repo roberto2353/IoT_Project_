@@ -8,6 +8,7 @@ import paho.mqtt.client as PahoMQTT
 
 PING_INTERVAL = 30
 
+
 class SensorREST(threading.Thread):
     exposed = True
     devices_counter=1

@@ -316,8 +316,9 @@ class MySubscriber:
             self._paho_mqtt.loop_stop()
             self._paho_mqtt.disconnect()
 
-        def myOnConnect (self, paho_mqtt, userdata, flags, rc):
-            print ("Connected to %s with result code: %d" % (self.messageBroker, rc))
+        def myOnConnect(self, paho_mqtt, userdata, flags, reasonCode, properties=None):
+            print(f"Connected to {self.messageBroker} with result code: {reasonCode}")
+
 
         def myOnMessageReceived (self, paho_mqtt , userdata, msg):
             message = json.loads(msg.payload.decode("utf-8")) #{"bn": updateCatalog<>, "e": [{...}]}
