@@ -14,7 +14,7 @@ class dbAdaptor:
     def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', influx_db='IoT_Smart_Parking'):
         self.clientID = clientID
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client("fabio", True)
+        self._paho_mqtt = PahoMQTT.Client(client_id=clientID)
 
         # Registra i callback
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -25,7 +25,7 @@ class dbAdaptor:
         else:
             self.topic = topic
 
-        self.messageBroker = 'mqtt.eclipseprojects.io'
+        self.messageBroker = 'localhost'
 
         # Configurazione del client InfluxDB
         self.client = InfluxDBClient(host=influx_host, port=influx_port, username=influx_user, password=influx_password, database=influx_db)
