@@ -122,7 +122,7 @@ def send_user_data_to_catalog(user_data):
 
     try:
         # Send the POST request
-        response = requests.post(url, headers=headers, json=user_info)
+        response = requests.post(url, headers=headers, json=user_info, verify=False)
         
         # Print the status code for debugging
         print(f"Status code: {response.status_code}")
@@ -154,7 +154,7 @@ def check_free_slots(msg):
 
     try:
         # Effettua una richiesta GET all'adaptor per ottenere i dispositivi
-        response = requests.get(url)
+        response = requests.get(url, verify=False)
         response.raise_for_status()
         
         # Decodifica la risposta come stringa JSON
@@ -211,7 +211,7 @@ def expire_reservation(slot_id, booking_code):
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"booking_code": booking_code})
     try:
-        response = requests.post(url, headers=headers, data=data)
+        response = requests.post(url, headers=headers, data=data, verify=False)
         response.raise_for_status()
         print(f'La prenotazione per il posto {slot_id} con codice {booking_code} è scaduta.')
     except Exception as e:

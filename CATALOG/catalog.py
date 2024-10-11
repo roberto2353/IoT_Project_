@@ -1,3 +1,4 @@
+from pathlib import Path
 import threading
 import uuid
 import cherrypy
@@ -13,6 +14,8 @@ data_dir = os.path.join(current_dir, '..', 'DATA')
 if data_dir not in sys.path:
     sys.path.insert(0, data_dir)
 
+P = Path(__file__).parent.absolute()
+SETTINGS = P / 'settings.json'
 from influxAdaptor import dbAdaptor
 
 SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
@@ -192,9 +195,10 @@ class CatalogManager:
 class CatalogREST(object):
     exposed = True
 
-    def __init__(self, catalog_manager, db_adaptor):
+    def __init__(self, catalog_manager, settings):
         self.catalog_manager = catalog_manager
-        self.db_adaptor = db_adaptor
+        self.db_adaptor = settings["adaptor_url"]+"/register_device"
+        
 
     def GET(self, *uri, **params):
         """Handle GET requests."""
@@ -291,28 +295,30 @@ class CatalogREST(object):
             raise cherrypy.HTTPError(500, 'Internal Server Error')
 
 class MySubscriber:
-        def __init__(self, clientID, topic, broker, port, catalog_manager):
-            self.clientID = clientID
+        def __init__(self, catalog_manager, settings):
+            self.clientID = "CatalogSubscriber"
 			# create an instance of paho.mqtt.client
-            self._paho_mqtt = PahoMQTT.Client(client_id=clientID) 
+            self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID) 
             
 			# register the callback
             self._paho_mqtt.on_connect = self.myOnConnect
             self._paho_mqtt.on_message = self.myOnMessageReceived 
-            self.topic = topic
-            self.messageBroker = broker
-            self.port = port
+            self.pubTopic = "ParkingLot/alive/#"
+            self.messageBroker = settings["messageBroker"]
+            self.port = settings["brokerPort"]
             self.catalog_manager = catalog_manager
+
+            self.start()
 
         def start (self):
             #manage connection to broker
             self._paho_mqtt.connect(self.messageBroker, self.port)
             self._paho_mqtt.loop_start()
             # subscribe for a topic
-            self._paho_mqtt.subscribe(self.topic, 2)
+            self._paho_mqtt.subscribe(self.pubTopic, 2)
 
         def stop (self):
-            self._paho_mqtt.unsubscribe(self.topic)
+            self._paho_mqtt.unsubscribe(self.pubTopic)
             self._paho_mqtt.loop_stop()
             self._paho_mqtt.disconnect()
 
@@ -328,15 +334,18 @@ class MySubscriber:
                 print("Device updated")
             if message['bn'] == "updateCatalogService":            
                 self.catalog_manager.update_service(message['e'][0])# {"n": serviceName, "t": time.time(), "v": "", "u": IP}
-                print("Service updated")
+                print(f"Service {message['e'][0]['n']} updated")
 
 if __name__ == '__main__':
     catalog_manager = CatalogManager("catalog.json")
-    db_adaptor_url = 'http://localhost:5001/register_device'
-    catalog_rest = CatalogREST(catalog_manager, db_adaptor_url)
+    # db_adaptor_url = 'http://localhost:5001/register_device'
+    # catalog_rest = CatalogREST(catalog_manager, db_adaptor_url)
 
-    mqtt_subscriber = MySubscriber(clientID="CatalogSubscriber", topic="ParkingLot/alive/#", broker="localhost", port=1883, catalog_manager=catalog_manager)
-    mqtt_subscriber.start()
+    # 
+    # mqtt_subscriber.start()
+    settings = json.load(open(SETTINGS))
+    catalog_rest = CatalogREST(catalog_manager, settings)
+    mqtt_subscriber = MySubscriber(catalog_manager, settings)
 
     conf = {
         '/': {

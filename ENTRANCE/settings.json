@@ -1,8 +1,7 @@
 {
-    "catalogURL": "http://127.0.0.1:8080",
     "updateInterval": 60,
     "serviceInfo": {
-        "ID": 2,
+        "ID": 5,
         "name": "EntranceService",
         "last_update": "",
         "port": "8085"
@@ -10,6 +9,7 @@
     "brokerPort": 1883, 
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "catalog_url": "http://localhost:8080",
-    "baseTopic": "ParkingLot"
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLot",
+    "adaptor_url": "http://localhost:5001"
 }

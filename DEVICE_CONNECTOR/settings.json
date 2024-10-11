@@ -1,4 +1,6 @@
 {
+    "updateInterval": 60,
+    "pingInterval": 30,
     "catalogURL": "http://localhost:8090",
     "devices":[
         {
@@ -58,7 +60,15 @@
             }
         }
     ],
-    "messageBroker": "localhost",
+    "serviceInfo": {
+        "ID": 2,
+        "name": "DevConnectorService",
+        "last_update": "",
+        "port": "8083"
+    },
     "brokerPort": 1883, 
-    "qos": 2
+    "qos": 2,
+    "messageBroker": "mqtt.eclipseprojects.io",
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLot"
 }  

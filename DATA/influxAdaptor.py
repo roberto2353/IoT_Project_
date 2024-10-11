@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 import paho.mqtt.client as PahoMQTT
 import time
 import json
@@ -7,17 +8,31 @@ from influxdb import InfluxDBClient
 import sys
 import cherrypy
 import requests  
+import threading
+P = Path(__file__).parent.absolute()
+SETTINGS = P / 'settings.json'
 
 class dbAdaptor:
     exposed = True  # Esponi la classe per CherryPy
 
-    def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', 
-                 influx_db='IoT_Smart_Parking', influx_stats = 'IoT_SP_Stats'):
-        self.clientID = clientID
-        self.influx_stats = influx_stats
-        self.influx_db = influx_db
+    def __init__(self, settings):
+        #influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', 
+        #        influx_db='IoT_Smart_Parking', influx_stats = 'IoT_SP_Stats'
+        
+        self.influx_stats = settings["statsDB"]
+        self.influx_db = settings["mainDB"]
+
+        self.pubTopic = settings["baseTopic"]
+        self.catalog_address = settings['catalog_url']
+        self.messageBroker = settings["messageBroker"]
+        self.port = settings["brokerPort"]
+        self.serviceInfo = settings['serviceInfo']
+        self.serviceID = self.serviceInfo['ID']
+        self.updateInterval = settings["updateInterval"]
+        self.influx_port = settings["influxPort"]
+
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
+        self._paho_mqtt = PahoMQTT.Client(client_id="AdaptorService")
 
 
 
@@ -25,35 +40,89 @@ class dbAdaptor:
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
-        if topic is None:
-            self.topic = 'ParkingLot/+/status'
-        else:
-            self.topic = topic
+        # if topic is None:
+        #     self.topic = 'ParkingLot/+/status'
+        # else:
+        #     self.topic = topic
 
         self.messageBroker = 'localhost'
 
         # Configurazione del client InfluxDB
-        self.client = InfluxDBClient(host=influx_host, port=influx_port, username=influx_user, password=influx_password, database=influx_db)
-        if {'name': influx_db} not in self.client.get_list_database():
-            self.client.create_database(influx_db)
-        if {'name': influx_stats} not in self.client.get_list_database():
-            self.client.create_database(influx_stats)
+        self.client = InfluxDBClient(host="localhost", port=self.influx_port, username="root", password="root", database=self.influx_db)
+        if {'name': self.influx_db} not in self.client.get_list_database():
+            self.client.create_database(self.influx_db)
+        if {'name': self.influx_stats} not in self.client.get_list_database():
+            self.client.create_database(self.influx_stats)
 
     def start(self):
-        # Gestisci la connessione al broker
-        self._paho_mqtt.connect(self.messageBroker, 1883)
-        self._paho_mqtt.loop_start()
-        # Iscrivi al topic
-        self._paho_mqtt.subscribe(self.topic, 2)
+        """Start the MQTT client."""
+        try:
+            # Connect to MQTT broker
+            self._paho_mqtt.connect(self.messageBroker, self.port)
+            self._paho_mqtt.loop_start()
+            print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
+            
+            # Register the service using a POST request
+            self.register_service()
+
+            # Start periodic alive messages
+            self.start_periodic_updates()
+        except Exception as e:
+            print(f"Error starting MQTT client: {e}")
 
     def stop(self):
-        self._paho_mqtt.unsubscribe(self.topic)
-        self._paho_mqtt.loop_stop()
-        self._paho_mqtt.disconnect()
-
+        """Stop the MQTT client."""
+        try:
+            self._paho_mqtt.loop_stop()
+            self._paho_mqtt.disconnect()
+            print("MQTT client stopped.")
+        except Exception as e:
+            print(f"Error stopping MQTT client: {e}")
+    
     def myOnConnect(self, paho_mqtt, userdata, flags, reasonCode, properties=None):
         print(f"Connected to {self.messageBroker} with result code: {reasonCode}")
 
+
+    def register_service(self):
+        """Registers the service in the catalog using POST the first time."""
+        # Initial POST request to register the service
+        url = f"{self.catalog_address}/services"
+        response = requests.post(url, json=self.serviceInfo)
+        if response.status_code == 200:
+            self.is_registered = True
+            print(f"Service {self.serviceID} registered successfully.")
+        else:
+            print(f"Failed to register service: {response.status_code} - {response.text}")
+
+    def start_periodic_updates(self):
+        """
+        Starts a background thread that publishes periodic updates via MQTT.
+        """
+        def periodic_update():
+            time.sleep(10)  # Initial delay before sending updates
+            while True:
+                try:
+                    message = {
+                        "bn": "updateCatalogService",
+                        "e": [
+                            {
+                                "n": f"{self.serviceID}",
+                                "u": "IP",
+                                "t": str(time.time()),
+                                "v": "alive"
+                            }
+                        ]
+                    }
+                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    self._paho_mqtt.publish(topic, json.dumps(message))
+                    print(f"Published alive message to {topic}: {message}")
+                    time.sleep(self.updateInterval)  # Wait before the next update
+                except Exception as e:
+                    print(f"Error during periodic update: {e}")
+
+        # Start periodic updates in a background thread
+        update_thread = threading.Thread(target=periodic_update, daemon=True)
+        update_thread.start()
 
     def recursive_json_decode(self, data):
         # Prova a decodificare fino a ottenere un dizionario o una lista
@@ -87,7 +156,7 @@ class dbAdaptor:
                         }
                     ]
                     # Scrivi l'aggiornamento su InfluxDB
-        self.client.write_points(json_body,time_precision='s', database=self.influx_stats,)
+        self.client.write_points(json_body,time_precision='s', database=self.influx_stats)
         print(f"Updated sensor {sensor_id} in stats db.")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
@@ -343,7 +412,9 @@ class dbAdaptor:
 
 
 if __name__ == "__main__":
-    test = dbAdaptor('IoT_Smart_Parking')
+
+    settings = json.load(open(SETTINGS))
+    test = dbAdaptor(settings)
     test.start()
     
     # Configurazione di CherryPy con MethodDispatcher
@@ -367,7 +438,7 @@ if __name__ == "__main__":
     
     try:
         cherrypy.engine.start()
-        print("dbAdaptor service started on port 5000.")
+        print("dbAdaptor service started on port 5001.")
         cherrypy.engine.block()
     except KeyboardInterrupt:
         print("Shutting down dbAdaptor service...")
