@@ -17,6 +17,8 @@ class MyMQTT:
         print(f"Connesso a {self.broker} con codice di risultato: {str(rc)}")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
+        # Un nuovo messaggio viene ricevuto
+        #print(f"Topic: '{msg.topic}', QoS: '{msg.qos}', Message: '{msg.payload.decode()}'")
         if self.notifier is not None:
             self.notifier.notify(msg.topic, msg.payload)
 

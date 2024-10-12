@@ -10,18 +10,13 @@ import string
 from pathlib import Path
 import uuid
 
-#sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
-
 P = Path(__file__).parent.absolute()
 SETTINGS_PATH = P / 'settings.json'
 
 with open(SETTINGS_PATH, 'r') as file:
     settings = json.load(file)
 
-#from DATA.event_logger import EventLogger
-
 TOKEN = '7501377611:AAGhXNYizRlkdl3V_BGtiIK-Slb76WcxzZ8'
-#event_logger = EventLogger()
 
 # States for the conversation
 NAME, SURNAME, IDENTITY, CREDIT_CARD = range(4)
@@ -103,8 +98,8 @@ def handle_message(msg):
             elif state == CREDIT_CARD:
                 if is_valid_credit_card(text):
                     user_data[chat_id]['credit_card'] = text
-                    bot.sendMessage(chat_id, "Registrazione completata!")
-                    send_user_data_to_catalog(user_data[chat_id])
+                    id = send_user_data_to_catalog(user_data[chat_id])
+                    bot.sendMessage(chat_id, f"Registration complete!\nUse your personal card or the code associate to it:\n{id} as id to book or enter in the parkings")
                     del user_data[chat_id]  # Registration complete, clean up
                 else:
                     bot.sendMessage(chat_id, "Numero di carta di credito non valido. Reinserisci il numero (16 cifre):")
@@ -114,8 +109,10 @@ def handle_message(msg):
 def send_user_data_to_catalog(user_data):
     url = settings['catalog_url'] + '/users'
     headers = {'Content-Type': 'application/json'}
+    id = str(uuid.uuid4())
+    print("id: ",id)
     user_info = {
-        "ID": str(uuid.uuid4()),  # Generate a unique ID for the user
+        "ID": id,  # Generate a unique ID for the user
         "name": user_data['name'],
         "surname": user_data['surname'],
         "identity": user_data['identity'],
@@ -139,6 +136,7 @@ def send_user_data_to_catalog(user_data):
         else:
             # Print plain text response if it's not JSON
             print(f"Response content: {response.text}")
+            return id
     
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")

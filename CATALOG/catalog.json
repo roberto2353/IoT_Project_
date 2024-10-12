@@ -1,115 +1,16 @@
 {
+    "project_name": "IoT4SmartParking",
+    "project_owner": "IoT_Group8",
+    "device_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8080,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
     "devices": [
-        {
-            "ID": 1,
-            "name": "sensor1",
-            "type": "photocell",
-            "location": "P0-1",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6532893
-        },
-        {
-            "ID": 2,
-            "name": "sensor2",
-            "type": "photocell",
-            "location": "P0-2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6666543
-        },
-        {
-            "ID": 3,
-            "name": "sensor3",
-            "type": "photocell",
-            "location": "P0-3",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.674617
-        },
-        {
-            "ID": 4,
-            "name": "sensor4",
-            "type": "photocell",
-            "location": "P0-4",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6784234
-        },
-        {
-            "ID": 5,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P0-5",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.68156
-        },
-        {
-            "ID": 6,
-            "name": "sensor6",
-            "type": "photocell",
-            "location": "P0-6",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.684666
-        },
-        {
-            "ID": 7,
-            "name": "sensor7",
-            "type": "photocell",
-            "location": "P0-7",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6872082
-        },
-        {
-            "ID": 8,
-            "type": "photocell",
-            "location": "P1-1",
-            "name": "sensor8",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6906736
-        },
-        {
-            "ID": 9,
-            "type": "photocell",
-            "location": "P1-2",
-            "name": "sensor9",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6935313
-        },
-        {
-            "ID": 10,
-            "type": "photocell",
-            "location": "P1-3",
-            "name": "sensor10",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.696509
-        },
-        {
-            "ID": 11,
-            "type": "photocell",
-            "location": "P1-4",
-            "name": "sensor11",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728140912.6992521
-        },
         {
             "ID": 12,
             "type": "photocell",
@@ -118,7 +19,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.7018497
+            "last_update": 1728402148.7637677
         },
         {
             "ID": 13,
@@ -128,7 +29,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.7055233
+            "last_update": 1728402150.7709906
         },
         {
             "ID": 14,
@@ -138,7 +39,19 @@
             "commands": [
                 "status"
             ],
-            "last_update": 1728140912.7107704
+            "last_update": 1728402152.7759228
         }
-    ]
+    ],
+    "service_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8084,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "users": [],
+    "services": [],
+    "parkings": []
 }
