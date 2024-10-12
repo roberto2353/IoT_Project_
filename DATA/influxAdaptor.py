@@ -10,8 +10,11 @@ import requests
 class dbAdaptor:
     exposed = True  # Esponi la classe per CherryPy
 
-    def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', influx_db='IoT_Smart_Parking'):
+    def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', 
+                 influx_db='IoT_Smart_Parking', influx_stats = 'IoT_SP_Stats'):
         self.clientID = clientID
+        self.influx_stats = influx_stats
+        self.influx_db = influx_db
         # Crea un'istanza di paho.mqtt.client
         self._paho_mqtt = PahoMQTT.Client("fabio", True)
 
@@ -30,6 +33,8 @@ class dbAdaptor:
         self.client = InfluxDBClient(host=influx_host, port=influx_port, username=influx_user, password=influx_password, database=influx_db)
         if {'name': influx_db} not in self.client.get_list_database():
             self.client.create_database(influx_db)
+        if {'name': influx_stats} not in self.client.get_list_database():
+            self.client.create_database(influx_stats)
 
     def start(self):
         # Gestisci la connessione al broker
@@ -56,6 +61,31 @@ class dbAdaptor:
                 print(f"JSON decode error: {e}")
                 break
         return data
+    def update_stats_db(self,data):
+        fee = data.get('fee', 'unknown')
+        floor = data.get('floor')
+        booking_code = data.get('booking_code', 'unknown')
+        duration = data.get('duration')
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        sensor_id = data.get('sensor_id')
+        json_body = [
+                        {
+                            "measurement": 'status',
+                            "tags": {
+                                "ID": sensor_id,
+                                "floor": floor
+                            },
+                            "time": str(current_time),  # Timestamp corrente
+                            "fields": {
+                                "booking_code": booking_code,  # Codice di prenotazione
+                                "duration": duration,
+                                "fee": fee
+                            }
+                        }
+                    ]
+                    # Scrivi l'aggiornamento su InfluxDB
+        self.client.write_points(json_body,time_precision='s', database=self.influx_stats,)
+        print(f"Updated sensor {sensor_id} in stats db.")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         # Un nuovo messaggio viene ricevuto
@@ -80,6 +110,8 @@ class dbAdaptor:
                 # Estrai i dettagli dell'evento
                 sensor_id = event.get('sensor_id', '')
                 status = event.get('v', 'unknown')  # Recupera lo stato
+                if status == 'free':
+                    self.update_stats_db(event)
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
@@ -108,12 +140,15 @@ class dbAdaptor:
                         }
                     ]
                     # Scrivi l'aggiornamento su InfluxDB
-                    self.client.write_points(json_body, time_precision='s')
+                    self.client.write_points(json_body, time_precision='s', database=self.influx_db)
                     print(f"Updated sensor {sensor_id} status to {status}.")
                 else:
                     print(f"Sensor with ID {sensor_id} not found in the database.")
             else:
                 print(f"Final data is not a dictionary: {type(final_data)}")
+            
+                
+                
         
         except json.JSONDecodeError as e:
             print(f"JSON decode error: {e}")
@@ -171,7 +206,7 @@ class dbAdaptor:
                     }
                 ]
                 # Scrivi i dati su InfluxDB
-                self.client.write_points(json_body)
+                self.client.write_points(json_body, database= self.influx_db)
                 print(f"Registered device with ID {device_info['ID']} on InfluxDB.")
                 return {"message": f"Device with ID {device_info['ID']} registered successfully."}, 201
             
@@ -215,7 +250,7 @@ class dbAdaptor:
                     }
                 ]
                 # Scrivi i dati su InfluxDB
-                self.client.write_points(json_body)
+                self.client.write_points(json_body, database = self.influx_db)
                 print(f"Device with ID {device_info['ID']} is reserved on InfluxDB.")
                 return {"message": f"Device with ID {device_info['ID']} is reserved."}, 201
             
@@ -253,7 +288,7 @@ class dbAdaptor:
                     }
                 ]
                 # Write the update to InfluxDB
-                self.client.write_points(json_body)
+                self.client.write_points(json_body, database= self.influx_db)
                 print(f"Updated device {sensor_id} status to {status}.")
                 return {"message": f"Device {sensor_id} updated successfully."}, 200
             

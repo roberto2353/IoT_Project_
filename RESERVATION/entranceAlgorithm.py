@@ -5,7 +5,7 @@ import os
 import random
 import time
 import cherrypy
-import cherrypy
+import pytz
 import requests
 from MyMQTT import MyMQTT
 import threading
@@ -83,8 +83,8 @@ class Algorithm:
             print(f"number of occupied/booked parking for floor {floor}: {count}")
 
     def update_device_status(self, device):
-        
-        event = {
+        if device['status'] == 'free':
+            event = {
                 "n": f"{device['ID']}/status", 
                 "u": "boolean", 
                 "t": str(datetime.datetime.now()), 
@@ -92,8 +92,24 @@ class Algorithm:
                 "sensor_id": device['ID'],
                 "location": device['location'],
                 "type": device['type'],
-                "booking_code": device['booking_code']
-            }
+                "booking_code": device['booking_code'],
+                "fee": device['fee'],
+                "duration":device['duration'],
+                "floor": self.extract_floor(device['location'])
+                }
+        else:
+            event = {
+                "n": f"{device['ID']}/status", 
+                "u": "boolean", 
+                "t": str(datetime.datetime.now()), 
+                "v": device['status'],  # Cambiamo lo stato in 'occupied'
+                "sensor_id": device['ID'],
+                "location": device['location'],
+                "type": device['type'],
+                "booking_code": device['booking_code'],
+                "floor": self.extract_floor(device['location'])
+                }
+            
         message = {"bn": device['name'], "e": [event]}
         mqtt_topic = f"{self.pubTopic}/{device['ID']}/status"
 
@@ -111,8 +127,8 @@ class Algorithm:
 
 
     def update_device_status(self, device):
-        
-        event = {
+        if device['status'] == 'free':
+            event = {
                 "n": f"{device['ID']}/status", 
                 "u": "boolean", 
                 "t": str(datetime.datetime.now()), 
@@ -120,8 +136,24 @@ class Algorithm:
                 "sensor_id": device['ID'],
                 "location": device['location'],
                 "type": device['type'],
-                "booking_code": device['booking_code']
-            }
+                "booking_code": device['booking_code'],
+                "fee": device['fee'],
+                "duration":device['duration'],
+                "floor": self.extract_floor(device['location'])
+                }
+        else:
+            event = {
+                "n": f"{device['ID']}/status", 
+                "u": "boolean", 
+                "t": str(datetime.datetime.now()), 
+                "v": device['status'],  # Cambiamo lo stato in 'occupied'
+                "sensor_id": device['ID'],
+                "location": device['location'],
+                "type": device['type'],
+                "booking_code": device['booking_code'],
+                "floor": self.extract_floor(device['location'])
+                }
+            
         message = {"bn": device['name'], "e": [event]}
         mqtt_topic = f"{self.pubTopic}/{device['ID']}/status"
 
@@ -169,7 +201,7 @@ class Algorithm:
     def changeDevState(self, device, floor, time):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         booking_code_ = str(uuid.uuid4())
-        booking_code = booking_code[:6]
+        booking_code = booking_code_[:6]
         if device['status'] == 'free' and int(self.extract_floor(device['location'])) == int(floor):
             device['status'] = 'occupied'
             device['last_update'] = str(current_time)
@@ -232,9 +264,38 @@ class Algorithm:
                     return {"message": "Parking found", "parking": device}
                 return {"message": "No free parking found"}
             
+    def fee_and_duration_calc(self,device):
+        booking_start_time_str = device.get('time', None)
+        booking_start_time = datetime.datetime.strptime(booking_start_time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)
+
             
-    def handle_departures(self):
-        departure_probability = 0.1  # 10% chance for any parked car to leave
+        #booking_start_timestamp = int(booking_start_time.timestamp())
+
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        current_time_ok = datetime.datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.UTC)
+            
+        print("current_time: ", current_time_ok, "booking_start_time: " ,booking_start_time)
+        parking_duration_seconds = (current_time_ok - booking_start_time).total_seconds()
+        parking_duration_hours = parking_duration_seconds / 3600 # Converti i secondi in ore
+        parking_duration_mins = parking_duration_seconds / 60 # Converti i secondi in min
+
+        print("parking_duration_hours :", parking_duration_hours)
+
+        if parking_duration_hours <= 10:
+            fee = parking_duration_hours * 2  # 2 euro per ora
+            return fee, parking_duration_mins
+        else:
+            # Se supera le 10 ore, calcola 20 euro ogni 24 ore (giorno intero)
+            full_days = int(parking_duration_hours // 24)  # Numero di giorni interi
+            remaining_hours = parking_duration_hours % 24  # Ore rimanenti dopo giorni interi
+            fee = full_days * 20 + (remaining_hours * 2 if remaining_hours <= 10 else 20)
+            return fee, parking_duration_mins
+        
+        
+        
+        
+                
     def handle_departures(self):
         departure_probability = 0.1  # 10% chance for any parked car to leave
         current_time = datetime.datetime.now()
@@ -245,12 +306,12 @@ class Algorithm:
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if device['status'] == 'occupied':
                 if random.random() < departure_probability:
+                    fee,duration_min = self.fee_and_duration_calc(device)
                     device['status'] = 'free'
                     device['last_update'] = str(current_time)
-                    device['booking_code'] = ""
-                    self.update_device_status(device)  # Send update to adaptor
-                    device['last_update'] = str(current_time)
-                    device['booking_code'] = ""
+                    device['fee'] = float(fee)
+                    device['duration'] = duration_min
+                    # device['booking_code'] = ""
                     self.update_device_status(device)  # Send update to adaptor
                     print(f"Device {device['ID']} at {device['location']} is now free. Car has departed.")
                     #TODO: ONLY REGISTERED USERS AND RANDOM USERS WILL DEPARTURE WITH THIS METHOD. 
