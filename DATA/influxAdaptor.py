@@ -13,9 +13,7 @@ class dbAdaptor:
     def __init__(self, clientID, topic=None, influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', influx_db='IoT_Smart_Parking'):
         self.clientID = clientID
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
-
-
+        self._paho_mqtt = PahoMQTT.Client("fabio", True)
 
         # Registra i callback
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -285,7 +283,7 @@ class dbAdaptor:
                         'ID': sensor['ID'],
                         'type': sensor['type'],
                         'location': sensor['location'],
-                        'name': sensor.get('name', ''),
+                        'name': sensor['name'],
                         'status': sensor['status'],
                         'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', '')
