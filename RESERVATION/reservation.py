@@ -30,7 +30,7 @@ class ParkingService:
                     # Create a booking code
                     if booking_code == "":
                         booking_code_ = str(uuid.uuid4())
-                    booking_code = booking_code_[:6]
+                        booking_code = booking_code_[:6]
                     selected_device['status'] = 'reserved'
                     selected_device['booking_code'] = booking_code
                     selected_device['last_update'] = str(current_time)
