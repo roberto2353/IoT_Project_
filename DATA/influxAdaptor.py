@@ -16,7 +16,9 @@ class dbAdaptor:
         self.influx_stats = influx_stats
         self.influx_db = influx_db
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client("fabio", True)
+        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
+
+
 
         # Registra i callback
         self._paho_mqtt.on_connect = self.myOnConnect
