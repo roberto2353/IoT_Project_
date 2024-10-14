@@ -15,6 +15,7 @@ class ParkingService:
     @cherrypy.expose
     @cherrypy.tools.allow(methods=['POST'])
     @cherrypy.tools.json_out()
+    @cherrypy.tools.json_in()
     def book(self):
         try:
             data = cherrypy.request.json
@@ -35,17 +36,17 @@ class ParkingService:
                     selected_device['booking_code'] = booking_code
                     selected_device['last_update'] = str(current_time)
 
-                    # Send reservation data to adaptor
-                    reservation_url = 'http://127.0.0.1:5000/reservation'
-                    headers = {'Content-Type': 'application/json'}
-                    reservation_data = {
-                        "ID": selected_device['ID'],
-                        "name": selected_device.get('name', 'unknown'),
-                        "type": selected_device.get('type', 'unknown'),
-                        "location": selected_device.get('location', 'unknown'),
-                        "booking_code": booking_code
-                    }
-                    requests.post(reservation_url, headers=headers, json=reservation_data)
+                    # # Send reservation data to adaptor
+                    # reservation_url = 'http://127.0.0.1:5000/reservation'
+                    # headers = {'Content-Type': 'application/json'}
+                    # reservation_data = {
+                    #     "ID": selected_device['ID'],
+                    #     "name": selected_device.get('name', 'unknown'),
+                    #     "type": selected_device.get('type', 'unknown'),
+                    #     "location": selected_device.get('location', 'unknown'),
+                    #     "booking_code": booking_code
+                    # }
+                    # requests.post(reservation_url, headers=headers, json=reservation_data)
 
                     # Publish MQTT message
                     event = {
@@ -62,7 +63,10 @@ class ParkingService:
                     return {
                         "message": f"Slot {selected_device['location']} successfully booked.",
                         "booking_code": booking_code,
-                        "slot_id": selected_device['ID']
+                        "slot_id": selected_device['ID'],
+                        "type": selected_device.get('type', 'unknown'),
+                        "name": selected_device.get('name', 'unknown'),
+                        "location": selected_device.get('location', 'unknown')
                     }
                 else:
                     return {"message": "No free slots available"}

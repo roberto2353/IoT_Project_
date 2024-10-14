@@ -10,38 +10,7 @@
             "PUT"
         ]
     },
-    "devices": [
-        {
-            "ID": 12,
-            "type": "photocell",
-            "location": "P1-5",
-            "name": "sensor12",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728402148.7637677
-        },
-        {
-            "ID": 13,
-            "type": "photocell",
-            "location": "P1-6",
-            "name": "sensor13",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728402150.7709906
-        },
-        {
-            "ID": 14,
-            "type": "photocell",
-            "location": "P1-7",
-            "name": "sensor14",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1728402152.7759228
-        }
-    ],
+    "devices": [],
     "service_catalog": {
         "ip": "127.0.0.1",
         "port": 8084,
@@ -51,7 +20,29 @@
             "PUT"
         ]
     },
-    "users": [],
+    "users": [
+        {
+            "ID": "3a801333-3fbd-4a00-9c60-361ac39f053e",
+            "name": "Kevin",
+            "surname": "Gumina",
+            "identity": "AA98345TR",
+            "credit_card": "8493021843902345"
+        },
+        {
+            "ID": "04f44865-c01b-4c24-a603-d08c84805c53",
+            "name": "Kevin",
+            "surname": "Gumina",
+            "identity": "AA98345TR",
+            "credit_card": "4895032859043285"
+        },
+        {
+            "ID": "f97f6a76-5844-4034-9f4c-d9d9e0a6187d",
+            "name": "Kevin",
+            "surname": "Gumina",
+            "identity": "WE38490ER",
+            "credit_card": "8493021349586094"
+        }
+    ],
     "services": [],
     "parkings": []
 }
