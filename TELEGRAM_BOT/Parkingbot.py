@@ -28,11 +28,11 @@ NAME, SURNAME, IDENTITY, CREDIT_CARD = range(4)
 user_data = {}
 logged_in_users = {}
 
-def generate_booking_code():
-    """Genera un codice di prenotazione casuale."""
-    letters = ''.join(random.choices(string.ascii_uppercase, k=3))
-    numbers = ''.join(random.choices(string.digits, k=3))
-    return letters + numbers
+# def generate_booking_code():
+#     """Genera un codice di prenotazione casuale."""
+#     letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+#     numbers = ''.join(random.choices(string.digits, k=3))
+#     return letters + numbers
 
 def is_valid_name(name):
     """Verifica se il nome contiene solo lettere."""
@@ -159,9 +159,9 @@ def handle_message(msg):
                     user_data[chat_id]['credit_card'] = text
                     id = send_user_data_to_catalog(user_data[chat_id], chat_id)
                     if id:
-                        bot.sendMessage(chat_id, f"Registrazione completata!\nSei ora loggato. Usa il tuo numero di carta di identità o il codice associato: {id} per prenotare o accedere al parcheggio.")
+                        bot.sendMessage(chat_id, f"Registrazione completata!\nUsa il tuo numero di carta di identità o il codice associato: {id} per prenotare o accedere al parcheggio.")
                         logged_in_users[chat_id] = True
-                        show_logged_in_menu(chat_id)
+                        show_initial_menu(chat_id)
                         del user_data[chat_id]
                 else:
                     bot.sendMessage(chat_id, "Numero di carta di credito non valido. Reinserisci il numero (16 cifre):")
@@ -204,8 +204,8 @@ def verify_login(chat_id):
                 user_data[chat_id]["book_code"] = user['ID']
                 bot.sendMessage(chat_id, "Login avvenuto con successo!")
                 show_logged_in_menu(chat_id)
-                del user_data[chat_id]
-                return
+                #del user_data[chat_id]
+                return 
 
         bot.sendMessage(chat_id, "Credenziali non valide.")
     except Exception as e:
@@ -254,8 +254,8 @@ def send_user_data_to_catalog(user_data, chat_id):
         response.raise_for_status()
         
         # Dopo una registrazione riuscita, l'utente è loggato
-        logged_in_users[chat_id] = True
-        user_data[chat_id]["book_code"] = id
+        # logged_in_users[chat_id] = True
+        # user_data[chat_id]["book_code"] = id
         return id
     
     except requests.exceptions.HTTPError as http_err:
@@ -302,25 +302,28 @@ def book_slot(msg):
     book_url = 'http://127.0.0.1:8098/book'
     
     try:
+        print("1")
+        print("chat_id: ",chat_id, "logged_in_users: ", logged_in_users[chat_id])
         if chat_id not in logged_in_users or not logged_in_users[chat_id]:
             data = {'booking_code': ''}
         else:
             data = {'booking_code': user_data[chat_id]['book_code']}
-        
+        print("2")
         headers = {'Content-Type': 'application/json'}
         book_response = requests.post(book_url, headers=headers, json=data)
+        print("3")
         book_response.raise_for_status()
-
+        print("4")
         r = book_response.json()
 
         print(r)
-
+        print("5")
         slot_id = r.get('slot_id', 'bho')
         booking_code = r.get('booking_code', 'no code')
-
+        print("6")
         if 'message' in r:
             print(f"Messaggio ricevuto dal server: {r['message']}")
-        
+        print("7")
         if chat_id in logged_in_users and logged_in_users[chat_id]:
             BC = user_data[chat_id]['book_code']
             bot.sendMessage(chat_id, f'Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {BC}. La prenotazione è valida per 2 minuti.')
