@@ -3,7 +3,7 @@
     "project_owner": "IoT_Group8",
     "device_catalog": {
         "ip": "127.0.0.1",
-        "port": 8080,
+        "port": 8090,
         "methods": [
             "GET",
             "POST",
@@ -11,66 +11,34 @@
         ]
     },
     "devices": [],
-    "service_catalog": {
-        "ip": "127.0.0.1",
-        "port": 8084,
-        "methods": [
-            "GET",
-            "POST",
-            "PUT"
-        ]
-    },
     "users": [
         {
-            "ID": "3a801333-3fbd-4a00-9c60-361ac39f053e",
+            "ID": "532f01ad-5496-47e1-a2b9-a8577fdbee3a",
             "name": "Kevin",
             "surname": "Gumina",
-            "identity": "AA98345TR",
-            "credit_card": "8493021843902345"
-        },
-        {
-            "ID": "04f44865-c01b-4c24-a603-d08c84805c53",
-            "name": "Kevin",
-            "surname": "Gumina",
-            "identity": "AA98345TR",
-            "credit_card": "4895032859043285"
-        },
-        {
-            "ID": "f97f6a76-5844-4034-9f4c-d9d9e0a6187d",
-            "name": "Kevin",
-            "surname": "Gumina",
-            "identity": "WE38490ER",
-            "credit_card": "8493021349586094"
-        },
-        {
-            "ID": "a8649246-5377-4f66-bb97-a4962027042e",
-            "name": "Juan",
-            "surname": "Guiterez",
-            "identity": "WI39403RT",
-            "credit_card": "0940392348593245"
-        },
-        {
-            "ID": "8bae20db-5b2f-40b1-9f37-0e6c30c7e6d4",
-            "name": "Carlos",
-            "surname": "Garcia",
-            "identity": "WE83940ER",
-            "credit_card": "4859403923458923"
-        },
-        {
-            "ID": "d8ae74f1-591f-4adf-8177-f638b0846cd2",
-            "name": "Jannis",
-            "surname": "Dippon",
-            "identity": "ER49324JD",
-            "credit_card": "4859332000948392"
-        },
-        {
-            "ID": "c1b47f73-57ad-4c98-9d19-fa41cd9cf788",
-            "name": "Pippo",
-            "surname": "Sammarcoto",
-            "identity": "AS38493DE",
-            "credit_card": "9940324950003495"
+            "identity": "BA64784ER",
+            "credit_card": "5333097600056478"
         }
     ],
-    "services": [],
+    "services": [
+        {
+            "ID": 4,
+            "name": "ReservationService",
+            "last_update": 1729006445.441768,
+            "port": "8098"
+        },
+        {
+            "ID": 1,
+            "name": "AdaptorService",
+            "last_update": 1729006473.8115637,
+            "port": "5001"
+        },
+        {
+            "ID": 5,
+            "name": "EntranceService",
+            "last_update": 1729006447.2245615,
+            "port": "8085"
+        }
+    ],
     "parkings": []
 }

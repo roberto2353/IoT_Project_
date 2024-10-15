@@ -6,7 +6,7 @@ url = 'http://127.0.0.1:8085/activate'
 
 # Dati da inviare nella richiesta
 data = {
-    "booking_code": "c2e64f"
+    "booking_code": "d5d30b"
 
 }
 

@@ -1,3 +1,4 @@
+import logging
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -218,7 +219,7 @@ def show_wallet(msg):
         bot.sendMessage(chat_id, "Esegui il login per vedere il tuo wallet.")
         return
 
-    url = 'http://127.0.0.1:5000/get_booking_info'  
+    url = 'http://127.0.0.1:5001/get_booking_info'  
     headers = {'Content-Type': 'application/json'}
     data = {"booking_code": user_data[chat_id].get('book_code', '')}
 
@@ -278,7 +279,7 @@ def logout(chat_id):
 def check_free_slots(msg):
     """Controlla e mostra i posti liberi."""
     chat_id = msg['chat']['id']
-    url = 'http://127.0.0.1:5000/'  
+    url = 'http://127.0.0.1:5001/'  
 
     try:
         response = requests.get(url)
@@ -299,20 +300,31 @@ def check_free_slots(msg):
 def book_slot(msg):
     """Prenota un posto e gestisce la scadenza della prenotazione."""
     chat_id = msg['chat']['id']
+    print(chat_id)
     book_url = 'http://127.0.0.1:8098/book'
     
     try:
         print("1")
-        print("chat_id: ",chat_id, "logged_in_users: ", logged_in_users[chat_id])
+        #print("chat_id: ",chat_id, "logged_in_users: ", logged_in_users[chat_id])
+
         if chat_id not in logged_in_users or not logged_in_users[chat_id]:
             data = {'booking_code': ''}
+            print("NO loggato")
         else:
             data = {'booking_code': user_data[chat_id]['book_code']}
+            print("loggato")
         print("2")
         headers = {'Content-Type': 'application/json'}
-        book_response = requests.post(book_url, headers=headers, json=data)
-        print("3")
-        book_response.raise_for_status()
+        print("Request data:", data)
+        try:
+            print("Invio richiesta a:", book_url)
+            book_response = requests.post(book_url, headers=headers, json=data)
+            print("Risposta ricevuta:", book_response.status_code)
+            book_response.raise_for_status()  # Solleva un'eccezione per codici di stato HTTP 4xx/5xx
+        except requests.exceptions.RequestException as e:
+            print(f"Errore durante la richiesta POST: {e}")
+            bot.sendMessage(chat_id, f'Errore durante la prenotazione: {e}')
+            return  # Esci dal metodo se c'è un errore
         print("4")
         r = book_response.json()
 
@@ -336,7 +348,7 @@ def book_slot(msg):
         bot.sendMessage(chat_id, f'Errore durante la prenotazione: {e}')
 
 def expire_reservation(selected_device, booking_code):
-    reservation_url = 'http://127.0.0.1:5000/reservation_exp'
+    reservation_url = 'http://127.0.0.1:5001/reservation_exp'
     headers = {'Content-Type': 'application/json'}
 
     reservation_data = {

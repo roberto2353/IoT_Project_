@@ -1,7 +1,15 @@
 {
-    "messageBroker": "mqtt.eclipseprojects.io",
+    "updateInterval": 60,
+    "serviceInfo": {
+        "ID": 5,
+        "name": "EntranceService",
+        "last_update": "",
+        "port": "8085"
+    },
     "brokerPort": 1883, 
-    "qos": 1,
-    "catalog_url": "http://localhost:8080",
-    "baseTopic": "ParkingLot"
+    "qos": 2,
+    "messageBroker": "mqtt.eclipseprojects.io",
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLot",
+    "adaptor_url": "http://localhost:5001"
 }

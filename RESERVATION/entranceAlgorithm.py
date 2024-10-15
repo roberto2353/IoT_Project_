@@ -42,15 +42,6 @@ class Algorithm:
 
         self.t_hold_time = 15
 
-    def start(self):
-        """Start the MQTT client."""
-        self.client.start()  # Start MQTT client connection
-        print(f"Publisher connesso al broker {self.messageBroker}:{self.port}")
-
-    def stop(self):
-        """Stop the MQTT client."""
-        self.client.stop()  # Stop MQTT client connection
-
 
     def countFloors(self):
         self.floors=[]
@@ -111,7 +102,7 @@ class Algorithm:
                 }
             
         message = {"bn": device['name'], "e": [event]}
-        mqtt_topic = f"{self.pubTopic}/{device['ID']}/status"
+        mqtt_topic = f"{self.pubTopic}/{str(device['ID'])}/status"
 
         # Invio del messaggio MQTT all'adaptor
         self.client.myPublish(mqtt_topic, json.dumps(message))
@@ -318,7 +309,7 @@ class Algorithm:
                     # NON REGISTERED USERS BUT USERS THAT MADE A RESERVATION REQUEST WILL BE HANDLED BY EXIT FILE.
 
     def refreshDevices(self):
-        adaptor_url = 'http://127.0.0.1:5000/'  # URL for adaptor
+        adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
         response = requests.get(adaptor_url)
         response.raise_for_status()  # Check if response is correct
         self.devices = response.json()
@@ -340,7 +331,7 @@ class Algorithm:
 
 class EntranceAlgorithmService:
     def __init__(self):
-        adaptor_url = 'http://127.0.0.1:5000/'  # URL for adaptor
+        adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
         response = requests.get(adaptor_url)
         response.raise_for_status()  # Check if response is correct
         devices = response.json()  # Fetch devices from adaptor

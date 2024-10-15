@@ -1,3 +1,5 @@
+from pathlib import Path
+import threading
 import cherrypy
 import sys
 import requests
@@ -7,26 +9,88 @@ import time
 from MyMQTT import MyMQTT
 from pathlib import Path
 import pytz
+import paho.mqtt.client as PahoMQTT
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
 
 class Exit:
-    def __init__(self, baseTopic, broker, port):
-        self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT("Exit", broker, port, None)
-        self.messageBroker = broker
-        self.port = port
+    def __init__(self, settings):
+        self.pubTopic = settings["baseTopic"]
+        self.catalog_address = settings['catalog_url']
+        self.messageBroker = settings["messageBroker"]
+        self.port = settings["brokerPort"]
+        self.serviceInfo = settings['serviceInfo']
+        self.serviceID = self.serviceInfo['ID']
+        self.updateInterval = settings["updateInterval"]
+        self.adaptor_url = settings['adaptor_url']
+
+        self.register_service()
+
+        self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher")
+        self._paho_mqtt.connect(self.messageBroker, self.port)
+        threading.Thread.__init__(self)
+        self.start()
+
+    def start_periodic_updates(self):
+        """
+        Starts a background thread that publishes periodic updates via MQTT.
+        """
+        def periodic_update():
+            time.sleep(10)
+            while True:
+                try:
+                    message = {
+                        "bn": "updateCatalogService",  
+                        "e": [
+                            {
+                                "n": f"{self.serviceID}",  
+                                "u": "IP",  
+                                "t": str(time.time()), 
+                                "v": ""  
+                            }
+                        ]
+                    }
+                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    self._paho_mqtt.publish(topic, json.dumps(message))  
+                    print(f"Published message to {topic}: {message}")
+                    time.sleep(self.updateInterval)
+                except Exception as e:
+                    print(f"Error during periodic update: {e}")
+
+        # Start periodic updates in a background thread
+        update_thread = threading.Thread(target=periodic_update, daemon=True)
+        update_thread.start()
 
     def start(self):
         """Start the MQTT client."""
-        self.client.start()  # Start MQTT client connection
-        print(f"Publisher connesso al broker {self.messageBroker}:{self.port}")
+        try:
+            self.client.start()  # Start MQTT client connection
+            print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
+            self.start_periodic_updates()
+        except Exception as e:
+            print(f"Error starting MQTT client: {e}")
 
     def stop(self):
         """Stop the MQTT client."""
-        self.client.stop()  # Stop MQTT client connection
+        try:
+            self.client.stop()  # Stop MQTT client connection
+        except Exception as e:
+            print(f"Error stopping MQTT client: {e}")
+
+    def register_service(self):
+        """Registers the service in the catalog using POST the first time."""
+        #Next times, updated with MQTT
+        
+        # Initial POST request to register the service
+        url = f"{self.catalog_address}/services"
+        response = requests.post(url, json=self.serviceInfo)
+        if response.status_code == 200:
+            self.is_registered = True
+            print(f"Service {self.serviceID} registered successfully.")
+        else:
+            print(f"Failed to register service: {response.status_code} - {response.text}")
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -34,8 +98,8 @@ class Exit:
     def exit(self):
         try:
 
-            adaptor_url = 'http://127.0.0.1:5000/'  # URL dell'adaptor
-            response = requests.get(adaptor_url)
+            #adaptor_url = 'http://127.0.0.1:5001/'  # URL dell'adaptor
+            response = requests.get(self.adaptor_url)
             response.raise_for_status()  # Controlla se la risposta è corretta
             
             # Ottieni la lista dei dispositivi dall'adaptor
@@ -137,13 +201,16 @@ class Exit:
 
 if __name__ == '__main__':
 
-    conf = json.load(open(SETTINGS))
-    baseTopic = conf["baseTopic"]
-    broker = conf["messageBroker"]
-    port = conf["brokerPort"]
-    catalog_url = conf["catalog_url"]
-
-    ex = Exit(baseTopic, broker, port)
-    ex.start()
+    conf = {
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.sessions.on': True
+        }
+    }
+    settings = json.load(open(SETTINGS))
+    ex = Exit(settings)
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8056})
+    cherrypy.tree.mount(ex, '/', conf)
+    cherrypy.engine.start()
+    #cherrypy.engine.block()
     cherrypy.quickstart(ex)
