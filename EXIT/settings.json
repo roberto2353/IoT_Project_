@@ -1,0 +1,15 @@
+{
+    "updateInterval": 60,
+    "serviceInfo": {
+        "ID": 6,
+        "name": "ExitService",
+        "last_update": "",
+        "port": "8087"
+    },
+    "brokerPort": 1883, 
+    "qos": 2,
+    "messageBroker": "mqtt.eclipseprojects.io",
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLot",
+    "adaptor_url": "http://localhost:5001"
+}
