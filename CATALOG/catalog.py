@@ -18,7 +18,7 @@ P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 from influxAdaptor import dbAdaptor
 
-SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
+SERVICE_EXPIRATION_THRESHOLD = 180 # Every 3 minutes old services are removed
 DEVICE_EXPIRATION_THRESHOLD = 120 #Every 2 minutes
 # Class to manage the catalog operations (loading, updating, saving)
 class CatalogManager:
@@ -30,6 +30,7 @@ class CatalogManager:
         self.expiration_thread_devices = threading.Thread(target=self.run_device_expiration_check, daemon=True)
         self.expiration_thread_services.start()
         self.expiration_thread_devices.start()
+        self.next_parking_id = 1
 
     def load_catalog(self):
         """Load the catalog from a JSON file."""
@@ -143,20 +144,53 @@ class CatalogManager:
         self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
         self.write_catalog()
 
+    # def add_parking(self, parking_info):
+    #     self.catalog["parkings"].append(parking_info)
+    #     self.write_catalog()
+
+    # def update_parking(self, parking_id, parking_info):
+    #     for i, parking in enumerate(self.catalog["parkings"]):
+    #         if parking['ID'] == parking_id:
+    #             self.catalog["parkings"][i] = parking_info
+    #             self.write_catalog()
+    #             return
+
+    # def remove_parking(self, parking_id):
+    #     self.catalog["parkings"] = [p for p in self.catalog["parkings"] if p['ID'] != parking_id]
+    #     self.write_catalog()
+
+    def parking_id_exists(self, parking_id):
+        # Check if a parking with the given ID already exists
+        return any(parking['ID'] == parking_id for parking in self.catalog["parkings"])
+
     def add_parking(self, parking_info):
+        # Ensure the ID is unique and auto-incremented
+        parking_info['ID'] = self.next_parking_id
         self.catalog["parkings"].append(parking_info)
+        self.next_parking_id += 1  # Increment the ID for the next parking
         self.write_catalog()
+        print(f"Parking with ID {parking_info['ID']} added.")
 
     def update_parking(self, parking_id, parking_info):
+        parking_id = int(parking_id)
         for i, parking in enumerate(self.catalog["parkings"]):
             if parking['ID'] == parking_id:
                 self.catalog["parkings"][i] = parking_info
+                self.catalog["parkings"][i]['ID'] = parking_id  # Ensure the ID remains the same
                 self.write_catalog()
+                print(f"Parking with ID {parking_id} updated.")
                 return
+        print(f"Parking with ID {parking_id} not found.")
 
     def remove_parking(self, parking_id):
-        self.catalog["parkings"] = [p for p in self.catalog["parkings"] if p['ID'] != parking_id]
-        self.write_catalog()
+        parking_id = int(parking_id)
+        if self.parking_id_exists(parking_id):
+            self.catalog["parkings"] = [p for p in self.catalog["parkings"] if p['ID'] != parking_id]
+            self.write_catalog()
+            print(f"Parking with ID {parking_id} removed.")
+            self.next_parking_id -= 1
+        else:
+            print(f"Parking with ID {parking_id} does not exist.")
 
     def check_service_expiration(self):
         """Remove services that have expired based on their 'last_update' timestamp."""

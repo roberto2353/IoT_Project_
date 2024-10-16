@@ -45,7 +45,7 @@ class dbAdaptor:
         # else:
         #     self.topic = topic
 
-        self.messageBroker = 'localhost'
+        #self.messageBroker = 'localhost'
 
         # Configurazione del client InfluxDB
         self.client = InfluxDBClient(host="localhost", port=self.influx_port, username="root", password="root", database=self.influx_db)
@@ -67,6 +67,8 @@ class dbAdaptor:
 
             # Start periodic alive messages
             self.start_periodic_updates()
+            self._paho_mqtt.subscribe('ParkingLot/+/status', 2)
+            
         except Exception as e:
             print(f"Error starting MQTT client: {e}")
 
