@@ -13,6 +13,7 @@ SETTINGS = P / 'settings.json'
 
 
 class Entrance:
+    exposed = True
     def __init__(self, settings):
         self.pubTopic = settings["baseTopic"]
         self.catalog_address = settings['catalog_url']
@@ -94,9 +95,10 @@ class Entrance:
     @cherrypy.tools.json_out() 
     def activate(self):
         try:
-            #adaptor_url = 'http://127.0.0.1:5001/'  # URL of the adaptor
-            response = requests.get(self.adaptor_url)
-            response.raise_for_status()  # Ensure the response is successful
+
+            adaptor_url = 'http://127.0.0.1:5001/'  # URL dell'adaptor
+            response = requests.get(adaptor_url)
+            response.raise_for_status()  # Controlla se la risposta è corretta
             
             # Get the list of devices from the adaptor
             devices = response.json()
@@ -173,4 +175,5 @@ if __name__ == '__main__':
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8085})
     cherrypy.tree.mount(en, '/', conf)
     cherrypy.engine.start()
-    cherrypy.engine.block()
+    #cherrypy.engine.block()
+    cherrypy.quickstart(en)

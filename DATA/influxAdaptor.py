@@ -32,7 +32,7 @@ class dbAdaptor:
         self.influx_port = settings["influxPort"]
 
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client(client_id="AdaptorService")
+        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
 
 
 
@@ -236,7 +236,8 @@ class dbAdaptor:
 
 
 
-
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def POST(self, *uri, **params):
@@ -288,24 +289,35 @@ class dbAdaptor:
                 print(f"Error registering device: {e}")
                 return {"error": str(e)}, 500
             
-        if uri[0] == 'reservation':
+        if uri[0] == 'reservation_exp':
             try:
                 device_info = cherrypy.request.json
-                required_fields = ['ID', 'name', 'type', 'location']
+                required_fields = ['ID', 'name', 'type', 'location', 'booking_code']
                 
                 # Verifica che tutti i campi richiesti siano presenti
                 for field in required_fields:
                     if field not in device_info:
                         return {"error": f"Missing field: {field}"}, 400
                 
-                # Controlla se un sensore con lo stesso ID esiste già
-                check_query = f'SELECT * FROM "status" WHERE "ID" = \'{device_info["ID"]}\''
+                # Verifica l'ultima entry per il dispositivo con ID e booking_code specifico
+                check_query = f'''
+                SELECT * FROM "status" 
+                WHERE "ID" = '{device_info["ID"]}' AND "booking_code" = '{device_info["booking_code"]}'
+                ORDER BY time DESC LIMIT 1
+                '''
                 result = self.client.query(check_query)
                 
-                # Se il risultato non è vuoto, significa che il dispositivo esiste già
-                if not list(result.get_points()):
-                    return {"message": f"Device with ID {device_info['ID']} doesn't exist."}, 409  # Conflict
+                # Se non ci sono risultati, significa che non c'è nessuna prenotazione attiva con quel booking_code
+                points = list(result.get_points())
+                if not points:
+                    return {"message": f"Device with ID {device_info['ID']} and booking_code {device_info['booking_code']} doesn't exist."}, 409  # Conflict
                 
+                # Controlla se lo stato dell'ultima entry è "reserved"
+                last_entry = points[0]
+                if last_entry['status'] != 'reserved':
+                    return {"message": "Reservation has already expired or was never made."}, 200  # Nessuna azione necessaria
+                
+                # Se l'ultima entry è "reserved", continua ad aggiornare lo stato
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 json_body = [
                     {
@@ -318,15 +330,15 @@ class dbAdaptor:
                         "time": str(current_time),  # Timestamp corrente
                         "fields": {
                             "name": device_info['name'],
-                            "status": "reserved",  # Lo stato è forzato da "free"
+                            "status": "free",  # Lo stato è forzato a "free"
                             "booking_code": device_info.get('booking_code', '')
                         }
                     }
                 ]
                 # Scrivi i dati su InfluxDB
-                self.client.write_points(json_body, database = self.influx_db)
-                print(f"Device with ID {device_info['ID']} is reserved on InfluxDB.")
-                return {"message": f"Device with ID {device_info['ID']} is reserved."}, 201
+                self.client.write_points(json_body, database=self.influx_db)
+                print(f"Device with ID {device_info['ID']} is again free on InfluxDB.")
+                return {"message": f"Device with ID {device_info['ID']} is again free."}, 201
             
             except Exception as e:
                 print(f"Error registering device: {e}")
@@ -369,6 +381,42 @@ class dbAdaptor:
             except Exception as e:
                 print(f"Error updating device: {e}")
                 return {"error": str(e)}, 500
+            
+        elif uri[0] == 'get_booking_info':
+            try:
+                request_data = cherrypy.request.json
+                booking_code = request_data.get('booking_code')
+                
+                if not booking_code:
+                    return {"error": "Missing 'booking_code' in request"}, 400
+                
+                # Query per sommare la durata e la tariffa totali per il booking_code
+                query = f"""
+                    SELECT SUM("duration") AS total_duration, SUM("fee") AS total_fee
+                    FROM "status"
+                    WHERE "booking_code" = '{booking_code}'
+                """
+                result = self.client.query(query, database=self.influx_stats)
+                
+                points = list(result.get_points())
+                if not points or (points[0]['total_duration'] is None and points[0]['total_fee'] is None):
+                    return {"message": f"No data found for booking_code {booking_code}"}, 404
+                
+                total_duration = points[0].get('total_duration', 0)
+                total_fee = points[0].get('total_fee', 0)
+                
+                response = {
+                    "booking_code": booking_code,
+                    "total_duration": total_duration,
+                    "total_fee": total_fee
+                }
+                
+                return response, 200
+            
+            except Exception as e:
+                print(f"Error retrieving booking info: {e}")
+                return {"error": str(e)}, 500
+
 
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")

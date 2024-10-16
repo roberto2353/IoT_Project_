@@ -66,7 +66,7 @@ class Exit:
     def start(self):
         """Start the MQTT client."""
         try:
-            #self.client.start()  # Start MQTT client connection
+            self.client.start()  # Start MQTT client connection
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
             self.start_periodic_updates()
         except Exception as e:
@@ -212,4 +212,5 @@ if __name__ == '__main__':
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8056})
     cherrypy.tree.mount(ex, '/', conf)
     cherrypy.engine.start()
-    cherrypy.engine.block()
+    #cherrypy.engine.block()
+    cherrypy.quickstart(ex)
