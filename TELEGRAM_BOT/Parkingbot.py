@@ -227,14 +227,19 @@ def show_wallet(msg):
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
 
-        total_fee = response.json().get('total_fee', '')
-        total_duration = response.json().get('total_duration', '')
+        # Verifica il contenuto della risposta
+        response_data = response.json()
+        print(f"Response data from server: {response_data}")  # Aggiungi questa linea
+
+        total_fee = response_data.get('total_fee', '')
+        total_duration = response_data.get('total_duration', '')
         if total_fee and total_duration:
             bot.sendMessage(chat_id, f"Le tue transazioni:\nDurata totale: {total_duration}\nImporto totale pagato: {total_fee}€")
         else:
             bot.sendMessage(chat_id, "Non ci sono transazioni recenti.")
     except Exception as e:
         bot.sendMessage(chat_id, f"Errore nel recupero delle transazioni: {e}")
+
 
 def send_user_data_to_catalog(user_data, chat_id):
     """Invia i dati dell'utente al catalogo e ritorna l'ID generato."""
