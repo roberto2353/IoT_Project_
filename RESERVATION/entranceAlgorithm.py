@@ -242,8 +242,10 @@ class Algorithm:
 
         for device in self.devices:
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            if device['status'] == 'occupied':
-                current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f" last update:{device.last_update}")
+            print(f"current time: {current_time}")
+            
+        
             if device['status'] == 'occupied':
                 if random.random() < departure_probability:
                     print("handling departures...")
