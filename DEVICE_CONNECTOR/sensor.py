@@ -140,7 +140,7 @@ if __name__ == '__main__':
         }
     }
 
-    cherrypy.config.update({'server.socket_host': 'eclipseprojects.io', 'server.socket_port': 8083})
+    cherrypy.config.update({'server.socket_host': 'localhost', 'server.socket_port': 8083})
     settings = json.load(open(SETTINGS))
     s = SensorREST(settings)
     cherrypy.tree.mount(s, '/', conf)
