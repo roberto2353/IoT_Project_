@@ -172,7 +172,7 @@ if __name__ == '__main__':
     }
     settings = json.load(open(SETTINGS))
     en = Entrance(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8085})
+    cherrypy.config.update({'server.socket_host': '192.168.1.58', 'server.socket_port': 8085})
     cherrypy.tree.mount(en, '/', conf)
     cherrypy.engine.start()
     #cherrypy.engine.block()

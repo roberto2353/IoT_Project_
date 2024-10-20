@@ -66,7 +66,7 @@ class Exit:
     def start(self):
         """Start the MQTT client."""
         try:
-            self.client.start()  # Start MQTT client connection
+            #self.client.start()  # Start MQTT client connection
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
             self.start_periodic_updates()
         except Exception as e:
@@ -75,7 +75,8 @@ class Exit:
     def stop(self):
         """Stop the MQTT client."""
         try:
-            self.client.stop()  # Stop MQTT client connection
+            #self.client.stop()  # Stop MQTT client connection
+            print("Publisher disconnected from broker.")
         except Exception as e:
             print(f"Error stopping MQTT client: {e}")
 
@@ -173,7 +174,7 @@ class Exit:
             mqtt_topic = f"{self.pubTopic}/{sensor_id}/status"
 
             # Invio del messaggio MQTT all'adaptor
-            self.client.myPublish(mqtt_topic, json.dumps(message))
+            self._paho_mqtt.publish(mqtt_topic, json.dumps(message))
             print(f"Messaggio pubblicato su topic {mqtt_topic}")
 
             # Risposta di successo al frontend
@@ -209,7 +210,7 @@ if __name__ == '__main__':
     }
     settings = json.load(open(SETTINGS))
     ex = Exit(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8056})
+    cherrypy.config.update({'server.socket_host': '192.168.1.58', 'server.socket_port': 8056})
     cherrypy.tree.mount(ex, '/', conf)
     cherrypy.engine.start()
     #cherrypy.engine.block()

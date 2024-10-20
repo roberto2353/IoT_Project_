@@ -27,7 +27,7 @@ class ReservationService:
         self.entrance_algorithm_url = "http://127.0.0.1:8081/get_best_parking"
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
+        self._paho_mqtt = PahoMQTT.Client()
         self.client = MyMQTT("Reservation_Kev", self.messageBroker, self.port, None)
 
         self._paho_mqtt.connect(self.messageBroker, self.port)
