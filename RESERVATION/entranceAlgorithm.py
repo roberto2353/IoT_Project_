@@ -242,7 +242,7 @@ class Algorithm:
 
         for device in self.devices:
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f" last update:{device.last_update}")
+            #print(f" last update:{device['last_update']}")
             print(f"current time: {current_time}")
             
         
@@ -251,7 +251,7 @@ class Algorithm:
                     print("handling departures...")
                     fee,duration_min = self.fee_and_duration_calc(device)
                     device['status'] = 'free'
-                    device['last_update'] = str(current_time)
+                    device['last_update'] = datetime.datetime.now()
                     device['fee'] = float(fee)
                     device['duration'] = duration_min
                     # device['booking_code'] = ""
