@@ -215,12 +215,12 @@ class Algorithm:
 
         current_time_ok = datetime.datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.UTC)
             
-        print("current_time: ", current_time_ok, "booking_start_time: " ,booking_start_time)
+        # print("current_time: ", current_time_ok, "booking_start_time: " ,booking_start_time)
         parking_duration_seconds = (current_time_ok - booking_start_time).total_seconds()
         parking_duration_hours = parking_duration_seconds / 3600 # Converti i secondi in ore
         parking_duration_mins = parking_duration_seconds / 60 # Converti i secondi in min
 
-        print("parking_duration_hours :", parking_duration_hours)
+        # print("parking_duration_hours :", parking_duration_hours)
 
         if parking_duration_hours <= 10:
             fee = parking_duration_hours * 2  # 2 euro per ora
@@ -246,6 +246,7 @@ class Algorithm:
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if device['status'] == 'occupied':
                 if random.random() < departure_probability:
+                    print("handling departures...")
                     fee,duration_min = self.fee_and_duration_calc(device)
                     device['status'] = 'free'
                     device['last_update'] = str(current_time)
@@ -274,9 +275,9 @@ class Algorithm:
             self.occDevPerFloorList()
             self.totalOccupied()
             self.arrival_time()
-            self.handle_departures()
             self.routeArrivals()
-            time.sleep(5)
+            self.handle_departures()
+            time.sleep(20)
 
 
 class EntranceAlgorithmService:
