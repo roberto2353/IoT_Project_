@@ -74,12 +74,13 @@ class Algorithm:
             print(f"number of occupied/booked parking for floor {floor}: {count}")
 
     def update_device_status(self, device):
-        if device['status'] == 'free':
+        #status already changed/updated in the received device
+        if device['status'] == 'free': #departure case
             event = {
                 "n": f"{device['ID']}/status", 
                 "u": "boolean", 
                 "t": str(datetime.datetime.now()), 
-                "v": device['status'],  # Cambiamo lo stato in 'occupied'
+                "v": device['status'], 
                 "sensor_id": device['ID'],
                 "location": device['location'],
                 "type": device['type'],
@@ -88,12 +89,12 @@ class Algorithm:
                 "duration":device['duration'],
                 "floor": self.extract_floor(device['location'])
                 }
-        else:
+        else:                          #arrival case
             event = {
                 "n": f"{device['ID']}/status", 
                 "u": "boolean", 
                 "t": str(datetime.datetime.now()), 
-                "v": device['status'],  # Cambiamo lo stato in 'occupied'
+                "v": device['status'], 
                 "sensor_id": device['ID'],
                 "location": device['location'],
                 "type": device['type'],
@@ -109,63 +110,14 @@ class Algorithm:
         print(f"Messaggio pubblicato su topic {mqtt_topic}")
 
         # Risposta di successo al frontend
-        return {
-                "message": f"Slot {device['location']} has been successfully  occupied.",
-                "slot_id": device['ID']
-            }
-
-
-
-
-    def update_device_status(self, device):
-        if device['status'] == 'free':
-            event = {
-                "n": f"{device['ID']}/status", 
-                "u": "boolean", 
-                "t": str(datetime.datetime.now()), 
-                "v": device['status'],  # Cambiamo lo stato in 'occupied'
-                "sensor_id": device['ID'],
-                "location": device['location'],
-                "type": device['type'],
-                "booking_code": device['booking_code'],
-                "fee": device['fee'],
-                "duration":device['duration'],
-                "floor": self.extract_floor(device['location'])
-                }
-        else:
-            event = {
-                "n": f"{device['ID']}/status", 
-                "u": "boolean", 
-                "t": str(datetime.datetime.now()), 
-                "v": device['status'],  # Cambiamo lo stato in 'occupied'
-                "sensor_id": device['ID'],
-                "location": device['location'],
-                "type": device['type'],
-                "booking_code": device['booking_code'],
-                "floor": self.extract_floor(device['location'])
-                }
-            
-        message = {"bn": device['name'], "e": [event]}
-        mqtt_topic = f"{self.pubTopic}/{device['ID']}/status"
-
-        # Invio del messaggio MQTT all'adaptor
-        self.client.myPublish(mqtt_topic, json.dumps(message))
-        print(f"Messaggio pubblicato su topic {mqtt_topic}")
-
-        # Risposta di successo al frontend
-        return {
-                "message": f"Slot {device['location']} has been successfully  occupied.",
-                "slot_id": device['ID']
-            }
-
-
-
+        # return {
+        #         "message": f"Slot {device['location']} has been successfully  occupied.",
+        #         "slot_id": device['ID']
+        #     }
 
     @staticmethod
     def extract_floor(location):
         if location.startswith("P"):
-            # print(f"{location[1]}")
-            # print(f"{location[1]}")
             return location[1]
         return None
 
@@ -202,13 +154,9 @@ class Algorithm:
         return False
 
     def get_free_device_on_floor(self, floor):
+        print(f"Looking for the first free slot on floor {floor}:")
         for device in self.devices:
-            print(f"{device['status']},{floor}")
-            print(f"{self.extract_floor(device['location'])}")
-            if device['status'] == 'free' and int(self.extract_floor(device['location'])) == int(floor):
-                print("device found")
-            print(f"{device['status']},{floor}")
-            print(f"{self.extract_floor(device['location'])}")
+            print(f"{device['status']},{floor} = {self.extract_floor(device['location'])}")
             if device['status'] == 'free' and int(self.extract_floor(device['location'])) == int(floor):
                 print("device found")
                 return device
@@ -218,7 +166,6 @@ class Algorithm:
         flag = 0
         time = datetime.datetime.now()
         if self.arrivals and time >= self.arrivals[0] and get == 'False':
-            print()
             self.arrivals.pop(0)
             for floor in range(self.n_floors):
                 print(f"current floor:{floor}")
@@ -239,6 +186,8 @@ class Algorithm:
                     print(f"Device {device['ID']} has changed state to {device['status']}")
                     flag=1
                     return device
+                
+                
         if get == 'True':
             for floor in range(self.n_floors):
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
@@ -317,6 +266,7 @@ class Algorithm:
     def simulate_arrivals_loop(self):
         while True:
             
+            print("inizio loop:\n")
             self.refreshDevices()
             self.countFloors()
             self.countDev()
