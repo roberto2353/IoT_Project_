@@ -1,0 +1,1 @@
+ C:\\Users\\fabio\\Documents\\GitHub\\IoT_Project_\\app\\.dart_tool\\flutter_build\\d89806d0990ff0fe77320aea4914ea53\\native_assets.yaml: 
