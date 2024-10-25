@@ -9,6 +9,7 @@ import paho.mqtt.client as PahoMQTT
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
+DEVICES = P / 'setting_status.json'
 
 class SensorREST(threading.Thread):
     exposed = True
@@ -130,6 +131,26 @@ class SensorREST(threading.Thread):
             self._paho_mqtt.publish(self.topic+location, json.dumps(message))
             print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
         print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
+        
+    def load_devs(self):
+        """Load the catalog from a JSON file."""
+        try:
+            with open(DEVICES, 'r') as file:
+                return(json.load(file))
+                
+        except Exception as e:
+            print(f"Failed to load catalog: {e}")
+        
+    def GET(self, *uri, **params):
+        try:
+            if len(uri) == 0:
+                raise cherrypy.HTTPError(status=400, message='Invalid URL')
+            elif uri[0] == 'devices':
+                devices = self.load_devs
+                return json.dumps({"devices": devices})
+        except Exception as e:
+            print(f"Error in GET: {e}")
+            raise cherrypy.HTTPError(500, 'no JSON file available')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,235 @@
+{
+    "devices": [
+        {
+            "deviceInfo": {
+                "ID": 1,
+                "name": "sensor1",
+                "type": "photocell",
+                "location": "P0-1",
+                "status": "occupied",
+                "booking_code": "7afd56",
+                "last_update": "2024-10-25 19:29:59"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 2,
+                "name": "sensor2",
+                "type": "photocell",
+                "location": "P0-2",
+                "status": "occupied",
+                "booking_code": "e19921",
+                "last_update": "2024-10-25 19:33:41"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 3,
+                "name": "sensor3",
+                "type": "photocell",
+                "location": "P0-3",
+                "status": "occupied",
+                "booking_code": "7cd1ab",
+                "last_update": "2024-10-25 19:32:21"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 4,
+                "name": "sensor4",
+                "type": "photocell",
+                "location": "P0-4",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877661.387971
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 5,
+                "name": "sensor5",
+                "type": "photocell",
+                "location": "P0-5",
+                "status": "occupied",
+                "booking_code": "a1730e",
+                "last_update": "2024-10-25 19:34:21"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 6,
+                "name": "sensor6",
+                "type": "photocell",
+                "location": "P0-6",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 7,
+                "name": "sensor7",
+                "type": "photocell",
+                "location": "P0-7",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 8,
+                "type": "photocell",
+                "location": "P1-1",
+                "name": "sensor8",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 9,
+                "type": "photocell",
+                "location": "P1-2",
+                "name": "sensor9",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 10,
+                "type": "photocell",
+                "location": "P1-3",
+                "name": "sensor10",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 11,
+                "type": "photocell",
+                "location": "P1-4",
+                "name": "sensor11",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 12,
+                "type": "photocell",
+                "location": "P1-5",
+                "name": "sensor12",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 13,
+                "type": "photocell",
+                "location": "P1-6",
+                "name": "sensor13",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 14,
+                "type": "photocell",
+                "location": "P1-7",
+                "name": "sensor14",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 15,
+                "type": "photocell",
+                "location": "P2-1",
+                "name": "sensor15",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 16,
+                "type": "photocell",
+                "location": "P2-2",
+                "name": "sensor16",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 17,
+                "type": "photocell",
+                "location": "P2-3",
+                "name": "sensor17",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 18,
+                "type": "photocell",
+                "location": "P2-4",
+                "name": "sensor18",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 19,
+                "type": "photocell",
+                "location": "P2-5",
+                "name": "sensor19",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 20,
+                "type": "photocell",
+                "location": "P2-6",
+                "name": "sensor20",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 21,
+                "type": "photocell",
+                "location": "P2-7",
+                "name": "sensor21",
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1729877398.9830167
+            }
+        }
+    ]
+}

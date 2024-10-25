@@ -20,6 +20,13 @@
             "credit_card": "5333097600056478"
         }
     ],
-    "services": [],
+    "services": [
+        {
+            "ID": 2,
+            "name": "DevConnectorService",
+            "last_update": 1729877647.5004385,
+            "port": "8083"
+        }
+    ],
     "parkings": []
 }
