@@ -32,7 +32,7 @@ class dbAdaptor:
         self.influx_port = settings["influxPort"]
 
         # Crea un'istanza di paho.mqtt.client
-        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2)
+        self._paho_mqtt = PahoMQTT.Client()
 
 
 
@@ -45,6 +45,7 @@ class dbAdaptor:
         # else:
         #     self.topic = topic
 
+        #self.messageBroker = 'localhost'
 
         # Configurazione del client InfluxDB
         self.client = InfluxDBClient(host="localhost", port=self.influx_port, username="root", password="root", database=self.influx_db)
@@ -66,11 +67,8 @@ class dbAdaptor:
 
             # Start periodic alive messages
             self.start_periodic_updates()
-
             self._paho_mqtt.subscribe('ParkingLot/+/status', 2)
             
-            
-
         except Exception as e:
             print(f"Error starting MQTT client: {e}")
 
@@ -388,10 +386,10 @@ class dbAdaptor:
             try:
                 request_data = cherrypy.request.json
                 booking_code = request_data.get('booking_code')
-                
+
                 if not booking_code:
                     return {"error": "Missing 'booking_code' in request"}, 400
-                
+
                 # Query per sommare la durata e la tariffa totali per il booking_code
                 query = f"""
                     SELECT SUM("duration") AS total_duration, SUM("fee") AS total_fee
@@ -399,25 +397,34 @@ class dbAdaptor:
                     WHERE "booking_code" = '{booking_code}'
                 """
                 result = self.client.query(query, database=self.influx_stats)
+
                 
                 points = list(result.get_points())
+                 
+
                 if not points or (points[0]['total_duration'] is None and points[0]['total_fee'] is None):
                     return {"message": f"No data found for booking_code {booking_code}"}, 404
+
                 
-                total_duration = points[0].get('total_duration', 0)
-                total_fee = points[0].get('total_fee', 0)
-                
+                first_point = points[0]
+
+                total_duration = first_point.get('total_duration', 0)
+                total_fee = first_point.get('total_fee', 0)
+
                 response = {
                     "booking_code": booking_code,
                     "total_duration": total_duration,
                     "total_fee": total_fee
                 }
-                
-                return response, 200
-            
+
+                return response  
+
             except Exception as e:
                 print(f"Error retrieving booking info: {e}")
                 return {"error": str(e)}, 500
+
+
+
 
 
         else:
@@ -452,6 +459,7 @@ class dbAdaptor:
                     sensors = {"message": "No sensors found in the database"}
                 
                 # Converti la lista in una stringa JSON
+                print("returned sensors from db via adaptor")
                 return json.dumps(sensors).encode('utf-8')
             
             except Exception as e:

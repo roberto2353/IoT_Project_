@@ -22,22 +22,16 @@
     ],
     "services": [
         {
-            "ID": 4,
-            "name": "ReservationService",
-            "last_update": 1729006445.441768,
-            "port": "8098"
-        },
-        {
             "ID": 1,
             "name": "AdaptorService",
-            "last_update": 1729006473.8115637,
+            "last_update": 1729935461.4122822,
             "port": "5001"
         },
         {
-            "ID": 5,
-            "name": "EntranceService",
-            "last_update": 1729006447.2245615,
-            "port": "8085"
+            "ID": 2,
+            "name": "DevConnectorService",
+            "last_update": 1729935501.009602,
+            "port": "8083"
         }
     ],
     "parkings": []
