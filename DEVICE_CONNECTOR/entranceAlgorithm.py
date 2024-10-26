@@ -90,9 +90,9 @@ class Algorithm:
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             event = {
-                "n": f"{device["deviceInfo"]['ID']}/status", 
+                "n": f'{device["deviceInfo"]["ID"]}/status', 
                 "u": "boolean", 
-                "t": time.time(), 
+                "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
                 "v": device["deviceInfo"]['status'], 
                 "sensor_id": device["deviceInfo"]['ID'],
                 "location": device["deviceInfo"]['location'],
@@ -104,9 +104,9 @@ class Algorithm:
                 }
         else:                          #arrival case
             event = {
-                "n": f"{device["deviceInfo"]['ID']}/status", 
+                "n": f'{device["deviceInfo"]["ID"]}/status', 
                 "u": "boolean", 
-                "t": time.time(), 
+                "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
                 "v": device["deviceInfo"]['status'], 
                 "sensor_id": device["deviceInfo"]['ID'],
                 "location": device["deviceInfo"]['location'],
@@ -116,7 +116,7 @@ class Algorithm:
                 }
             
         message = {"bn": device["deviceInfo"]['name'], "e": [event]}
-        mqtt_topic = f"{self.pubTopic}/{str(device["deviceInfo"]['ID'])}/status"
+        mqtt_topic = f'{self.pubTopic}/{str(device["deviceInfo"]["ID"])}/status'
 
         # Invio del messaggio MQTT all'adaptor
         self.client.myPublish(mqtt_topic, json.dumps(message))
@@ -169,8 +169,8 @@ class Algorithm:
     def get_free_device_on_floor(self, floor):
         print(f"Looking for the first free slot on floor {floor}:")
         for device in self.devices:
-            print(f"{device["deviceInfo"]['status']},{floor} = {self.extract_floor(device["deviceInfo"]['location'])}")
-            if device["deviceInfo"]['status'] == 'free' and int(self.extract_floor(device["deviceInfo"]['location'])) == int(floor):
+            print(f'{device["deviceInfo"]["status"]},{floor} = {self.extract_floor(device["deviceInfo"]["location"])}')
+            if device["deviceInfo"]["status"] == 'free' and int(self.extract_floor(device["deviceInfo"]["location"])) == int(floor):
                 print("device found")
                 return device
         return None
@@ -187,7 +187,7 @@ class Algorithm:
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
                     device = self.get_free_device_on_floor(floor)
                     if device and self.changeDevState(device, floor, time):
-                        print(f"Device {device["deviceInfo"]['ID']} has changed state to {device["deviceInfo"]['status']}")
+                        print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
                         flag=1
                         return device
 
@@ -196,7 +196,7 @@ class Algorithm:
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if device and self.changeDevState(device, floor, time):
                     print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
-                    print(f"Device {device["deviceInfo"]['ID']} has changed state to {device["deviceInfo"]['status']}")
+                    print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
                     flag=1
                     return device
                 
@@ -270,7 +270,7 @@ class Algorithm:
                     # device['duration'] = duration_min
                     device["deviceInfo"]['booking_code'] = ""
                     self.update_device_status(device)  # Send update to adaptor
-                    print(f"Device {device["deviceInfo"]['ID']} at {device["deviceInfo"]['location']} is now free. Car has departed.")
+                    print(f'Device {device["deviceInfo"]["ID"]} at {device["deviceInfo"]["location"]} is now free. Car has departed.')
                     #TODO: ONLY REGISTERED USERS AND RANDOM USERS WILL DEPARTURE WITH THIS METHOD. 
                     # NON REGISTERED USERS BUT USERS THAT MADE A RESERVATION REQUEST WILL BE HANDLED BY EXIT FILE.
 
