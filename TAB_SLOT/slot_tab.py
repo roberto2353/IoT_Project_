@@ -26,9 +26,11 @@ class SlotBoard:
     def initialize_board(self):
         """Inizializza il tabellone con il numero di posti totali, liberi e occupati."""
         try:
-            adaptor_url = 'http://127.0.0.1:5000/'  # URL for adaptor
+            adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
             response = requests.get(adaptor_url)
-            response.raise_for_status()  # Check if response is correct
+            response.raise_for_status()  # Check if the response is correct
+
+            # Get the list of devices from the adaptor
             slots = response.json()
             self.total_slots = len(slots)
             print(f"Tabellone inizializzato: {self.total_slots} posti totali")

@@ -135,7 +135,7 @@ class SensorREST(threading.Thread):
     def load_devs(self):
         """Load the catalog from a JSON file."""
         try:
-            with open(DEVICES, 'r') as file:
+            with open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json', 'r') as file:
                 return(json.load(file))
                 
         except Exception as e:
@@ -146,11 +146,17 @@ class SensorREST(threading.Thread):
             if len(uri) == 0:
                 raise cherrypy.HTTPError(status=400, message='Invalid URL')
             elif uri[0] == 'devices':
-                devices = self.load_devs
-                return json.dumps({"devices": devices})
+                devices_data = self.load_devs()  # Load the full data structure from JSON
+                devices = devices_data.get("devices")  # Extract the list of devices from the dictionary
+                
+                if isinstance(devices, list):  # Ensure it's a list (expected format)
+                    return json.dumps({"devices": devices})
+                else:
+                    raise ValueError("Invalid data format for devices")
         except Exception as e:
             print(f"Error in GET: {e}")
             raise cherrypy.HTTPError(500, 'no JSON file available')
+
 
 
 if __name__ == '__main__':
@@ -161,7 +167,7 @@ if __name__ == '__main__':
         }
     }
 
-    cherrypy.config.update({'server.socket_host': 'localhost', 'server.socket_port': 8083})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8083})
     settings = json.load(open(SETTINGS))
     s = SensorREST(settings)
     cherrypy.tree.mount(s, '/', conf)

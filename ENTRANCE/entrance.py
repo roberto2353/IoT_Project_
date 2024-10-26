@@ -96,13 +96,12 @@ class Entrance:
     def activate(self):
         try:
 
-            adaptor_url = 'http://127.0.0.1:5001/'  # URL dell'adaptor
+            adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
             response = requests.get(adaptor_url)
-            response.raise_for_status()  # Controlla se la risposta è corretta
-            
+            response.raise_for_status()  
+
             # Get the list of devices from the adaptor
             devices = response.json()
-
             print("Devices from adaptor: ", devices)
 
             # Filter devices with status 'reserved'

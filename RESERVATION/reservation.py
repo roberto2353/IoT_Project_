@@ -23,6 +23,7 @@ class ReservationService:
         self.serviceID = self.serviceInfo['ID']
         self.updateInterval = settings["updateInterval"]
         self.adaptor_url = settings['adaptor_url']
+        self.device_connector_url = settings["devConn_url"]
 
         self.entrance_algorithm_url = "http://127.0.0.1:8081/get_best_parking"
         self.register_service()

@@ -20,19 +20,6 @@
             "credit_card": "5333097600056478"
         }
     ],
-    "services": [
-        {
-            "ID": 1,
-            "name": "AdaptorService",
-            "last_update": 1729935461.4122822,
-            "port": "5001"
-        },
-        {
-            "ID": 2,
-            "name": "DevConnectorService",
-            "last_update": 1729935501.009602,
-            "port": "8083"
-        }
-    ],
+    "services": [],
     "parkings": []
 }

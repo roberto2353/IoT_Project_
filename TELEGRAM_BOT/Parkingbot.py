@@ -281,18 +281,35 @@ def logout(chat_id):
     
     show_initial_menu(chat_id)
 
+
+def recursive_json_decode(data):
+        # Prova a decodificare fino a ottenere un dizionario o una lista
+        while isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                break
+        return data
+
 def check_free_slots(msg):
     """Controlla e mostra i posti liberi."""
     chat_id = msg['chat']['id']
-    url = 'http://127.0.0.1:5001/'  
+    url = 'http://127.0.0.1:8083/devices'  
 
     try:
         response = requests.get(url)
         response.raise_for_status()
         
-        slots = json.loads(response.text)
+        slots = response.json()
+        print(slots)
 
-        free_slots = [slot for slot in slots if slot.get('status') == 'free']
+        devices = slots.get("devices", [])
+        if not isinstance(devices, list):
+            raise ValueError("La risposta JSON non contiene una lista di dispositivi valida sotto la chiave 'devices'.")
+
+        # Filtro per dispositivi con 'status' libero
+        free_slots = [device["deviceInfo"] for device in devices if device.get("deviceInfo", {}).get("status") == "free"]
         
         if free_slots:
             slots_info = "\n".join([f"ID: {slot['location']}, Nome: {slot['name']}" for slot in free_slots])
