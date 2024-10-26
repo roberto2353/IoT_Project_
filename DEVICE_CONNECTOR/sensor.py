@@ -20,6 +20,7 @@ class SensorREST(threading.Thread):
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
         self.serviceInfo = settings['serviceInfo']
+        self.parkingInfo = settings['parkingInfo']
         self.serviceID = self.serviceInfo['ID']
         #self.first_insertion = True
         self.deviceInfo = []  # Initialize as a list to store multiple device infos
@@ -29,6 +30,7 @@ class SensorREST(threading.Thread):
         
         time.sleep(3)
         self.register_service()
+        self.register_parking()
         self.topic = "ParkingLot/alive/"
         self.messageBroker = settings["messageBroker"]
         self.port = settings["brokerPort"]
@@ -36,6 +38,7 @@ class SensorREST(threading.Thread):
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
+        self.run()
 
     
     def start(self):
@@ -65,6 +68,19 @@ class SensorREST(threading.Thread):
             requests.post(f'{self.catalogUrl}/devices', data=json.dumps(device_info))
         print("Devices registered correctly!")
 
+    def register_parking(self):
+        """Registers the service in the catalog using POST the first time."""
+        #Next times, updated with MQTT
+        
+        # Initial POST request to register the service
+        url = f"{self.catalogUrl}/parkings"
+        response = requests.post(url, json=self.parkingInfo)
+        if response.status_code == 200:
+            #self.is_registered = True
+            print(f"Parking 1 registered successfully.")
+        else:
+            print(f"Failed to register service: {response.status_code} - {response.text}")
+
     def register_service(self):
         """Registers the service in the catalog using POST the first time."""
         #Next times, updated with MQTT
@@ -77,6 +93,7 @@ class SensorREST(threading.Thread):
             print(f"Service {self.serviceID} registered successfully.")
         else:
             print(f"Failed to register service: {response.status_code} - {response.text}")
+            
 
     def start_periodic_updates(self):
         """

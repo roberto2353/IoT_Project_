@@ -165,11 +165,13 @@ class CatalogManager:
 
     def add_parking(self, parking_info):
         # Ensure the ID is unique and auto-incremented
-        parking_info['ID'] = self.next_parking_id
-        self.catalog["parkings"].append(parking_info)
-        self.next_parking_id += 1  # Increment the ID for the next parking
-        self.write_catalog()
-        print(f"Parking with ID {parking_info['ID']} added.")
+        if not self.parking_id_exists(parking_info['ID']):
+            print("ok")
+            #parking_info['ID'] = self.next_parking_id
+            self.catalog["parkings"].append(parking_info)
+            self.next_parking_id += 1  # Increment the ID for the next parking
+            self.write_catalog()
+            print(f"Parking with ID {parking_info['ID']} added.")
 
     def update_parking(self, parking_id, parking_info):
         parking_id = int(parking_id)
@@ -330,7 +332,7 @@ class CatalogREST(object):
 
 class MySubscriber:
         def __init__(self, catalog_manager, settings):
-            self.clientID = "CatalogSubscriber"
+            self.clientID = "CatalogSubscriber_Kevin"
 			# create an instance of paho.mqtt.client
             self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID) 
             
