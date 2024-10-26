@@ -22,10 +22,10 @@
     ],
     "services": [
         {
-            "ID": 1,
-            "name": "AdaptorService",
-            "last_update": 1729186450.971244,
-            "port": "5001"
+            "ID": 2,
+            "name": "DevConnectorService",
+            "last_update": 1729877647.5004385,
+            "port": "8083"
         }
     ],
     "parkings": []

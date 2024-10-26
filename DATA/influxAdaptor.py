@@ -459,6 +459,7 @@ class dbAdaptor:
                     sensors = {"message": "No sensors found in the database"}
                 
                 # Converti la lista in una stringa JSON
+                print("returned sensors from db via adaptor")
                 return json.dumps(sensors).encode('utf-8')
             
             except Exception as e:
