@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 import cherrypy
 import requests
@@ -20,6 +21,7 @@ class SensorREST(threading.Thread):
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
         self.serviceInfo = settings['serviceInfo']
+        self.parkingInfo = settings['parkingInfo']
         self.serviceID = self.serviceInfo['ID']
         #self.first_insertion = True
         self.deviceInfo = []  # Initialize as a list to store multiple device infos
@@ -29,6 +31,8 @@ class SensorREST(threading.Thread):
         
         time.sleep(3)
         self.register_service()
+        self.register_parking()
+        
         self.topic = "ParkingLot/alive/"
         self.messageBroker = settings["messageBroker"]
         self.port = settings["brokerPort"]
@@ -36,6 +40,7 @@ class SensorREST(threading.Thread):
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
+        self.run()
 
     
     def start(self):
@@ -128,6 +133,7 @@ class SensorREST(threading.Thread):
                 ]
             }
             # Publish the message to the broker
+            print(self.topic+location)
             self._paho_mqtt.publish(self.topic+location, json.dumps(message))
             print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
         print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
@@ -135,12 +141,24 @@ class SensorREST(threading.Thread):
     def load_devs(self):
         """Load the catalog from a JSON file."""
         try:
-            with open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json', 'r') as file:
+            with open('', 'r') as file:
                 return(json.load(file))
                 
         except Exception as e:
             print(f"Failed to load catalog: {e}")
-        
+    
+    def register_parking(self):
+
+        #Next times, updated with MQTT
+        url = f"{self.catalogUrl}/parkings"
+        response = requests.post(url, json=self.parkingInfo)
+        if response.status_code == 200:
+            #self.is_registered = True
+            print(f"Parking 1 registered successfully.")
+        else:
+            print(f"Failed to register service: {response.status_code} - {response.text}")
+
+
     def GET(self, *uri, **params):
         try:
             if len(uri) == 0:

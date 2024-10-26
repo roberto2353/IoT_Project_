@@ -165,11 +165,17 @@ class CatalogManager:
 
     def add_parking(self, parking_info):
         # Ensure the ID is unique and auto-incremented
-        parking_info['ID'] = self.next_parking_id
-        self.catalog["parkings"].append(parking_info)
-        self.next_parking_id += 1  # Increment the ID for the next parking
-        self.write_catalog()
-        print(f"Parking with ID {parking_info['ID']} added.")
+        if not self.parking_id_exists(parking_info['ID']):
+            print("ok")
+            #parking_info['ID'] = self.next_parking_id
+            self.catalog["parkings"].append(parking_info)
+            self.next_parking_id += 1  # Increment the ID for the next parking
+            self.write_catalog()
+            print(f"Parking with ID {parking_info['ID']} added.")
+            return
+        else:
+            print(f"Parking with ID {parking_info['ID']} already exists")
+            return
 
     def update_parking(self, parking_id, parking_info):
         parking_id = int(parking_id)

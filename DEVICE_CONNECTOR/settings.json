@@ -178,6 +178,15 @@
         "last_update": "",
         "port": "8083"
     },
+    "parkingInfo": {
+        "ID": 1,
+        "name": "DevConnector1",
+        "last_update": "",
+        "location":"Torino",
+        "url":"127.0.0.1",
+        "port": "8083",
+        "topic":"ParkingLot/Dev1"
+    },
     "brokerPort": 1883, 
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
