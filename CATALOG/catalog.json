@@ -22,7 +22,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.434735"
+            "last_update": "1729959704.3782332"
         },
         {
             "ID": 2,
@@ -32,7 +32,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.435166"
+            "last_update": "1729959704.3784971"
         },
         {
             "ID": 3,
@@ -42,7 +42,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.435288"
+            "last_update": "1729959704.378569"
         },
         {
             "ID": 4,
@@ -52,7 +52,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.435391"
+            "last_update": "1729959704.378627"
         },
         {
             "ID": 5,
@@ -62,7 +62,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.4354858"
+            "last_update": "1729959704.378679"
         },
         {
             "ID": 6,
@@ -72,7 +72,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.4355788"
+            "last_update": "1729959704.3787289"
         },
         {
             "ID": 7,
@@ -82,7 +82,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.4356768"
+            "last_update": "1729959704.378777"
         },
         {
             "ID": 8,
@@ -92,7 +92,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.435969"
+            "last_update": "1729959704.378826"
         },
         {
             "ID": 9,
@@ -102,7 +102,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.436095"
+            "last_update": "1729959704.378884"
         },
         {
             "ID": 10,
@@ -112,7 +112,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.436219"
+            "last_update": "1729959704.378934"
         },
         {
             "ID": 11,
@@ -122,7 +122,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.4363241"
+            "last_update": "1729959704.378983"
         },
         {
             "ID": 12,
@@ -132,7 +132,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.436429"
+            "last_update": "1729959704.3790321"
         },
         {
             "ID": 13,
@@ -142,7 +142,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.4365"
+            "last_update": "1729959704.379081"
         },
         {
             "ID": 14,
@@ -152,7 +152,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.436703"
+            "last_update": "1729959704.379166"
         },
         {
             "ID": 15,
@@ -162,7 +162,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.436817"
+            "last_update": "1729959704.3792179"
         },
         {
             "ID": 16,
@@ -172,7 +172,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.4369018"
+            "last_update": "1729959704.379266"
         },
         {
             "ID": 17,
@@ -182,7 +182,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.43698"
+            "last_update": "1729959704.379313"
         },
         {
             "ID": 18,
@@ -192,7 +192,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.437054"
+            "last_update": "1729959704.37936"
         },
         {
             "ID": 19,
@@ -202,7 +202,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.437126"
+            "last_update": "1729959704.3794072"
         },
         {
             "ID": 20,
@@ -212,7 +212,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.437197"
+            "last_update": "1729959704.3794591"
         },
         {
             "ID": 21,
@@ -222,20 +222,20 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1729952458.437269"
+            "last_update": "1729959704.37952"
         }
     ],
     "services": [
         {
             "ID": 1,
             "name": "AdaptorService",
-            "last_update": 1729952429.50064,
+            "last_update": 1729959692.664125,
             "port": "5001"
         },
         {
             "ID": 2,
             "name": "DevConnectorService",
-            "last_update": 1729952438.572727,
+            "last_update": 1729959684.7848132,
             "port": "8083"
         }
     ],

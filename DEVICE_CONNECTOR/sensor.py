@@ -17,7 +17,7 @@ class SensorREST(threading.Thread):
     devices_counter=1
 
     def __init__(self, settings):
-        
+        #super().__init__()
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
         self.serviceInfo = settings['serviceInfo']
@@ -38,9 +38,9 @@ class SensorREST(threading.Thread):
         self.port = settings["brokerPort"]
         self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher")
         self._paho_mqtt.connect(self.messageBroker, self.port)
-        threading.Thread.__init__(self)
+        threading.Thread(target=self.pingCatalog, daemon=True).start()
         self.start()
-        self.run()
+        #self.run()
 
     
     def start(self):
@@ -113,15 +113,16 @@ class SensorREST(threading.Thread):
         update_thread = threading.Thread(target=periodic_update, daemon=True)
         update_thread.start()
 
-    def run(self):
-        while True:
-            time.sleep(self.pingInterval)
-            self.pingCatalog()
+    #def run(self):
+    #    while True:
+    #        time.sleep(self.pingInterval)
+    #        self.pingCatalog()
     
     def pingCatalog(self):
-        for device in self.deviceInfo:
-            location = device["location"]
-            message = {
+        while True:
+            for device in self.deviceInfo:
+                location = device["location"]
+                message = {
                 "bn": "updateCatalogSlot",  
                 "e": [
                     {
@@ -131,17 +132,18 @@ class SensorREST(threading.Thread):
                         "v": ""  
                     }
                 ]
-            }
+                }
             # Publish the message to the broker
-            print(self.topic+location)
-            self._paho_mqtt.publish(self.topic+location, json.dumps(message))
-            print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
-        print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
+                print(self.topic+location)
+                self._paho_mqtt.publish(self.topic+location, json.dumps(message))
+                print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
+            print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
+            time.sleep(self.pingInterval)
         
     def load_devs(self):
         """Load the catalog from a JSON file."""
         try:
-            with open('', 'r') as file:
+            with open(SETTINGS, 'r') as file:
                 return(json.load(file))
                 
         except Exception as e:
@@ -158,7 +160,8 @@ class SensorREST(threading.Thread):
         else:
             print(f"Failed to register service: {response.status_code} - {response.text}")
 
-
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
         try:
             if len(uri) == 0:
@@ -181,7 +184,10 @@ if __name__ == '__main__':
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-            'tools.sessions.on': True
+            'tools.sessions.on': True,
+            'tools.response_headers.on': True,
+            'tools.encode.on': True, 
+            'tools.response_headers.headers': [('Content-Type', 'application/json')]
         }
     }
 
