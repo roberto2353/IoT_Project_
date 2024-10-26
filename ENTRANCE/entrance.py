@@ -110,6 +110,7 @@ class Entrance:
 
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
+            #self.pubTopic = input_data.get('topic')
 
             right_slot = [slot for slot in reserved_slots if slot.get('booking_code') == booking_code]
 
