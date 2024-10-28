@@ -17,10 +17,12 @@ class SensorREST(threading.Thread):
     exposed = True
     devices_counter=1
 
-    def __init__(self, settings):
+    def __init__(self, settings, status):
         super().__init__()  # Corretto inizializzazione del thread
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
+        self.devices_status = status['devices']
+        self.setting_status_path = P / 'settings_status.json'
         self.serviceInfo = settings['serviceInfo']
         self.parkingInfo = settings['parkingInfo']
         self.serviceID = self.serviceInfo['ID']
@@ -52,6 +54,10 @@ class SensorREST(threading.Thread):
         self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_K")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread(target=self.pingCatalog, daemon=True).start()
+
+        self._paho_mqtt.on_connect = self.myOnConnect
+        self._paho_mqtt.on_message = self.myOnMessageReceived
+
         self.start()
     
     # @cherrypy.expose
@@ -69,6 +75,9 @@ class SensorREST(threading.Thread):
             #self.client.start()  # Start MQTT client connection
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
             self.start_periodic_updates()
+            self._paho_mqtt.subscribe('ParkingLot/DevConn1/+/status', 2)
+            self._paho_mqtt.loop_start()
+            print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
         except Exception as e:
             print(f"Error starting MQTT client: {e}")
 
@@ -203,6 +212,67 @@ class SensorREST(threading.Thread):
             print(f"Error in GET: {e}")
             raise cherrypy.HTTPError(500, 'no JSON file available')
         
+    def recursive_json_decode(self, data):
+        # Prova a decodificare fino a ottenere un dizionario o una lista
+        while isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                break
+        return data
+    
+    def myOnConnect(self, paho_mqtt, userdata, flags, reasonCode, properties=None):
+        print(f"Connected to {self.messageBroker} with result code: {reasonCode}")
+        
+    def myOnMessageReceived(self, paho_mqtt, userdata, msg):
+        # Un nuovo messaggio viene ricevuto
+        print(f"ARRIVED!!!!!!!!! Topic: '{msg.topic}', QoS: '{msg.qos}', Message: '{msg.payload.decode()}'")
+        
+        try:
+            # Decodifica del payload JSON una prima volta
+            decoded_message = msg.payload.decode()
+            print(f"Decoded message (first decode): {decoded_message}")
+
+            # Decodifica ricorsiva fino a ottenere un dizionario o una lista
+            final_data = self.recursive_json_decode(decoded_message)
+            print(f"Final decoded message: {final_data}")
+            print(f"Data type after final decode: {type(final_data)}")
+
+            # Assicurati che 'final_data' sia un dizionario
+            if isinstance(final_data, dict):
+                data = final_data
+                event = data.get('e', [])[0]
+                print(f"Extracted event: {event}")
+
+                # Estrai i dettagli dell'evento
+                sensor_id = event.get('sensor_id', '')
+                status_ = event.get('v', 'unknown')  # Recupera lo stato
+                location = event.get('location', 'unknown')
+                sensor_type = event.get('type', 'unknown')
+                booking_code = event.get('booking_code', '')
+                current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                for dev in self.devices_status:
+                    if dev["deviceInfo"]['ID'] == sensor_id:
+                        dev["deviceInfo"]['status'] = status_
+                        dev["deviceInfo"]['last_update'] = current_time
+                        dev["deviceInfo"]['booking_code'] = booking_code
+                        print(status_)
+                        with open(self.setting_status_path, 'w') as f:
+                            json.dump({"devices":self.devices_status}, f, indent=4)
+               
+            else:
+                print(f"Final data is not a dictionary: {type(final_data)}")
+            
+                
+                
+        
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
+        
+        except Exception as e:
+            print(f"Error processing message: {e}")
+        
 
 
 
@@ -220,7 +290,8 @@ if __name__ == '__main__':
 
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8083})
     settings = json.load(open("C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json"))
-    s = SensorREST(settings)
+    status = json.load(open("C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json"))
+    s = SensorREST(settings,status)
     cherrypy.tree.mount(s, '/', conf)
     cherrypy.engine.start()
     cherrypy.engine.block()

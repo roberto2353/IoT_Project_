@@ -148,11 +148,14 @@ class ReservationService:
                 }
             
                     message = {"bn": selected_device['name'], "e": [event]}
-                    mqtt_topic = f"{self.pubTopic}/{str(selected_device['ID'])}/status"
+                    mqtt_topic_db = f"{self.pubTopic}/{str(selected_device['ID'])}/status"
+                    mqtt_topic_dc = f"{self.pubTopic}/DevConn1/{str(selected_device['ID'])}/status"
+
 
         # Invio del messaggio MQTT all'adaptor
-                    self.client.myPublish(mqtt_topic, json.dumps(message))
-                    print(f"Messaggio pubblicato su topic {mqtt_topic}")
+                    self.client.myPublish(mqtt_topic_db, json.dumps(message))
+                    self.client.myPublish(mqtt_topic_dc, json.dumps(message))
+                    print(f"Messaggio pubblicato su topic")
 
 
 
