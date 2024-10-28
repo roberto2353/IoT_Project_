@@ -95,9 +95,11 @@ class Entrance:
     @cherrypy.tools.json_out() 
     def activate(self):
         try:
-
-            adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
-            response = requests.get(adaptor_url)
+            input_data = cherrypy.request.json
+            booking_code = input_data.get('booking_code')
+            url = input_data.get('url')
+            #adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
+            response = requests.get(url)
             response.raise_for_status()  
 
             # Get the list of devices from the adaptor
@@ -106,9 +108,6 @@ class Entrance:
 
             # Filter devices with status 'reserved'
             reserved_slots = [slot for slot in devices if slot.get('status') == 'reserved']
-
-            input_data = cherrypy.request.json
-            booking_code = input_data.get('booking_code')
             #self.pubTopic = input_data.get('topic')
 
             right_slot = [slot for slot in reserved_slots if slot.get('booking_code') == booking_code]

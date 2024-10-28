@@ -99,8 +99,11 @@ class Exit:
     def exit(self):
         try:
 
-            adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
-            response = requests.get(adaptor_url)
+            #adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
+            input_data = cherrypy.request.json 
+            url = input_data.get('url')
+            booking_code = input_data.get('booking_code')
+            response = requests.get(url)
             response.raise_for_status()  # Check if the response is correct
 
             # Get the list of devices from the adaptor
@@ -112,10 +115,6 @@ class Exit:
             occupied_slots = [slot for slot in devices if slot.get('status') == 'occupied']
 
             print("OS: ", occupied_slots)
-
-            input_data = cherrypy.request.json
-            booking_code = input_data.get('booking_code')
-
 
 
             right_slot = [slot for slot in occupied_slots if slot.get('booking_code') == booking_code]
