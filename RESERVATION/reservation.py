@@ -104,11 +104,14 @@ class ReservationService:
         try:
             data = cherrypy.request.json
             booking_code = data['booking_code']
+            url = data['url']
             print("passed: booking_code ", booking_code)
-
-            response = requests.get(self.entrance_algorithm_url)
+            print("passed: url ", url)
+            response = requests.get(url)
             if response.status_code == 200:
-                selected_device = response.json().get("parking")
+                print(response.json())
+                selected_device_ = response.json().get("parking")
+                selected_device = selected_device_.get("deviceInfo", {})
                 print(f"selected device for current booking: {selected_device['ID']}")
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if selected_device:

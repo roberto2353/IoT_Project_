@@ -14,13 +14,14 @@ import uuid
 from pathlib import Path
 from threading import Lock
 
+
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
 class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT(clientID="Simulation", broker=broker, port=port, notifier=None)
+        self.client = MyMQTT(clientID="Simulation_K", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
         self.port = port
         self.devices = devices
@@ -39,6 +40,7 @@ class Algorithm:
         """Start the MQTT client."""
         self.client.start()  # Start MQTT client connection
         print(f"Publisher connesso al broker {self.messageBroker}:{self.port}")
+       
 
     def stop(self):
         """Stop the MQTT client."""
@@ -219,8 +221,6 @@ class Algorithm:
      
     @cherrypy.expose
     @cherrypy.tools.json_out()
-     
-            
     def fee_and_duration_calc(self,device):
         booking_start_time_str = device.get('time', None)
         booking_start_time = datetime.datetime.strptime(booking_start_time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)

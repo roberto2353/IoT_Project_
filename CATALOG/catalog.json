@@ -10,16 +10,10 @@
             "PUT"
         ]
     },
+    "brokerPort": 1883,
+    "qos": 2,
+    "messageBroker": "mqtt.eclipseprojects.io",
     "devices": [],
-    "users": [
-        {
-            "ID": "532f01ad-5496-47e1-a2b9-a8577fdbee3a",
-            "name": "Kevin",
-            "surname": "Gumina",
-            "identity": "BA64784ER",
-            "credit_card": "5333097600056478"
-        }
-    ],
     "services": [],
     "parkings": [
         {

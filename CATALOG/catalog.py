@@ -172,6 +172,10 @@ class CatalogManager:
             self.next_parking_id += 1  # Increment the ID for the next parking
             self.write_catalog()
             print(f"Parking with ID {parking_info['ID']} added.")
+            return
+        else:
+            print(f"Parking with ID {parking_info['ID']} already exists")
+            return
 
     def update_parking(self, parking_id, parking_info):
         parking_id = int(parking_id)
