@@ -105,6 +105,7 @@ class ReservationService:
             data = cherrypy.request.json
             booking_code = data['booking_code']
             url = data['url']
+            dev_name = data['name']
             print("passed: booking_code ", booking_code)
             print("passed: url ", url)
             response = requests.get(url)
@@ -149,7 +150,7 @@ class ReservationService:
             
                     message = {"bn": selected_device['name'], "e": [event]}
                     mqtt_topic_db = f"{self.pubTopic}/{str(selected_device['ID'])}/status"
-                    mqtt_topic_dc = f"{self.pubTopic}/DevConn1/{str(selected_device['ID'])}/status"
+                    mqtt_topic_dc = f"{self.pubTopic}/{dev_name}/{str(selected_device['ID'])}/status"
 
 
         # Invio del messaggio MQTT all'adaptor

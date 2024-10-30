@@ -109,7 +109,8 @@ def on_callback_query(msg):
             if parking["ID"] == parking_id:
                 user_data[chat_id] = {
                     "parking_url": parking["url"],
-                    "parking_port": parking["port"]
+                    "parking_port": parking["port"],
+                    "name":parking["name"]
                 }
                 bot.sendMessage(chat_id, f"Parcheggio {parking['name']} selezionato!")
                 show_initial_menu(chat_id)  # Mostra il menu dopo la selezione
@@ -368,15 +369,16 @@ def book_slot(msg):
 
     parking_url = user_data[chat_id]['parking_url']
     parking_port = user_data[chat_id]['parking_port']
+    name_dev = user_data[chat_id]['name']
     print("parking_url ", parking_url)
     print("parking_port ", parking_port)
     url = f'http://{parking_url}:{parking_port}/get_best_parking'
     
     try:
         if chat_id not in logged_in_users or not logged_in_users[chat_id]:
-            data = {'booking_code': '', 'url':url}
+            data = {'booking_code': '', 'url':url, 'name':name_dev}
         else:
-            data = {'booking_code': user_data[chat_id]['book_code'], 'url':url}
+            data = {'booking_code': user_data[chat_id]['book_code'], 'url':url, 'name':name_dev}
 
         headers = {'Content-Type': 'application/json'}
         book_response = requests.post(book_url, headers=headers, json=data)
@@ -393,13 +395,14 @@ def book_slot(msg):
         else:
             bot.sendMessage(chat_id, f'Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {booking_code}. La prenotazione è valida per 2 minuti.')
         
-        Timer(120, expire_reservation, args=[r, booking_code]).start()
+        Timer(120, expire_reservation, args=[r, booking_code, msg]).start()
 
     except Exception as e:
         bot.sendMessage(chat_id, f'Errore durante la prenotazione: {e}')
 
 # Funzione per gestire la scadenza della prenotazione
-def expire_reservation(selected_device, booking_code):
+def expire_reservation(selected_device, booking_code, msg):
+    chat_id = msg['chat']['id']
     reservation_url = 'http://127.0.0.1:5001/reservation_exp'
     headers = {'Content-Type': 'application/json'}
 
@@ -408,7 +411,8 @@ def expire_reservation(selected_device, booking_code):
                         "name": selected_device.get('name', 'unknown'),
                         "type": selected_device.get('type', 'unknown'),
                         "location": selected_device.get('location', 'unknown'),
-                        "booking_code": booking_code
+                        "booking_code": booking_code,
+                        "name_dev":user_data[chat_id]['name']
     }
 
     req = requests.post(reservation_url, headers=headers, json=reservation_data)

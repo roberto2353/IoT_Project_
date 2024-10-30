@@ -97,7 +97,11 @@ class Entrance:
         try:
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
-            url = input_data.get('url')
+            url_ = input_data.get('url')
+            port= input_data.get('port')    
+            url= f"http://{url_}:{port}/devices"
+            name_dev = input_data.get('name')
+            print('url:::',url)
             #adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
             response = requests.get(url)
             response.raise_for_status()  
@@ -136,11 +140,15 @@ class Entrance:
                 "booking_code": booking_code
             }
             message = {"bn": sensor_name, "e": [event]}
-            mqtt_topic = f"{self.pubTopic}/{sensor_id}/status"
+            mqtt_topic_db = f"{self.pubTopic}/{sensor_id}/status"
+            mqtt_topic_dc = f"{self.pubTopic}/{name_dev}/{str(selected_device['ID'])}/status"
 
-            # Send the MQTT message to the adaptor
-            self._paho_mqtt.publish(mqtt_topic, json.dumps(message))  # Changed to 'publish'
-            print(f"Message published on topic {mqtt_topic}")
+
+            # Invio del messaggio MQTT all'adaptor
+            self._paho_mqtt.publish(mqtt_topic_db, json.dumps(message))
+            self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
+            print(f"Messaggio pubblicato sui topic")
+
 
             # Successful response to the frontend
             return {
@@ -171,7 +179,7 @@ if __name__ == '__main__':
     }
     settings = json.load(open(SETTINGS))
     en = Entrance(settings)
-    cherrypy.config.update({'server.socket_host': '192.168.1.58', 'server.socket_port': 8085})
+    cherrypy.config.update({'server.socket_host': 'localhost', 'server.socket_port': 8085})
     cherrypy.tree.mount(en, '/', conf)
     cherrypy.engine.start()
     #cherrypy.engine.block()

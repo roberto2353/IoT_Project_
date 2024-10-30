@@ -75,7 +75,7 @@ class SensorREST(threading.Thread):
             #self.client.start()  # Start MQTT client connection
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
             self.start_periodic_updates()
-            self._paho_mqtt.subscribe('ParkingLot/DevConn1/+/status', 2)
+            self._paho_mqtt.subscribe('ParkingLot/DevConnector1/+/status', 2)
             self._paho_mqtt.loop_start()
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
         except Exception as e:
@@ -172,7 +172,7 @@ class SensorREST(threading.Thread):
     def load_devs(self):
         """Load the catalog from a JSON file."""
         try:
-            with open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json', 'r') as file:
+            with open(DEVICES, 'r') as file:
                 return(json.load(file))
                 
         except Exception as e:
@@ -241,6 +241,7 @@ class SensorREST(threading.Thread):
 
             # Assicurati che 'final_data' sia un dizionario
             if isinstance(final_data, dict):
+                print("E SIAMO QUA'''")
                 data = final_data
                 event = data.get('e', [])[0]
                 print(f"Extracted event: {event}")
@@ -252,26 +253,33 @@ class SensorREST(threading.Thread):
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                for dev in self.devices_status:
+
+                # Carica i dati esistenti
+                with open(self.setting_status_path, 'r') as f:
+                    data = json.load(f)
+
+                # Trova e aggiorna solo il dispositivo specifico
+                for dev in data["devices"]:
                     if dev["deviceInfo"]['ID'] == sensor_id:
                         dev["deviceInfo"]['status'] = status_
                         dev["deviceInfo"]['last_update'] = current_time
                         dev["deviceInfo"]['booking_code'] = booking_code
                         print(status_)
-                        with open(self.setting_status_path, 'w') as f:
-                            json.dump({"devices":self.devices_status}, f, indent=4)
-               
+                        break  # Esce dal ciclo una volta trovato il dispositivo
+
+                # Riscrivi solo il dispositivo aggiornato nel file
+                with open(self.setting_status_path, 'w') as f:
+                    json.dump(data, f, indent=4)
+
             else:
                 print(f"Final data is not a dictionary: {type(final_data)}")
-            
-                
-                
-        
+
         except json.JSONDecodeError as e:
             print(f"JSON decode error: {e}")
         
         except Exception as e:
             print(f"Error processing message: {e}")
+
         
 
 
@@ -289,8 +297,8 @@ if __name__ == '__main__':
     }
 
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8083})
-    settings = json.load(open("C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json"))
-    status = json.load(open("C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json"))
+    settings = json.load(open(SETTINGS))
+    status = json.load(open(DEVICES))
     s = SensorREST(settings,status)
     cherrypy.tree.mount(s, '/', conf)
     cherrypy.engine.start()

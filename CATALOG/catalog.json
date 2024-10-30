@@ -14,7 +14,14 @@
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
     "devices": [],
-    "services": [],
+    "services": [
+        {
+            "ID": 1,
+            "name": "AdaptorService",
+            "last_update": 1730299492.5620892,
+            "port": "5001"
+        }
+    ],
     "parkings": [
         {
             "ID": 1,

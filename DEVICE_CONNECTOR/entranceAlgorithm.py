@@ -79,16 +79,24 @@ class Algorithm:
             print(f"number of occupied/booked parking for floor {floor}: {count}")
 
     def update_device_status(self, device):
-        #status already changed/updated in the received device
+        # status already changed/updated in the received device
         with self.lock:
-            for dev in self.devices:
+            # Leggi i dati esistenti dal file
+            with open(self.setting_status_path, 'r') as f:
+                data = json.load(f)
+            
+            # Cerca e aggiorna solo il dispositivo in considerazione
+            for dev in data["devices"]:
                 if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
-                    with open(self.setting_status_path, 'w') as f:
-                        json.dump({"devices":self.devices}, f, indent=4)
-                    break
+                    break  # Esce dopo aver trovato il dispositivo
+
+            # Riscrivi il file con i dati aggiornati
+            with open(self.setting_status_path, 'w') as f:
+                json.dump(data, f, indent=4)
+
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             event = {
@@ -291,7 +299,8 @@ class Algorithm:
         while True:
             
             print("inizio loop:\n")
-            # self.refreshDevices()
+            self.refreshDevices()
+            print("REFRESH OK\n")
             self.countFloors()
             self.countDev()
             self.devPerFloorList()
