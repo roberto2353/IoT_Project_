@@ -2,11 +2,14 @@ import requests
 import json
 
 # URL del server CherryPy
-url = 'http://127.0.0.1:8085/activate'
+url = 'http://127.0.0.1:8056/exit'
 
 # Dati da inviare nella richiesta
 data = {
-    "booking_code": "d5d30b"
+    "booking_code": "20ad25",
+    "url":"127.0.0.1",
+    "port":8083,
+    "name":'DevConnector1'
 
 }
 

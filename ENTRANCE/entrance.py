@@ -92,9 +92,11 @@ class Entrance:
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
-    @cherrypy.tools.json_out() 
+    @cherrypy.tools.json_out()
+    @cherrypy.tools.allow(methods=['POST']) 
     def activate(self):
         try:
+            print("RICHIESTA OKS")
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
             url_ = input_data.get('url')
@@ -107,14 +109,28 @@ class Entrance:
             response.raise_for_status()  
 
             # Get the list of devices from the adaptor
-            devices = response.json()
-            print("Devices from adaptor: ", devices)
+            slots = response.json()
+            #print("slots: ", slots)
+
+            # Assicurati che 'slots' sia un dizionario
+            if isinstance(slots, str):
+                slots = json.loads(slots)  # Decodifica la stringa JSON manualmente
+
+            # Controlla che 'slots' sia un dizionario e contenga la chiave 'devices'
+            if not isinstance(slots, dict) or "devices" not in slots:
+                raise ValueError("La risposta JSON non contiene un dizionario valido o manca la chiave 'devices'.")
+
+            devices = slots.get("devices", [])
+            print("devices: ", devices)
 
             # Filter devices with status 'reserved'
-            reserved_slots = [slot for slot in devices if slot.get('status') == 'reserved']
+            reserved_slots = [device["deviceInfo"] for device in devices if device.get("deviceInfo", {}).get("status") == 'reserved']
             #self.pubTopic = input_data.get('topic')
+            print("reserved_slots: ", reserved_slots)
+
 
             right_slot = [slot for slot in reserved_slots if slot.get('booking_code') == booking_code]
+            print("right_slot: ", right_slot)
 
             if not right_slot:
                 raise cherrypy.HTTPError(400, "Slot not reserved in the system")
@@ -179,7 +195,7 @@ if __name__ == '__main__':
     }
     settings = json.load(open(SETTINGS))
     en = Entrance(settings)
-    cherrypy.config.update({'server.socket_host': 'localhost', 'server.socket_port': 8085})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8085})
     cherrypy.tree.mount(en, '/', conf)
     cherrypy.engine.start()
     #cherrypy.engine.block()

@@ -172,7 +172,8 @@ class SensorREST(threading.Thread):
     def load_devs(self):
         """Load the catalog from a JSON file."""
         try:
-            with open(DEVICES, 'r') as file:
+            #with open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json') as file:
+            with open(DEVICES, 'r') as file:    
                 return(json.load(file))
                 
         except Exception as e:
@@ -297,6 +298,8 @@ if __name__ == '__main__':
     }
 
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8083})
+    #status = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json'))
+    #settings = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json'))
     settings = json.load(open(SETTINGS))
     status = json.load(open(DEVICES))
     s = SensorREST(settings,status)
