@@ -104,11 +104,15 @@ class ReservationService:
         try:
             data = cherrypy.request.json
             booking_code = data['booking_code']
+            url = data['url']
+            dev_name = data['name']
             print("passed: booking_code ", booking_code)
-
-            response = requests.get(self.entrance_algorithm_url)
+            print("passed: url ", url)
+            response = requests.get(url)
             if response.status_code == 200:
-                selected_device = response.json().get("parking")
+                print(response.json())
+                selected_device_ = response.json().get("parking")
+                selected_device = selected_device_.get("deviceInfo", {})
                 print(f"selected device for current booking: {selected_device['ID']}")
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if selected_device:
@@ -145,11 +149,14 @@ class ReservationService:
                 }
             
                     message = {"bn": selected_device['name'], "e": [event]}
-                    mqtt_topic = f"{self.pubTopic}/{str(selected_device['ID'])}/status"
+                    mqtt_topic_db = f"{self.pubTopic}/{str(selected_device['ID'])}/status"
+                    mqtt_topic_dc = f"{self.pubTopic}/{dev_name}/{str(selected_device['ID'])}/status"
+
 
         # Invio del messaggio MQTT all'adaptor
-                    self.client.myPublish(mqtt_topic, json.dumps(message))
-                    print(f"Messaggio pubblicato su topic {mqtt_topic}")
+                    self.client.myPublish(mqtt_topic_db, json.dumps(message))
+                    self.client.myPublish(mqtt_topic_dc, json.dumps(message))
+                    print(f"Messaggio pubblicato su topic")
 
 
 

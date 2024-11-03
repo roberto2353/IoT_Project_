@@ -93,32 +93,47 @@ class Exit:
         else:
             print(f"Failed to register service: {response.status_code} - {response.text}")
 
+
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out() 
     def exit(self):
         try:
 
-            adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
-            response = requests.get(adaptor_url)
-            response.raise_for_status()  # Check if the response is correct
+            #adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
+            input_data = cherrypy.request.json 
+            url_ = input_data.get('url')
+            port= input_data.get('port')
+            url= f"http://{url_}:{port}/devices"
+            booking_code = input_data.get('booking_code')
+            name_dev = input_data.get('name')
+            response = requests.get(url)
+            response.raise_for_status()  
 
             # Get the list of devices from the adaptor
-            devices = response.json()
+            slots = response.json()
+            #print("slots: ", slots)
 
-            print("AS: ", devices)
+            # Assicurati che 'slots' sia un dizionario
+            if isinstance(slots, str):
+                slots = json.loads(slots)  # Decodifica la stringa JSON manualmente
+
+            # Controlla che 'slots' sia un dizionario e contenga la chiave 'devices'
+            if not isinstance(slots, dict) or "devices" not in slots:
+                raise ValueError("La risposta JSON non contiene un dizionario valido o manca la chiave 'devices'.")
+
+            devices = slots.get("devices", [])
+            #print("devices: ", devices)
 
             # Filtra i dispositivi con stato 'free'
-            occupied_slots = [slot for slot in devices if slot.get('status') == 'occupied']
+            occupied_slots = [device["deviceInfo"] for device in devices if device.get("deviceInfo", {}).get("status") == 'occupied']
 
             print("OS: ", occupied_slots)
 
-            input_data = cherrypy.request.json
-            booking_code = input_data.get('booking_code')
-
-
 
             right_slot = [slot for slot in occupied_slots if slot.get('booking_code') == booking_code]
+
+            print("right_slot", right_slot)
 
             if not right_slot:
                 raise cherrypy.HTTPError(400, "Slot does not occupied in the system")
@@ -131,33 +146,8 @@ class Exit:
             location = selected_device.get('location', 'unknown')
             sensor_type = selected_device.get('type', 'unknown')
             sensor_name = selected_device.get('name', 'unknown')
-            booking_start_time_str = selected_device.get('time', None)
             
-            if booking_start_time_str is None:
-                raise cherrypy.HTTPError(500, 'Booking start time not found')
-            
-            booking_start_time = datetime.strptime(booking_start_time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)
-
-            
-            #booking_start_timestamp = int(booking_start_time.timestamp())
-
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            current_time_ok = datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.UTC)
-            
-            print("current_time: ", current_time_ok, "booking_start_time: " ,booking_start_time)
-            parking_duration_seconds = (current_time_ok - booking_start_time).total_seconds()
-            parking_duration_hours = parking_duration_seconds / 3600 # Converti i secondi in ore
-
-            print("parking_duration_hours :", parking_duration_hours)
-
-            if parking_duration_hours <= 10:
-                fee = parking_duration_hours * 2  # 2 euro per ora
-            else:
-                # Se supera le 10 ore, calcola 20 euro ogni 24 ore (giorno intero)
-                full_days = int(parking_duration_hours // 24)  # Numero di giorni interi
-                remaining_hours = parking_duration_hours % 24  # Ore rimanenti dopo giorni interi
-                fee = full_days * 20 + (remaining_hours * 2 if remaining_hours <= 10 else 20)
+            parking_duration_hours, fee = self.calculate_fee_and_duration(sensor_id)
 
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
@@ -171,11 +161,14 @@ class Exit:
                 "booking_code": booking_code
             }
             message = {"bn": sensor_name, "e": [event]}
-            mqtt_topic = f"{self.pubTopic}/{sensor_id}/status"
+            mqtt_topic_db = f"{self.pubTopic}/{sensor_id}/status"
+            mqtt_topic_dc = f"{self.pubTopic}/{name_dev}/{str(selected_device['ID'])}/status"
+
 
             # Invio del messaggio MQTT all'adaptor
-            self._paho_mqtt.publish(mqtt_topic, json.dumps(message))
-            print(f"Messaggio pubblicato su topic {mqtt_topic}")
+            self._paho_mqtt.publish(mqtt_topic_db, json.dumps(message))
+            self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
+            print(f"Messaggio pubblicato sui topic")
 
             # Risposta di successo al frontend
             return {
@@ -196,6 +189,79 @@ class Exit:
         except Exception as e:
             cherrypy.log.error(f"Error during activation process: {str(e)}")
             return {"error": str(e)}, 500
+        
+
+    def calculate_fee_and_duration(self, sensor_id):
+        """
+        Calculate the parking duration and fee based on the slot's sensor ID.
+        """
+        try:
+            # Fetch sensor data from the adaptor
+            url = f"http://127.0.0.1:5001/"
+            response = requests.get(url)
+            response.raise_for_status()
+            sensors = response.json()
+
+            print(sensors)
+
+            # Find the sensor with the matching ID
+            sensor_data = next((sensor for sensor in sensors if sensor.get("ID") == str(sensor_id)), None)
+    
+
+            if not sensor_data:
+                raise ValueError(f"No data found for sensor ID: {sensor_id}")
+
+            # Extract the booking start time and other relevant data
+            booking_start_time_str = sensor_data.get('time')
+            if not booking_start_time_str:
+                raise ValueError("Booking start time not found in sensor data")
+
+            booking_start_time = datetime.strptime(booking_start_time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)
+            current_time = datetime.now().replace(tzinfo=pytz.UTC)
+
+            # Calculate parking duration and fee
+            parking_duration_seconds = (current_time - booking_start_time).total_seconds()
+            parking_duration_hours = parking_duration_seconds / 3600  # Convert seconds to hours
+
+            if parking_duration_hours <= 10:
+                fee = parking_duration_hours * 2  # 2 euros per hour
+            else:
+                full_days = int(parking_duration_hours // 24)
+                remaining_hours = parking_duration_hours % 24
+                fee = full_days * 20 + (remaining_hours * 2 if remaining_hours <= 10 else 20)
+
+            return parking_duration_hours, fee
+
+        except requests.exceptions.RequestException as e:
+            raise cherrypy.HTTPError(500, f"Error communicating with adaptor: {str(e)}")
+        except Exception as e:
+            raise cherrypy.HTTPError(500, f"Error calculating fee and duration: {str(e)}")
+    
+
+    @cherrypy.expose
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
+    def calcola_fee(self):
+        """Endpoint to calculate fee and duration based on sensor ID."""
+        try:
+            input_data = cherrypy.request.json
+            sensor_id = input_data.get('sensor_id')
+            
+            if not sensor_id:
+                raise cherrypy.HTTPError(400, "Missing 'sensor_id' parameter")
+
+            # Calculate duration and fee using the sensor ID
+            parking_duration_hours, fee = self.calculate_fee_and_duration(sensor_id)
+            
+            return {
+                "parking_duration": str(parking_duration_hours),
+                "parking_fee": fee
+            }
+
+        except Exception as e:
+            cherrypy.log.error(f"Error in calcola_fee: {str(e)}")
+            return {"error": str(e)}, 500
+        
                 
                 
 
@@ -210,7 +276,7 @@ if __name__ == '__main__':
     }
     settings = json.load(open(SETTINGS))
     ex = Exit(settings)
-    cherrypy.config.update({'server.socket_host': '192.168.1.58', 'server.socket_port': 8056})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8056})
     cherrypy.tree.mount(ex, '/', conf)
     cherrypy.engine.start()
     #cherrypy.engine.block()

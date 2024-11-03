@@ -337,7 +337,25 @@ class dbAdaptor:
                 ]
                 # Scrivi i dati su InfluxDB
                 self.client.write_points(json_body, database=self.influx_db)
+                event = {
+                    "n": f"{str(device_info['ID'])}/status", 
+                    "u": "boolean", 
+                    #"t": str(datetime.datetime.now()), 
+                    "v": "free",  # Cambiamo lo stato in 'free'
+                    "sensor_id": device_info['ID'],
+                    "location": device_info['location'],
+                    "type": device_info['type'],
+                    "booking_code": device_info.get('booking_code', '')
+                    #"floor": self.extract_floor(selected_device['location'])
+                    }
+            
+                message = {"bn": device_info['name'], "e": [event]}
+                mqtt_topic_dc = f"{self.pubTopic}/{device_info['name_dev']}/{str(device_info['ID'])}/status"
+                self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
+                print(f"Messaggio pubblicato su topic per il DC scadenza prenotazione")
+
                 print(f"Device with ID {device_info['ID']} is again free on InfluxDB.")
+
                 return {"message": f"Device with ID {device_info['ID']} is again free."}, 201
             
             except Exception as e:
