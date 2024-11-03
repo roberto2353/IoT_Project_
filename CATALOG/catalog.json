@@ -22,11 +22,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.3782332"
-=======
             "last_update": "1730547381.6968842"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 2,
@@ -36,11 +32,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.3784971"
-=======
             "last_update": "1730547381.6968842"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 3,
@@ -50,11 +42,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.378569"
-=======
             "last_update": "1730547381.700505"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 4,
@@ -64,11 +52,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.378627"
-=======
             "last_update": "1730547381.700505"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 5,
@@ -78,11 +62,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.378679"
-=======
             "last_update": "1730547381.7052197"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 6,
@@ -92,11 +72,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.3787289"
-=======
             "last_update": "1730547381.7053058"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 7,
@@ -106,35 +82,17 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.378777"
-=======
             "last_update": "1730547381.7053058"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 8,
             "name": "sensor8",
-<<<<<<< HEAD
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.378826"
-        },
-        {
-            "ID": 9,
-=======
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
             "type": "photocell",
             "location": "P1-2",
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.378884"
-=======
             "last_update": "1730547381.708908"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 9,
@@ -144,11 +102,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.378934"
-=======
             "last_update": "1730547381.7101414"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 10,
@@ -158,11 +112,7 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.378983"
-=======
             "last_update": "1730547381.7101414"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 11,
@@ -172,130 +122,30 @@
             "commands": [
                 "status"
             ],
-<<<<<<< HEAD
-            "last_update": "1729959704.3790321"
-=======
             "last_update": "1730547381.7101414"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         },
         {
             "ID": 12,
             "name": "sensor12",
             "type": "photocell",
             "location": "P1-6",
-<<<<<<< HEAD
-            "name": "sensor13",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.379081"
-        },
-        {
-            "ID": 14,
-            "type": "photocell",
-            "location": "P1-7",
-            "name": "sensor14",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.379166"
-        },
-        {
-            "ID": 15,
-            "type": "photocell",
-            "location": "P2-1",
-            "name": "sensor15",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.3792179"
-        },
-        {
-            "ID": 16,
-            "type": "photocell",
-            "location": "P2-2",
-            "name": "sensor16",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.379266"
-        },
-        {
-            "ID": 17,
-            "type": "photocell",
-            "location": "P2-3",
-            "name": "sensor17",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.379313"
-        },
-        {
-            "ID": 18,
-            "type": "photocell",
-            "location": "P2-4",
-            "name": "sensor18",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.37936"
-        },
-        {
-            "ID": 19,
-            "type": "photocell",
-            "location": "P2-5",
-            "name": "sensor19",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.3794072"
-        },
-        {
-            "ID": 20,
-            "type": "photocell",
-            "location": "P2-6",
-            "name": "sensor20",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.3794591"
-        },
-        {
-            "ID": 21,
-            "type": "photocell",
-            "location": "P2-7",
-            "name": "sensor21",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1729959704.37952"
-=======
             "commands": [
                 "status"
             ],
             "last_update": "1730547381.7101414"
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         }
     ],
     "services": [
         {
             "ID": 1,
             "name": "AdaptorService",
-<<<<<<< HEAD
-            "last_update": 1729959692.664125,
-=======
             "last_update": 1730547365.857557,
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
             "port": "5001"
         },
         {
             "ID": 2,
             "name": "DevConnectorService",
-<<<<<<< HEAD
-            "last_update": 1729959684.7848132,
-=======
             "last_update": 1730547360.101392,
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
             "port": "8083"
         },
         {

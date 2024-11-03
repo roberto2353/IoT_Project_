@@ -17,13 +17,8 @@ class SensorREST(threading.Thread):
     exposed = True
     devices_counter=1
 
-<<<<<<< HEAD
-    def __init__(self, settings):
-        #super().__init__()
-=======
     def __init__(self, settings, status):
         super().__init__()  # Corretto inizializzazione del thread
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
         self.devices_status = status['devices']
@@ -59,10 +54,6 @@ class SensorREST(threading.Thread):
         self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_K")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread(target=self.pingCatalog, daemon=True).start()
-<<<<<<< HEAD
-        self.start()
-        #self.run()
-=======
 
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
@@ -76,7 +67,6 @@ class SensorREST(threading.Thread):
     #     """Ottiene il miglior parcheggio disponibile utilizzando l'algoritmo."""
     #     print("richiesta arrivata")
     #     return self.entranceAlgorithmService.algorithm.routeArrivals(get='True')
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
 
     
     def start(self):
@@ -182,12 +172,8 @@ class SensorREST(threading.Thread):
     def load_devs(self):
         """Load the catalog from a JSON file."""
         try:
-<<<<<<< HEAD
-            with open(SETTINGS, 'r') as file:
-=======
             #with open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json') as file:
             with open(DEVICES, 'r') as file:    
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
                 return(json.load(file))
                 
         except Exception as e:
@@ -307,10 +293,6 @@ if __name__ == '__main__':
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.sessions.on': True,
             'tools.response_headers.on': True,
-<<<<<<< HEAD
-            'tools.encode.on': True, 
-=======
->>>>>>> 58912435b20f8f5db07da31845dc4ec38181ca09
             'tools.response_headers.headers': [('Content-Type', 'application/json')]
         }
     }
