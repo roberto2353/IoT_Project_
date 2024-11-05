@@ -40,9 +40,9 @@
                 "name": "sensor4",
                 "type": "photocell",
                 "location": "P0-4",
-                "status": "free",
-                "booking_code": "",
-                "last_update": 1730822189.235679
+                "status": "occupied",
+                "booking_code": "3bfbcb",
+                "last_update": "2024-11-05 16:56:49"
             }
         },
         {
