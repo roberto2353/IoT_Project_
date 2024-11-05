@@ -456,8 +456,8 @@ class dbAdaptor:
     def GET(self, *uri, **params):
         if len(uri) == 0:
             try:
-                # Esegui una query per ottenere tutti i sensori dal database
-                query = query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code" FROM "status" GROUP BY "ID"'
+                # Esegui una query per ottenere ultimo stato di tutti i sensori dal database
+                query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code" FROM "status" GROUP BY "ID"'
                 result = self.client.query(query)
                 
                 # Converti il risultato in un formato JSON-friendly
@@ -483,11 +483,90 @@ class dbAdaptor:
             except Exception as e:
                 error_message = {"error": str(e)}
                 return json.dumps(error_message).encode('utf-8')
+
+        elif len(uri) >= 2 and uri[0] == "sensors" and uri[1] == "occupied":
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_occupied_sensors_by_time(start, end)
+        
+        elif uri[0] == "sensors" and len(uri) == 1:
+            # Endpoint to get all sensor data, with optional time range
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_all_sensors(start, end)
+
+        elif len(uri) == 2 and uri[0] == "sensors":
+            # Endpoint to get sensor data by ID
+            sensor_id = uri[1]
+            return self.get_sensor_by_id(sensor_id)
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")
 
     
+    def get_all_sensors(self, start=None, end=None):
+        try:
+            # Base query to get the latest status for all sensors
+            query = 'SELECT * FROM "status"'
 
+            # Modify query if start and end times are provided
+            if start and end:
+                query += f' WHERE time >= {start} AND time <= {end}'
+            elif start:
+                query += f' WHERE time >= {start}'
+            elif end:
+                query += f' WHERE time <= {end}'
+            
+            query += ' GROUP BY "ID"'
+
+            result = self.client.query(query)
+            #print(result)
+            sensors = []
+            sensors = list(result.get_points())
+            
+            
+
+            if not sensors:
+                return json.dumps({"message": "No sensors found in the database for the specified time range"}).encode('utf-8')
+            #print(sensors)
+            return json.dumps(sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
+
+    def get_occupied_sensors_by_time(self, start, end):
+        try:
+            query = f'SELECT * FROM "status" WHERE "status" = \'occupied\' AND time >= {start} AND time <= {end}'
+            result = self.client.query(query)
+            
+            occupied_sensors = []
+            occupied_sensors = list(result.get_points())
+            
+            if not occupied_sensors:
+                return json.dumps({"message": "No occupied sensors found in the specified time range"}).encode('utf-8')
+            
+            return json.dumps(occupied_sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
+    
+    def get_sensor_by_id(self, sensor_id):
+        try:
+            query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
+            result = self.client.query(query)
+            
+            sensors = []
+            sensors = list(result.get_points())
+            
+            if not sensors:
+                return json.dumps({"message": f"No data found for sensor ID {sensor_id}"}).encode('utf-8')
+            
+            return json.dumps(sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
 
 if __name__ == "__main__":
 

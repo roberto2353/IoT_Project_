@@ -7,8 +7,9 @@
                 "type": "photocell",
                 "location": "P0-1",
                 "status": "occupied",
-                "booking_code": "488d6a",
-                "last_update": "2024-11-02 12:30:45"
+                "booking_code": "25a99a",
+                "last_update": "2024-11-05 16:51:16",
+                "active": true
             }
         },
         {
@@ -18,8 +19,8 @@
                 "type": "photocell",
                 "location": "P0-2",
                 "status": "occupied",
-                "booking_code": "b39254",
-                "last_update": "2024-11-02 12:33:25"
+                "booking_code": "e96b75",
+                "last_update": "2024-11-05 16:52:09"
             }
         },
         {
@@ -40,8 +41,8 @@
                 "type": "photocell",
                 "location": "P0-4",
                 "status": "occupied",
-                "booking_code": "36c9fb",
-                "last_update": "2024-11-02 12:35:06"
+                "booking_code": "ee3be0",
+                "last_update": "2024-11-05 16:29:40"
             }
         },
         {
@@ -52,7 +53,7 @@
                 "location": "P0-5",
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1730544522.8826275
+                "last_update": 1730819759.994773
             }
         },
         {
@@ -73,8 +74,8 @@
                 "type": "photocell",
                 "location": "P1-1",
                 "status": "occupied",
-                "booking_code": "f008ac",
-                "last_update": "2024-11-02 12:34:46"
+                "booking_code": "f63d06",
+                "last_update": "2024-11-05 16:51:49"
             }
         },
         {
@@ -84,8 +85,8 @@
                 "type": "photocell",
                 "location": "P1-2",
                 "status": "occupied",
-                "booking_code": "6a5fcc",
-                "last_update": "2024-11-02 12:36:26"
+                "booking_code": "7d94af",
+                "last_update": "2024-11-05 16:31:00"
             }
         },
         {
@@ -94,9 +95,9 @@
                 "name": "sensor9",
                 "type": "photocell",
                 "location": "P1-3",
-                "status": "occupied",
-                "booking_code": "bc5d9d",
-                "last_update": "2024-11-02 12:36:06"
+                "status": "free",
+                "booking_code": "",
+                "last_update": 1730821869.128938
             }
         },
         {
@@ -107,7 +108,8 @@
                 "location": "P1-4",
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1730547105.8047862
+                "last_update": "2024-11-05 16:51:13",
+                "active": false
             }
         },
         {
@@ -118,7 +120,7 @@
                 "location": "P1-5",
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1730298729.9958174
+                "last_update": 1730820480.314164
             }
         },
         {

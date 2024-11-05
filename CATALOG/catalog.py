@@ -24,6 +24,7 @@ DEVICE_EXPIRATION_THRESHOLD = 120 #Every 2 minutes
 class CatalogManager:
     def __init__(self, catalog_file):
         self.catalog_file = catalog_file
+        self.reset_catalog()
         self.catalog=self.load_catalog()
 
         self.expiration_thread_services = threading.Thread(target=self.run_service_expiration_check, daemon=True)
@@ -48,6 +49,17 @@ class CatalogManager:
                 json.dump(self.catalog, file, indent=4)
         except Exception as e:
             print(f"Failed to save catalog: {e}")
+    
+    def reset_catalog(self):
+        with open(self.catalog_file, 'r') as f:
+            catalog = json.load(f)
+        catalog['devices'] = []
+        catalog['users'] = []
+        catalog['parkings'] = []
+        catalog['services'] = []
+        with open(self.catalog_file, 'w') as file:
+            json.dump(catalog, file, indent=4)
+        print(f"Catalog is starting...")
 
     # Catalog manipulation methods
     def add_device(self, device_info):

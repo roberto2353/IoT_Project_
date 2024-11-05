@@ -11,7 +11,7 @@ from entranceAlgorithm import Algorithm, EntranceAlgorithmService
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
-DEVICES = P / 'setting_status.json'
+DEVICES = P / 'settings_status.json'
 
 class SensorREST(threading.Thread):
     exposed = True
@@ -92,6 +92,7 @@ class SensorREST(threading.Thread):
         for device in self.devices:
             device_info = device['deviceInfo']
             device_info['ID'] = SensorREST.devices_counter
+            device_info['active'] = True
             SensorREST.devices_counter += 1
             if device_info['type'] == 'photocell':
                 device_info['commands'] = ['status']
@@ -212,7 +213,54 @@ class SensorREST(threading.Thread):
         except Exception as e:
             print(f"Error in GET: {e}")
             raise cherrypy.HTTPError(500, 'no JSON file available')
-        
+    
+    def POST(self, *uri, **params):
+        try:
+            if len(uri) == 0:
+                raise cherrypy.HTTPError(status=400, message='Invalid URL')
+            elif uri[0] == 'changeState':
+                raw_body = cherrypy.request.body.read()
+                data = json.loads(raw_body)
+                print(data)
+                # Extract sensor ID and new status from the JSON data
+                sensor_id = data.get('sensor_id')
+                new_status = data.get('state')
+
+                if sensor_id is None or new_status is None:
+                    raise cherrypy.HTTPError(status=400, message='Missing sensor_id or state in JSON payload')
+
+                # Load the existing device statuses from the file
+                with open(self.setting_status_path, 'r') as file:
+                    devices_data = json.load(file)
+
+                # Find and update the specific device's status
+                device_found = False
+                for device in devices_data['devices']:
+                    if device['deviceInfo']['ID'] == int(sensor_id):
+                        print("TROVATO!!!!!!!!")
+                        device['deviceInfo']['active'] = True if new_status == 'active' else False
+                        device['deviceInfo']['last_update'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        device_found = True
+                        
+                        break  # Exit loop after updating the device
+
+                if not device_found:
+                    raise cherrypy.HTTPError(status=404, message='Sensor ID not found')
+
+                # Write the updated devices data back to the file
+                with open(self.setting_status_path, 'w') as file:
+                    json.dump(devices_data, file, indent=4)
+
+                # Respond with success
+                return json.dumps({"message": f"Sensor {sensor_id} status updated to {new_status}"}).encode('utf-8')
+
+        except json.JSONDecodeError:
+            raise cherrypy.HTTPError(400, 'Invalid JSON format')
+    
+        except Exception as e:
+            print(f"Error in POST: {e}")
+            raise cherrypy.HTTPError(500, 'Internal Server Error')
+
     def recursive_json_decode(self, data):
         # Prova a decodificare fino a ottenere un dizionario o una lista
         while isinstance(data, str):
