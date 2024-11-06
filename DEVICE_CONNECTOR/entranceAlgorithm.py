@@ -271,11 +271,27 @@ class Algorithm:
             if device["deviceInfo"]['status'] == 'occupied':
                 if random.random() < departure_probability:
                     print("handling departures...")
+                    reservation_url = 'http://127.0.0.1:8056/calcola_fee'
+                    headers = {'Content-Type': 'application/json'}
+
+                    reservation_data = {
+                        "ID": device["deviceInfo"]["ID"]
+                        }
+
+                    req = requests.post(reservation_url, headers=headers, json=reservation_data)
+                    try:
+                        response_data = req.json()  # Prova a interpretare il contenuto come JSON
+                        print(f"Response JSON: {response_data}")
+                    except ValueError:
+                        # Se non è in formato JSON, stampa il contenuto come testo
+                        print(f"Response Text: {req.text}")
+                    except requests.exceptions.RequestException as e:
+                        print(f"Errore nella richiesta: {e}")
                     # fee,duration_min = self.fee_and_duration_calc(device)
                     device["deviceInfo"]['status'] = 'free'
                     device["deviceInfo"]['last_update'] = time.time()
-                    # device['fee'] = float(fee)
-                    # device['duration'] = duration_min
+                    device["deviceInfo"]['fee'] = float(response_data['parking_fee'])
+                    device["deviceInfo"]['duration'] = float(response_data['parking_duration'])
                     device["deviceInfo"]['booking_code'] = ""
                     self.update_device_status(device)  # Send update to adaptor
                     print(f'Device {device["deviceInfo"]["ID"]} at {device["deviceInfo"]["location"]} is now free. Car has departed.')
