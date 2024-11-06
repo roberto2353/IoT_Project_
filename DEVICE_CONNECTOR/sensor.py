@@ -17,15 +17,13 @@ class SensorREST(threading.Thread):
     exposed = True
     devices_counter=1
 
-    def __init__(self, settings, status):
-        super().__init__()  # Corretto inizializzazione del thread
-        self.catalogUrl = settings['catalogURL']
-        self.devices = settings['devices']
-        self.devices_status = status['devices']
-        self.setting_status_path = P / 'settings_status.json'
-        self.serviceInfo = settings['serviceInfo']
-        self.parkingInfo = settings['parkingInfo']
-        self.serviceID = self.serviceInfo['ID']
+    def __init__(self, pi):
+        
+        self.settings = json.load(open('settings.json'))
+        self.catalogURL = self.settings['catalogURL']
+        self.devices = self.settings['devices']
+        self.pingInterval = pi
+        #self.first_insertion = True
         self.deviceInfo = []  # Initialize as a list to store multiple device infos
         self.pingInterval = settings["pingInterval"]
         self.updateInterval = settings["updateInterval"]
@@ -58,6 +56,7 @@ class SensorREST(threading.Thread):
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
+        threading.Thread.__init__(self)
         self.start()
     
     # @cherrypy.expose
