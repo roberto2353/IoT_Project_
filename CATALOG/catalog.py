@@ -1,10 +1,16 @@
+from datetime import datetime
 from pathlib import Path
-import threading
-import uuid
-import threading
-import cherrypy
-import json
+import paho.mqtt.client as PahoMQTT
 import time
+import json
+from datetime import datetime
+from influxdb import InfluxDBClient
+import sys
+import cherrypy
+import requests  
+import threading
+P = Path(__file__).parent.absolute()
+SETTINGS = P / 'settings.json'
 
 SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
 DEVICE_EXPIRATION_THRESHOLD = 120 #Every 2 minutes
