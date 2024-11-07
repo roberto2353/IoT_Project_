@@ -17,11 +17,10 @@ class SensorREST(threading.Thread):
     exposed = True
     devices_counter=1
 
-    def __init__(self, settings, status):
+    def __init__(self, settings):
         super().__init__()  # Corretto inizializzazione del thread
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
-        self.devices_status = status['devices']
         self.setting_status_path = P / 'settings_status.json'
         self.serviceInfo = settings['serviceInfo']
         self.parkingInfo = settings['parkingInfo']
@@ -349,8 +348,8 @@ if __name__ == '__main__':
     #status = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json'))
     #settings = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json'))
     settings = json.load(open(SETTINGS))
-    status = json.load(open(DEVICES))
-    s = SensorREST(settings,status)
+    #status = json.load(open(DEVICES))
+    s = SensorREST(settings)
     cherrypy.tree.mount(s, '/', conf)
     cherrypy.engine.start()
     cherrypy.engine.block()

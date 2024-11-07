@@ -13,6 +13,7 @@ import threading
 import uuid
 from pathlib import Path
 from threading import Lock
+import os
 
 
 P = Path(__file__).parent.absolute()
@@ -20,6 +21,7 @@ SETTINGS = P / 'settings.json'
 
 class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
+        self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
         self.client = MyMQTT(clientID="Simulation_K", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
@@ -33,7 +35,7 @@ class Algorithm:
         self.tot_occupied = 0
         self.arrivals = []
         self.t_hold_time = 15
-        self.setting_status_path = P / 'settings_status.json'
+        
         self.lock = Lock()  # Create a lock
 
     def start(self):
@@ -47,7 +49,6 @@ class Algorithm:
         self.client.stop()  # Stop MQTT client connection
 
         self.t_hold_time = 15
-
 
     def countFloors(self):
         self.floors=[]
@@ -342,7 +343,10 @@ class EntranceAlgorithmService:
         port = conf["brokerPort"]
         catalog_url = conf["catalog_url"]
         self.setting_status_path = P / 'settings_status.json'
+        self.reset_file(self.setting_status_path)
         
+        # I think it's better to delete it and create it again each time, 
+        # in case the devices in settings change, otherwise now they are not updated
         # Check if setting_status.json exists, and create it if it doesn't
         self.ensure_setting_status(devices)
         try:
@@ -353,7 +357,15 @@ class EntranceAlgorithmService:
         except json.JSONDecodeError:
             print("Error: setting_status.json is corrupted or empty.")
         self.algorithm = Algorithm(devices,baseTopic, broker, port)  # Create Algorithm instance
-        
+    
+    def reset_file(self, filepath):
+        try:
+            os.remove(filepath)
+            print(f"File {filepath} deleted successfully.")
+        except FileNotFoundError:
+            print(f"File {filepath} not found.")
+        except Exception as e:
+            print(f"Error deleting file {filepath}: {e}")
         
     def ensure_setting_status(self, devices):
     
@@ -401,8 +413,3 @@ if __name__ == '__main__':
     cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
     cherrypy.quickstart(entranceAlgorithmService)
     
-    entranceAlgorithmService = EntranceAlgorithmService()
-    entranceAlgorithmService.algorithm.start()
-    entranceAlgorithmService.sim_loop_start()
-    cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
-    cherrypy.quickstart(entranceAlgorithmService)

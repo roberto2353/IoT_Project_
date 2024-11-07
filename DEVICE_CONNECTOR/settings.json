@@ -9,7 +9,7 @@
             "name": "sensor1",
             "type": "photocell",
             "location": "P0-1",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -18,7 +18,7 @@
             "name": "sensor2",
             "type": "photocell",
             "location": "P0-2",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -27,7 +27,7 @@
             "name": "sensor3",
             "type": "photocell",
             "location": "P0-3",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -36,7 +36,7 @@
             "name": "sensor4",
             "type": "photocell",
             "location": "P0-4",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -45,7 +45,7 @@
             "name": "sensor5",
             "type": "photocell",
             "location": "P0-5",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -54,7 +54,7 @@
             "name": "sensor6",
             "type": "photocell",
             "location": "P0-6",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -63,7 +63,7 @@
             "name": "sensor7",
             "type": "photocell",
             "location": "P1-1",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -72,7 +72,7 @@
             "name": "sensor8",
             "type": "photocell",
             "location": "P1-2",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -81,7 +81,7 @@
             "name": "sensor9",
             "type": "photocell",
             "location": "P1-3",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -90,7 +90,7 @@
             "name": "sensor10",
             "type": "photocell",
             "location": "P1-4",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -99,7 +99,7 @@
             "name": "sensor11",
             "type": "photocell",
             "location": "P1-5",
-            "active": ""
+            "active": true
             }
         },
         {
@@ -108,7 +108,7 @@
             "name": "sensor12",
             "type": "photocell",
             "location": "P1-6",
-            "active": ""
+            "active": true
             }
         }
     ],
