@@ -1,24 +1,12 @@
 from pathlib import Path
 import threading
 import uuid
+import threading
 import cherrypy
 import json
 import time
-import paho.mqtt.client as PahoMQTT
-import requests
-import os
-import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(current_dir, '..', 'DATA')
-if data_dir not in sys.path:
-    sys.path.insert(0, data_dir)
-
-P = Path(__file__).parent.absolute()
-SETTINGS = P / 'settings.json'
-from influxAdaptor import dbAdaptor
-
-SERVICE_EXPIRATION_THRESHOLD = 180 # Every 3 minutes old services are removed
+SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
 DEVICE_EXPIRATION_THRESHOLD = 120 #Every 2 minutes
 # Class to manage the catalog operations (loading, updating, saving)
 class CatalogManager:
@@ -31,7 +19,6 @@ class CatalogManager:
         self.expiration_thread_devices = threading.Thread(target=self.run_device_expiration_check, daemon=True)
         self.expiration_thread_services.start()
         self.expiration_thread_devices.start()
-        self.next_parking_id = 1
 
     def load_catalog(self):
         """Load the catalog from a JSON file."""
@@ -62,29 +49,17 @@ class CatalogManager:
         print(f"Catalog is starting...")
 
     # Catalog manipulation methods
-    def add_device(self, device_info):
-        if not any(d['ID'] == device_info['ID'] for d in self.catalog["devices"]):
-            self.catalog["devices"].append(device_info)
+    def add_device(self, devices_info):
+        if not any(d['ID'] == devices_info['ID'] for d in self.catalog["devices"]):
+            self.catalog["devices"].append(devices_info)
             self.write_catalog()
         else:
-            raise ValueError(f"Device with ID {device_info['ID']} already exists")
+            raise ValueError(f"Device with ID {devices_info['ID']} already exists")
 
-    def update_device(self, device_info):
-        device_id = int(device_info["n"])
+    def update_device(self, device_id, devices_info):
         for device in self.catalog["devices"]:
             if device['ID'] == device_id:
-                location = device["location"]
-                device["last_update"] = device_info["t"]
-                print("Device at location " +location+ " updated correctly!")
-                self.write_catalog()
-                return
-        raise ValueError(f"Device with ID {device_id} not found")
-    
-    def update_device_state(self, device_info):
-        device_id = device_info["ID"]
-        for device in self.catalog["devices"]:
-            if device['ID'] == device_id:
-                device.update(device_info)
+                device.update(devices_info)
                 self.write_catalog()
                 return
         raise ValueError(f"Device with ID {device_id} not found")
@@ -107,13 +82,11 @@ class CatalogManager:
         return f"Service with ID {service_info['ID']} added successfully."
 
 
-    def update_service(self, service_info):
+    def update_service(self, service_id, service_info):
     # Check if the service exists before updating
-        service_id = int(service_info["n"])
-        for service in self.catalog["services"]:
+        for i, service in enumerate(self.catalog["services"]):
             if service['ID'] == service_id:
-                service["last_update"] = time.time()
-                print("aggiornato")
+                self.catalog["services"][i] = service_info
                 self.write_catalog()
                 return f"Service with ID {service_id} updated successfully."
     
@@ -132,18 +105,8 @@ class CatalogManager:
 
 
     def add_user(self, user_info):
-        if not any(d['ID'] == user_info['ID'] for d in self.catalog["users"]):
-                    new_user = {
-                        "ID": user_info.get("ID", str(uuid.uuid4())),  # If no ID provided, generate one
-                        "name": user_info["name"],
-                        "surname": user_info['surname'],
-                        "identity": user_info['identity'],
-                        "credit_card": user_info['credit_card']
-                    }
-                    self.catalog["users"].append(new_user)
-                    self.write_catalog()
-                    return
-        raise ValueError(f"User already registered")
+        self.catalog["users"].append(user_info)
+        self.write_catalog()
 
     def update_user(self, user_id, user_info):
         for i, user in enumerate(self.catalog["users"]):
@@ -156,73 +119,34 @@ class CatalogManager:
         self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
         self.write_catalog()
 
-    # def add_parking(self, parking_info):
-    #     self.catalog["parkings"].append(parking_info)
-    #     self.write_catalog()
-
-    # def update_parking(self, parking_id, parking_info):
-    #     for i, parking in enumerate(self.catalog["parkings"]):
-    #         if parking['ID'] == parking_id:
-    #             self.catalog["parkings"][i] = parking_info
-    #             self.write_catalog()
-    #             return
-
-    # def remove_parking(self, parking_id):
-    #     self.catalog["parkings"] = [p for p in self.catalog["parkings"] if p['ID'] != parking_id]
-    #     self.write_catalog()
-
-    def parking_id_exists(self, parking_id):
-        # Check if a parking with the given ID already exists
-        return any(parking['ID'] == parking_id for parking in self.catalog["parkings"])
-
     def add_parking(self, parking_info):
-        # Ensure the ID is unique and auto-incremented
-        if not self.parking_id_exists(parking_info['ID']):
-            print("ok")
-            #parking_info['ID'] = self.next_parking_id
-            self.catalog["parkings"].append(parking_info)
-            self.next_parking_id += 1  # Increment the ID for the next parking
-            self.write_catalog()
-            print(f"Parking with ID {parking_info['ID']} added.")
-            return
-        else:
-            print(f"Parking with ID {parking_info['ID']} already exists")
-            return
+        self.catalog["parkings"].append(parking_info)
+        self.write_catalog()
 
     def update_parking(self, parking_id, parking_info):
-        parking_id = int(parking_id)
         for i, parking in enumerate(self.catalog["parkings"]):
             if parking['ID'] == parking_id:
                 self.catalog["parkings"][i] = parking_info
-                self.catalog["parkings"][i]['ID'] = parking_id  # Ensure the ID remains the same
                 self.write_catalog()
-                print(f"Parking with ID {parking_id} updated.")
                 return
-        print(f"Parking with ID {parking_id} not found.")
 
     def remove_parking(self, parking_id):
-        parking_id = int(parking_id)
-        if self.parking_id_exists(parking_id):
-            self.catalog["parkings"] = [p for p in self.catalog["parkings"] if p['ID'] != parking_id]
-            self.write_catalog()
-            print(f"Parking with ID {parking_id} removed.")
-            self.next_parking_id -= 1
-        else:
-            print(f"Parking with ID {parking_id} does not exist.")
+        self.catalog["parkings"] = [p for p in self.catalog["parkings"] if p['ID'] != parking_id]
+        self.write_catalog()
 
     def check_service_expiration(self):
-        """Remove services that have expired based on their 'last_update' timestamp."""
+        """Remove services that have expired based on their 'last_updated' timestamp."""
         current_time = time.time()
         updated_services = [
             s for s in self.catalog["services"]
-            if s.get("last_update") and (current_time - float(s["last_update"]) <= SERVICE_EXPIRATION_THRESHOLD)
+            if s.get("last_updated") and (current_time - float(s["last_updated"]) <= SERVICE_EXPIRATION_THRESHOLD)
         ]
         self.catalog["services"] = updated_services
         self.write_catalog()
     
 
     def check_device_expiration(self):
-        """Remove devices that have expired based on their 'last_update' timestamp."""
+        """Remove devices that have expired based on their 'last_updated' timestamp."""
         current_time = time.time()
         updated_devices = [
         d for d in self.catalog["devices"]
@@ -247,10 +171,8 @@ class CatalogManager:
 class CatalogREST(object):
     exposed = True
 
-    def __init__(self, catalog_manager, settings):
+    def __init__(self, catalog_manager):
         self.catalog_manager = catalog_manager
-        self.db_adaptor = settings["adaptor_url"]+"/register_device"
-        
 
     def GET(self, *uri, **params):
         """Handle GET requests."""
@@ -277,16 +199,9 @@ class CatalogREST(object):
 
             if uri[0] == 'devices':
                 self.catalog_manager.add_device(json_body)
-                try:
-                        response = requests.post(self.db_adaptor, json=json_body, timeout=5)
-                        if response.status_code == 200:
-                            output = f"Device with ID {json_body['ID']} has been added and registered on InfluxDB."
-                        else:
-                            raise cherrypy.HTTPError(status=500, message=f"Failed to register device on InfluxDB: error_msg")
-                except requests.exceptions.RequestException as e:
-                        raise cherrypy.HTTPError(status=500, message=f"Failed to communicate with dbAdaptor: {e}")
                 return f"Device with ID {json_body['ID']} added"
             elif uri[0] == 'services':
+                print("pippo")
                 self.catalog_manager.add_service(json_body)
                 return f"Service with ID {json_body['ID']} added"
             elif uri[0] == 'users':
@@ -308,7 +223,7 @@ class CatalogREST(object):
             json_body = json.loads(body.decode('utf-8'))
 
             if uri[0] == 'devices':
-                self.catalog_manager.update_device_state(json_body)
+                self.catalog_manager.update_device(json_body['ID'], json_body)
                 return f"Device with ID {json_body['ID']} updated"
             elif uri[0] == 'services':
                 self.catalog_manager.update_service(json_body['ID'], json_body)
@@ -390,14 +305,7 @@ class MySubscriber:
 
 if __name__ == '__main__':
     catalog_manager = CatalogManager("catalog.json")
-    # db_adaptor_url = 'http://localhost:5001/register_device'
-    # catalog_rest = CatalogREST(catalog_manager, db_adaptor_url)
-
-    # 
-    # mqtt_subscriber.start()
-    settings = json.load(open(SETTINGS))
-    catalog_rest = CatalogREST(catalog_manager, settings)
-    mqtt_subscriber = MySubscriber(catalog_manager, settings)
+    catalog_rest = CatalogREST(catalog_manager)
 
     conf = {
         '/': {

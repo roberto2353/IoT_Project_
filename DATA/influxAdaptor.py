@@ -21,6 +21,7 @@ class dbAdaptor:
         
         self.influx_stats = settings["statsDB"]
         self.influx_db = settings["mainDB"]
+        self.influx_prova = settings["provaDB"]
 
         self.pubTopic = settings["baseTopic"]
         self.catalog_address = settings['catalog_url']
@@ -53,6 +54,8 @@ class dbAdaptor:
             self.client.create_database(self.influx_db)
         if {'name': self.influx_stats} not in self.client.get_list_database():
             self.client.create_database(self.influx_stats)
+        if {'name': self.influx_prova} not in self.client.get_list_database():
+            self.client.create_database(self.influx_prova)
 
     def start(self):
         """Start the MQTT client."""
@@ -152,13 +155,15 @@ class dbAdaptor:
                             "time": str(current_time),  # Timestamp corrente
                             "fields": {
                                 "booking_code": booking_code,  # Codice di prenotazione
-                                "duration": duration,
-                                "fee": fee
+                                "duration": float(duration),
+                                "fee": float(fee)
                             }
                         }
                     ]
+        # TODO NON FUNZIONA
+        print(f"\n\n\nDOVREBBE STAMPARE LA FEE = {float(fee)} E LA DURATION = {float(duration)}. DATA TYPE: {type(fee)}\n\n\n")
                     # Scrivi l'aggiornamento su InfluxDB
-        self.client.write_points(json_body,time_precision='s', database=self.influx_stats)
+        self.client.write_points(json_body,time_precision='s', database=self.influx_prova) #influx_stats
         print(f"Updated sensor {sensor_id} in stats db.")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
@@ -414,7 +419,7 @@ class dbAdaptor:
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
-                result = self.client.query(query, database=self.influx_stats)
+                result = self.client.query(query, database=self.influx_prova) #influx_stats
 
                 
                 points = list(result.get_points())

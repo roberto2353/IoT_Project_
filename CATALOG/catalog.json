@@ -13,7 +13,9 @@
     "brokerPort": 1883,
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "devices": [
+    "devices": [],
+    "services": [],
+    "parkings": [
         {
             "ID": 1,
             "name": "sensor1",
