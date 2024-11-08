@@ -13,7 +13,7 @@ P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
 SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
-DEVICE_EXPIRATION_THRESHOLD = 120 #Every 2 minutes
+DEVICE_EXPIRATION_THRESHOLD =  120 #Every 2 minutes
 # Class to manage the catalog operations (loading, updating, saving)
 class CatalogManager:
     def __init__(self, catalog_file):
@@ -70,6 +70,19 @@ class CatalogManager:
                 return
         raise ValueError(f"Device with ID {device_id} not found")
 
+    def update_device_alive(self, aliveMessage):
+        found = False
+        device_id = 0
+        for device in self.catalog["devices"]:
+            if device["ID"] == int(aliveMessage["n"]):
+                device_id = int(aliveMessage["n"])
+                device["last_update"] = aliveMessage["t"]
+                found = True
+        if found:
+            self.write_catalog()
+            return f"Device {device_id} timestamp correctly updated"
+        raise ValueError(f"Device {device_id} not found")
+
     def remove_device(self, device_id):
         for i, device in enumerate(self.catalog["devices"]):
             if device['ID'] == device_id:
@@ -98,6 +111,18 @@ class CatalogManager:
     
         raise ValueError(f"Service with ID {service_id} not found.")
 
+    def update_service_alive(self, aliveMessage):
+        found = False
+        service_id = 0
+        for service in self.catalog["services"]:
+            if service["ID"] == int(aliveMessage["n"]):
+                service_id = int(aliveMessage["n"])
+                service["last_update"] = aliveMessage["t"]
+                found = True
+        if found:
+            self.write_catalog()
+            return f"Service {service_id} timestamp correctly updated"
+        raise ValueError(f"Service {service_id} not found")
 
     def remove_service(self, service_id):
     # Check if the service exists before removing
@@ -141,11 +166,11 @@ class CatalogManager:
         self.write_catalog()
 
     def check_service_expiration(self):
-        """Remove services that have expired based on their 'last_updated' timestamp."""
+        """Remove services that have expired based on their 'last_update' timestamp."""
         current_time = time.time()
         updated_services = [
             s for s in self.catalog["services"]
-            if s.get("last_updated") and (current_time - float(s["last_updated"]) <= SERVICE_EXPIRATION_THRESHOLD)
+            if s.get("last_update") and (current_time - float(s["last_update"]) <= SERVICE_EXPIRATION_THRESHOLD)
         ]
         self.catalog["services"] = updated_services
         self.write_catalog()
@@ -179,6 +204,7 @@ class CatalogREST(object):
 
     def __init__(self, catalog_manager):
         self.catalog_manager = catalog_manager
+        
 
     def GET(self, *uri, **params):
         """Handle GET requests."""
@@ -303,15 +329,20 @@ class MySubscriber:
             message = json.loads(msg.payload.decode("utf-8")) #{"bn": updateCatalog<>, "e": [{...}]}
             #self.catalog = CatalogREST(self.catalog_manager)
             if message['bn'] == "updateCatalogSlot":            
-                self.catalog_manager.update_device(message['e'][0])# {"n": ID, "t": time.time(), "v": "", "u": IP}
-                print("Device updated")
+                self.catalog_manager.update_device_alive(message['e'][0])# {"n": ID, "t": time.time(), "v": "", "u": IP}
+                id = message['e'][0]['n']
+                print(f"Device {id} updated")
             if message['bn'] == "updateCatalogService":            
-                self.catalog_manager.update_service(message['e'][0])# {"n": serviceName, "t": time.time(), "v": "", "u": IP}
-                print(f"Service {message['e'][0]['n']} updated")
+                self.catalog_manager.update_service_alive(message['e'][0])# {"n": serviceName, "t": time.time(), "v": "", "u": IP}
+                id = message['e'][0]['n']
+                print(f"Service {id} updated")
 
 if __name__ == '__main__':
+
+    settings = json.load(open(SETTINGS))
     catalog_manager = CatalogManager("catalog.json")
     catalog_rest = CatalogREST(catalog_manager)
+    mqtt_subscriber = MySubscriber(catalog_manager, settings)
 
     conf = {
         '/': {

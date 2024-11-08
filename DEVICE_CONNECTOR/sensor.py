@@ -95,6 +95,7 @@ class SensorREST(threading.Thread):
             SensorREST.devices_counter += 1
             if device_info['type'] == 'photocell':
                 device_info['commands'] = ['status']
+            device_info['last_update'] = time.time()
             self.deviceInfo.append(device_info)  # Store device info in a list
             requests.post(f'{self.catalogUrl}/devices', data=json.dumps(device_info))
         print("Devices registered correctly!")
@@ -150,22 +151,23 @@ class SensorREST(threading.Thread):
     def pingCatalog(self):
         while True:
             for device in self.deviceInfo:
-                location = device["location"]
-                message = {
-                "bn": "updateCatalogSlot",  
-                "e": [
+                if device['active'] == True:
+                    location = device["location"]
+                    message = {
+                    "bn": "updateCatalogSlot",  
+                    "e": [
                     {
                         "n": f"{device['ID']}",  
                         "u": "IP",  
                         "t": str(time.time()), 
                         "v": ""  
                     }
-                ]
-                }
-            # Publish the message to the broker
-                print(self.topic+location)
-                self._paho_mqtt.publish(self.topic+location, json.dumps(message))
-                print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
+                    ]
+                    }
+                    # Publish the message to the broker
+                    print(self.topic+location)
+                    self._paho_mqtt.publish(self.topic+location, json.dumps(message))
+                    print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
             print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
             time.sleep(self.pingInterval)
         
@@ -242,14 +244,29 @@ class SensorREST(threading.Thread):
                         device_found = True
                         
                         break  # Exit loop after updating the device
-
+                
                 if not device_found:
                     raise cherrypy.HTTPError(status=404, message='Sensor ID not found')
+
 
                 # Write the updated devices data back to the file
                 with open(self.setting_status_path, 'w') as file:
                     json.dump(devices_data, file, indent=4)
-
+                
+                device_found = False
+                # In the list of sensors too (for update of active devices)
+                for device in self.deviceInfo:
+                    if device['ID'] == int(sensor_id):
+                        
+                        device['active'] = True if new_status == 'active' else False
+                        #device['last_update'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        device_found = True
+                        
+                        break  # Exit loop after updating the device
+                
+                if not device_found:
+                    raise cherrypy.HTTPError(status=404, message='Sensor ID not found')
+                
                 # Respond with success
                 return json.dumps({"message": f"Sensor {sensor_id} status updated to {new_status}"}).encode('utf-8')
 
