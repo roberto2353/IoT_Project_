@@ -6,6 +6,8 @@ import requests
 def fetch_sensors():
     # Get sensor data by contacting the adaptor (you may need to adapt the URL)
     try:    
+        #user can choose the parking -> ask catalog, get names and then add a query in adaptor that specifies
+        #the parking (add in the database the parking name for each sensor)
         response = requests.get("http://localhost:5001/")
         response.raise_for_status()
         data = response.json()
@@ -64,33 +66,4 @@ for idx, row in sensors.iterrows():
 else:
     st.write("No sensor data available.")
 
-    # Display the sensors data as a table with an extra "Action" column
-# st.write("Current Sensors List:")
-   
-# # Iterate over each row to add an activate/deactivate button
-# for idx, row in sensors.iterrows():
-    
-#     col1, col2 = st.columns([4, 1])  # Adjust column sizes as needed
-    
-#     with col1:
-#         # Show the row data without 'state' column for cleaner output
-#         st.write(row.drop(['state']).to_frame().T)  # Display row data
-
-        
-#     with col2:
-#         # Determine current state and button label
-#         current_state = row['state']
-#         new_state = "active" if current_state == "inactive" else "inactive"
-#         button_label = "Activate" if new_state == "active" else "Deactivate"
-
-#         # Show the button for activating/deactivating
-#         if st.button(button_label, key=row['ID']):
-#             # Toggle the state
-#             success = toggle_sensor(row['ID'], new_state)
-#             if success:
-#                 # Update the state in the DataFrame
-#                 sensors.at[idx, 'state'] = new_state  # Change the state for the button label to reflect
-#                 st.success(f"Sensor {row['ID']} set to {new_state}")
-#             else:
-#                 st.error("Failed to update sensor state")
-
+ 

@@ -504,10 +504,69 @@ class dbAdaptor:
             # Endpoint to get sensor data by ID
             sensor_id = uri[1]
             return self.get_sensor_by_id(sensor_id)
+        
+        elif len(uri) == 1 and uri[0] == "fees":
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_fees(start, end)
+
+        elif len(uri) ==1 and uri[0] == "durations":
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_durations(start, end)
+        
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")
 
+    def get_fees(self, start=None, end=None):
+        try:
+            query = 'SELECT ID, time, fee FROM "status"'
+            if start and end:
+                query += f' WHERE time >= {start} AND time <= {end}'
+            elif start:
+                query += f' WHERE time >= {start}'
+            elif end:
+                query += f' WHERE time <= {end}'
+            
+            query += ' GROUP BY "ID"'
+            result = self.client.query(query, database = 'prova_stats')
+            #print(result)
+            sensors = []
+            sensors = list(result.get_points())
+            if not sensors:
+                return json.dumps({"message": "No data found in the database for the specified time range"}).encode('utf-8')
+            #print(sensors)
+            return json.dumps(sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
     
+    def get_durations(self, start=None, end=None):
+        try:
+            query = 'SELECT ID, time, "duration" FROM "status"'
+            if start and end:
+                query += f' WHERE time >= {start} AND time <= {end}'
+            elif start:
+                query += f' WHERE time >= {start}'
+            elif end:
+                query += f' WHERE time <= {end}'
+            
+            query += ' GROUP BY "ID"'
+            result = self.client.query(query, database = 'prova_stats')
+            #print(result)
+            sensors = []
+            sensors = list(result.get_points())
+            print(sensors)
+            if not sensors:
+                return json.dumps({"message": "No data found in the database for the specified time range"}).encode('utf-8')
+            #print(sensors)
+            return json.dumps(sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
+
     def get_all_sensors(self, start=None, end=None):
         try:
             # Base query to get the latest status for all sensors

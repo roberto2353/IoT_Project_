@@ -199,6 +199,7 @@ class SensorREST(threading.Thread):
             if len(uri) == 0:
                 raise cherrypy.HTTPError(status=400, message='Invalid URL')
             elif uri[0] == 'devices':
+                
                 devices_data = self.load_devs()  # Load the full data structure from JSON
                 devices = devices_data.get("devices")  # Extract the list of devices from the dictionary
 
@@ -206,6 +207,8 @@ class SensorREST(threading.Thread):
                     return json.dumps({"devices": devices})
                 else:
                     raise ValueError("Invalid data format for devices")
+                
+                
             elif uri[0] == 'get_best_parking':
                 print("Richiesta per 'get_best_parking' ricevuta")
                 return self.entranceAlgorithmService.algorithm.routeArrivals(get='True')
