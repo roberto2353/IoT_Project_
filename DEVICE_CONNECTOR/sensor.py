@@ -17,11 +17,10 @@ class SensorREST(threading.Thread):
     exposed = True
     devices_counter=1
 
-    def __init__(self, settings, status):
+    def __init__(self, settings):
         super().__init__()  # Corretto inizializzazione del thread
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
-        self.devices_status = status['devices']
         self.setting_status_path = P / 'settings_status.json'
         self.serviceInfo = settings['serviceInfo']
         self.parkingInfo = settings['parkingInfo']
@@ -42,8 +41,6 @@ class SensorREST(threading.Thread):
         self.entranceAlgorithmService.algorithm.start()
         self.entranceAlgorithmService.sim_loop_start()
 
-        threading.Thread(target=self.entranceAlgorithmService.algorithm.simulate_arrivals_loop, daemon=True).start()  # Avvia simulazione
-
         time.sleep(3)
         self.register_service()
         self.register_parking()
@@ -59,6 +56,7 @@ class SensorREST(threading.Thread):
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
         self.start()
+        threading.Thread(target=self.entranceAlgorithmService.algorithm.simulate_arrivals_loop, daemon=True).start()  # Avvia simulazione
     
     # @cherrypy.expose
     # @cherrypy.tools.json_out()
@@ -91,11 +89,12 @@ class SensorREST(threading.Thread):
     def register_devices(self):
         for device in self.devices:
             device_info = device['deviceInfo']
-            device_info['ID'] = SensorREST.devices_counter
+            device_info['ID'] = self.devices_counter
             device_info['active'] = True
-            SensorREST.devices_counter += 1
+            self.devices_counter += 1
             if device_info['type'] == 'photocell':
                 device_info['commands'] = ['status']
+            device_info['last_update'] = time.time()
             self.deviceInfo.append(device_info)  # Store device info in a list
             requests.post(f'{self.catalogUrl}/devices', data=json.dumps(device_info))
         print("Devices registered correctly!")
@@ -151,22 +150,23 @@ class SensorREST(threading.Thread):
     def pingCatalog(self):
         while True:
             for device in self.deviceInfo:
-                location = device["location"]
-                message = {
-                "bn": "updateCatalogSlot",  
-                "e": [
+                if device['active'] == True:
+                    location = device["location"]
+                    message = {
+                    "bn": "updateCatalogSlot",  
+                    "e": [
                     {
                         "n": f"{device['ID']}",  
                         "u": "IP",  
                         "t": str(time.time()), 
                         "v": ""  
                     }
-                ]
-                }
-            # Publish the message to the broker
-                print(self.topic+location)
-                self._paho_mqtt.publish(self.topic+location, json.dumps(message))
-                print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
+                    ]
+                    }
+                    # Publish the message to the broker
+                    print(self.topic+location)
+                    self._paho_mqtt.publish(self.topic+location, json.dumps(message))
+                    print(f"Published to topic {self.topic+location}: {json.dumps(message)}")
             print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
             time.sleep(self.pingInterval)
         
@@ -198,6 +198,7 @@ class SensorREST(threading.Thread):
             if len(uri) == 0:
                 raise cherrypy.HTTPError(status=400, message='Invalid URL')
             elif uri[0] == 'devices':
+                
                 devices_data = self.load_devs()  # Load the full data structure from JSON
                 devices = devices_data.get("devices")  # Extract the list of devices from the dictionary
 
@@ -205,6 +206,8 @@ class SensorREST(threading.Thread):
                     return json.dumps({"devices": devices})
                 else:
                     raise ValueError("Invalid data format for devices")
+                
+                
             elif uri[0] == 'get_best_parking':
                 print("Richiesta per 'get_best_parking' ricevuta")
                 return self.entranceAlgorithmService.algorithm.routeArrivals(get='True')
@@ -240,17 +243,33 @@ class SensorREST(threading.Thread):
                         print("TROVATO!!!!!!!!")
                         device['deviceInfo']['active'] = True if new_status == 'active' else False
                         device['deviceInfo']['last_update'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        #TODO: SEE if necessary to also insert free as status since may be reserved or occupied when becomes not active or maybe force a departure
                         device_found = True
                         
                         break  # Exit loop after updating the device
-
+                
                 if not device_found:
                     raise cherrypy.HTTPError(status=404, message='Sensor ID not found')
+
 
                 # Write the updated devices data back to the file
                 with open(self.setting_status_path, 'w') as file:
                     json.dump(devices_data, file, indent=4)
-
+                
+                device_found = False
+                # In the list of sensors too (for update of active devices)
+                for device in self.deviceInfo:
+                    if device['ID'] == int(sensor_id):
+                        
+                        device['active'] = True if new_status == 'active' else False
+                        #device['last_update'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        device_found = True
+                        
+                        break  # Exit loop after updating the device
+                
+                if not device_found:
+                    raise cherrypy.HTTPError(status=404, message='Sensor ID not found')
+                
                 # Respond with success
                 return json.dumps({"message": f"Sensor {sensor_id} status updated to {new_status}"}).encode('utf-8')
 
@@ -349,8 +368,8 @@ if __name__ == '__main__':
     #status = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json'))
     #settings = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json'))
     settings = json.load(open(SETTINGS))
-    status = json.load(open(DEVICES))
-    s = SensorREST(settings,status)
+    #status = json.load(open(DEVICES))
+    s = SensorREST(settings)
     cherrypy.tree.mount(s, '/', conf)
     cherrypy.engine.start()
     cherrypy.engine.block()

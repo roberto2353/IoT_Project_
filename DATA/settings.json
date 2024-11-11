@@ -13,5 +13,6 @@
     "baseTopic": "ParkingLot",
     "mainDB": "IoT_Smart_Parking",
     "statsDB": "IoT_SP_Stats",
+    "provaDB": "prova_stats",
     "influxPort": 8086
 }

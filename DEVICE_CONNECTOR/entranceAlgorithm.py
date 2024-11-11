@@ -13,6 +13,7 @@ import threading
 import uuid
 from pathlib import Path
 from threading import Lock
+import os
 
 
 P = Path(__file__).parent.absolute()
@@ -20,6 +21,7 @@ SETTINGS = P / 'settings.json'
 
 class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
+        self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
         self.client = MyMQTT(clientID="Simulation_K", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
@@ -33,7 +35,7 @@ class Algorithm:
         self.tot_occupied = 0
         self.arrivals = []
         self.t_hold_time = 15
-        self.setting_status_path = P / 'settings_status.json'
+        
         self.lock = Lock()  # Create a lock
 
     def start(self):
@@ -47,7 +49,6 @@ class Algorithm:
         self.client.stop()  # Stop MQTT client connection
 
         self.t_hold_time = 15
-
 
     def countFloors(self):
         self.floors=[]
@@ -86,19 +87,46 @@ class Algorithm:
                 data = json.load(f)
             
             # Cerca e aggiorna solo il dispositivo in considerazione
+            
+        if device["deviceInfo"]['status'] == 'free': #departure case
+            for dev in data["devices"]:
+                if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
+                    dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
+                    dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
+                    booking_code = device["deviceInfo"]['booking_code']
+                    dev["deviceInfo"]['booking_code'] = ""
+                    dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
+                
+            # Riscrivi il file con i dati aggiornati
+            with open(self.setting_status_path, 'w') as f:
+                json.dump(data, f, indent=4)
+            event = {
+                "n": f'{device["deviceInfo"]["ID"]}/status', 
+                "u": "boolean", 
+                "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
+                "v": device["deviceInfo"]['status'], 
+                "sensor_id": device["deviceInfo"]['ID'],
+                "location": device["deviceInfo"]['location'],
+                "type": device["deviceInfo"]['type'],
+                "booking_code": booking_code,
+                "fee": device["deviceInfo"]['fee'],
+                "duration":device["deviceInfo"]['duration'],
+                "floor": self.extract_floor(device["deviceInfo"]['location']),
+                "active": device["deviceInfo"]['active']
+                
+                }
+        else:                          #arrival case
             for dev in data["devices"]:
                 if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
+                    dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
                     break  # Esce dopo aver trovato il dispositivo
 
             # Riscrivi il file con i dati aggiornati
             with open(self.setting_status_path, 'w') as f:
                 json.dump(data, f, indent=4)
-
-            
-        if device["deviceInfo"]['status'] == 'free': #departure case
             event = {
                 "n": f'{device["deviceInfo"]["ID"]}/status', 
                 "u": "boolean", 
@@ -108,21 +136,8 @@ class Algorithm:
                 "location": device["deviceInfo"]['location'],
                 "type": device["deviceInfo"]['type'],
                 "booking_code": device["deviceInfo"]['booking_code'],
-                #"fee": device["deviceInfo"]['fee'],
-                #"duration":device["deviceInfo"]['duration'],
-                "floor": self.extract_floor(device["deviceInfo"]['location'])
-                }
-        else:                          #arrival case
-            event = {
-                "n": f'{device["deviceInfo"]["ID"]}/status', 
-                "u": "boolean", 
-                "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
-                "v": device["deviceInfo"]['status'], 
-                "sensor_id": device["deviceInfo"]['ID'],
-                "location": device["deviceInfo"]['location'],
-                "type": device["deviceInfo"]['type'],
-                "booking_code": device["deviceInfo"]['booking_code'],
-                "floor": self.extract_floor(device["deviceInfo"]['location'])
+                "floor": self.extract_floor(device["deviceInfo"]['location']),
+                "active": device["deviceInfo"]['active']
                 }
             
         message = {"bn": device["deviceInfo"]['name'], "e": [event]}
@@ -167,7 +182,7 @@ class Algorithm:
     def changeDevState(self, device, floor, time):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         booking_code_ = str(uuid.uuid4())
-        booking_code = booking_code_[:6]
+        booking_code = booking_code_[:7]
         if device["deviceInfo"]['status'] == 'free' and int(self.extract_floor(device["deviceInfo"]['location'])) == int(floor):
             device["deviceInfo"]['status'] = 'occupied'
             device["deviceInfo"]['last_update'] = str(current_time)
@@ -266,17 +281,31 @@ class Algorithm:
         current_time = time.time()
 
         for device in self.devices:
-            
             #print(f" last update:{device['last_update']}")
-            if device["deviceInfo"]['status'] == 'occupied':
+            if device["deviceInfo"]['status'] == 'occupied' or device["deviceInfo"]['status'] == "occupied" and len(device["deviceInfo"]["booking_code"])>6 and device["deviceInfo"]["active"] == 'True' or device["deviceInfo"]["active"] == True: 
                 if random.random() < departure_probability:
                     print("handling departures...")
+                    reservation_url = 'http://127.0.0.1:8056/calcola_fee'
+                    headers = {'Content-Type': 'application/json'}
+
+                    reservation_data = {
+                        "sensor_id": device["deviceInfo"]["ID"]
+                        }
+
+                    req = requests.post(reservation_url, headers=headers, json=reservation_data)
+                    try:
+                        response_data = req.json()  # Prova a interpretare il contenuto come JSON
+                        print(f"Response JSON: {response_data}")
+                    except ValueError:
+                        # Se non è in formato JSON, stampa il contenuto come testo
+                        print(f"Response Text: {req.text}")
+                    except requests.exceptions.RequestException as e:
+                        print(f"Errore nella richiesta: {e}")
                     # fee,duration_min = self.fee_and_duration_calc(device)
                     device["deviceInfo"]['status'] = 'free'
                     device["deviceInfo"]['last_update'] = time.time()
-                    # device['fee'] = float(fee)
-                    # device['duration'] = duration_min
-                    device["deviceInfo"]['booking_code'] = ""
+                    device["deviceInfo"]['fee'] = str(response_data['parking_fee'])
+                    device["deviceInfo"]['duration'] = str(response_data['parking_duration'])
                     self.update_device_status(device)  # Send update to adaptor
                     print(f'Device {device["deviceInfo"]["ID"]} at {device["deviceInfo"]["location"]} is now free. Car has departed.')
                     #TODO: ONLY REGISTERED USERS AND RANDOM USERS WILL DEPARTURE WITH THIS METHOD. 
@@ -300,7 +329,6 @@ class Algorithm:
             
             print("inizio loop:\n")
             self.refreshDevices()
-            print("REFRESH OK\n")
             self.countFloors()
             self.countDev()
             self.devPerFloorList()
@@ -325,7 +353,10 @@ class EntranceAlgorithmService:
         port = conf["brokerPort"]
         catalog_url = conf["catalog_url"]
         self.setting_status_path = P / 'settings_status.json'
+        self.reset_file(self.setting_status_path)
         
+        # I think it's better to delete it and create it again each time, 
+        # in case the devices in settings change, otherwise now they are not updated
         # Check if setting_status.json exists, and create it if it doesn't
         self.ensure_setting_status(devices)
         try:
@@ -336,7 +367,15 @@ class EntranceAlgorithmService:
         except json.JSONDecodeError:
             print("Error: setting_status.json is corrupted or empty.")
         self.algorithm = Algorithm(devices,baseTopic, broker, port)  # Create Algorithm instance
-        
+    
+    def reset_file(self, filepath):
+        try:
+            os.remove(filepath)
+            print(f"File {filepath} deleted successfully.")
+        except FileNotFoundError:
+            print(f"File {filepath} not found.")
+        except Exception as e:
+            print(f"Error deleting file {filepath}: {e}")
         
     def ensure_setting_status(self, devices):
     
@@ -384,8 +423,3 @@ if __name__ == '__main__':
     cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
     cherrypy.quickstart(entranceAlgorithmService)
     
-    entranceAlgorithmService = EntranceAlgorithmService()
-    entranceAlgorithmService.algorithm.start()
-    entranceAlgorithmService.sim_loop_start()
-    cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
-    cherrypy.quickstart(entranceAlgorithmService)

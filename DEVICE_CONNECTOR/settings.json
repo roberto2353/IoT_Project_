@@ -8,7 +8,8 @@
             "ID": 1,
             "name": "sensor1",
             "type": "photocell",
-            "location": "P0-1"
+            "location": "P0-1",
+            "active": true
             }
         },
         {
@@ -16,7 +17,8 @@
             "ID": 2,
             "name": "sensor2",
             "type": "photocell",
-            "location": "P0-2"
+            "location": "P0-2",
+            "active": true
             }
         },
         {
@@ -24,7 +26,8 @@
             "ID": 3,
             "name": "sensor3",
             "type": "photocell",
-            "location": "P0-3"
+            "location": "P0-3",
+            "active": true
             }
         },
         {
@@ -32,7 +35,8 @@
             "ID": 4,
             "name": "sensor4",
             "type": "photocell",
-            "location": "P0-4"
+            "location": "P0-4",
+            "active": true
             }
         },
         {
@@ -40,7 +44,8 @@
             "ID": 5,
             "name": "sensor5",
             "type": "photocell",
-            "location": "P0-5"
+            "location": "P0-5",
+            "active": true
             }
         },
         {
@@ -48,7 +53,8 @@
             "ID": 6,
             "name": "sensor6",
             "type": "photocell",
-            "location": "P0-6"
+            "location": "P0-6",
+            "active": true
             }
         },
         {
@@ -56,7 +62,8 @@
             "ID": 7,
             "name": "sensor7",
             "type": "photocell",
-            "location": "P1-1"
+            "location": "P1-1",
+            "active": true
             }
         },
         {
@@ -64,7 +71,8 @@
             "ID": 8,
             "name": "sensor8",
             "type": "photocell",
-            "location": "P1-2"
+            "location": "P1-2",
+            "active": true
             }
         },
         {
@@ -72,7 +80,8 @@
             "ID": 9,
             "name": "sensor9",
             "type": "photocell",
-            "location": "P1-3"
+            "location": "P1-3",
+            "active": true
             }
         },
         {
@@ -80,7 +89,8 @@
             "ID": 10,
             "name": "sensor10",
             "type": "photocell",
-            "location": "P1-4"
+            "location": "P1-4",
+            "active": true
             }
         },
         {
@@ -88,7 +98,8 @@
             "ID": 11,
             "name": "sensor11",
             "type": "photocell",
-            "location": "P1-5"
+            "location": "P1-5",
+            "active": true
             }
         },
         {
@@ -96,7 +107,8 @@
             "ID": 12,
             "name": "sensor12",
             "type": "photocell",
-            "location": "P1-6"
+            "location": "P1-6",
+            "active": true
             }
         }
     ],

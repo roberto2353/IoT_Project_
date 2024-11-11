@@ -21,6 +21,7 @@ class dbAdaptor:
         
         self.influx_stats = settings["statsDB"]
         self.influx_db = settings["mainDB"]
+        self.influx_prova = settings["provaDB"]
 
         self.pubTopic = settings["baseTopic"]
         self.catalog_address = settings['catalog_url']
@@ -53,6 +54,8 @@ class dbAdaptor:
             self.client.create_database(self.influx_db)
         if {'name': self.influx_stats} not in self.client.get_list_database():
             self.client.create_database(self.influx_stats)
+        if {'name': self.influx_prova} not in self.client.get_list_database():
+            self.client.create_database(self.influx_prova)
 
     def start(self):
         """Start the MQTT client."""
@@ -142,6 +145,7 @@ class dbAdaptor:
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
+        active = data.get('active')
         json_body = [
                         {
                             "measurement": 'status',
@@ -152,13 +156,16 @@ class dbAdaptor:
                             "time": str(current_time),  # Timestamp corrente
                             "fields": {
                                 "booking_code": booking_code,  # Codice di prenotazione
-                                "duration": duration,
-                                "fee": fee
+                                "duration": float(duration),
+                                "fee": float(fee),
+                                "active": active
                             }
                         }
                     ]
+        # TODO NON FUNZIONA
+        print(f"\n\n\nDOVREBBE STAMPARE LA FEE = {float(fee)} E LA DURATION = {float(duration)}. DATA TYPE: {type(fee)}\n\n\n")
                     # Scrivi l'aggiornamento su InfluxDB
-        self.client.write_points(json_body,time_precision='s', database=self.influx_stats)
+        self.client.write_points(json_body,time_precision='s', database=self.influx_prova) #influx_stats
         print(f"Updated sensor {sensor_id} in stats db.")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
@@ -189,6 +196,7 @@ class dbAdaptor:
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
+                active = event.get('active', '') 
 
                 # Controlla se un sensore con lo stesso ID esiste già nel database
                 check_query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
@@ -209,7 +217,8 @@ class dbAdaptor:
                             "fields": {
                                 "name": data['bn'],  # Nome del sensore o dispositivo
                                 "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
-                                "booking_code": booking_code  # Codice di prenotazione
+                                "booking_code": booking_code,  # Codice di prenotazione
+                                "active": active
                             }
                         }
                     ]
@@ -247,7 +256,7 @@ class dbAdaptor:
         if uri[0] == 'register_device':
             try:
                 device_info = cherrypy.request.json
-                required_fields = ['ID', 'name', 'type', 'location']
+                required_fields = ['ID', 'name', 'type', 'location', 'active']
                 
                 # Verifica che tutti i campi richiesti siano presenti
                 for field in required_fields:
@@ -276,7 +285,8 @@ class dbAdaptor:
                         "fields": {
                             "name": device_info['name'],
                             "status": "free",  # Lo stato è forzato a "free"
-                            "booking_code": device_info.get('booking_code', '')
+                            "booking_code": device_info.get('booking_code', ''),
+                            "active": device_info['active'] 
                         }
                     }
                 ]
@@ -331,7 +341,8 @@ class dbAdaptor:
                         "fields": {
                             "name": device_info['name'],
                             "status": "free",  # Lo stato è forzato a "free"
-                            "booking_code": device_info.get('booking_code', '')
+                            "booking_code": device_info.get('booking_code', ''),
+                            "active": device_info['active']
                         }
                     }
                 ]
@@ -345,7 +356,8 @@ class dbAdaptor:
                     "sensor_id": device_info['ID'],
                     "location": device_info['location'],
                     "type": device_info['type'],
-                    "booking_code": device_info.get('booking_code', '')
+                    "booking_code": device_info.get('booking_code', ''),
+                    "active": device_info.get('active', '')
                     #"floor": self.extract_floor(selected_device['location'])
                     }
             
@@ -365,7 +377,7 @@ class dbAdaptor:
         if uri[0] == 'update_device':
             try:
                 device_info = cherrypy.request.json
-                required_fields = ['ID', 'status', 'last_update', 'booking_code']
+                required_fields = ['ID', 'status', 'last_update', 'booking_code','active']
 
                 # Check for required fields
                 for field in required_fields:
@@ -376,6 +388,7 @@ class dbAdaptor:
                 status = device_info['status']
                 last_update = device_info['last_update']
                 booking_code = device_info['booking_code']
+                active = device_info['active']
 
                 # Update or insert the device status in InfluxDB
                 json_body = [
@@ -387,7 +400,8 @@ class dbAdaptor:
                         "time": last_update,  # Use the provided timestamp
                         "fields": {
                             "status": status,
-                            "booking_code": booking_code
+                            "booking_code": booking_code,
+                            "active": active
                         }
                     }
                 ]
@@ -414,7 +428,7 @@ class dbAdaptor:
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
-                result = self.client.query(query, database=self.influx_stats)
+                result = self.client.query(query, database=self.influx_prova) #influx_stats
 
                 
                 points = list(result.get_points())
@@ -456,8 +470,8 @@ class dbAdaptor:
     def GET(self, *uri, **params):
         if len(uri) == 0:
             try:
-                # Esegui una query per ottenere tutti i sensori dal database
-                query = query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code" FROM "status" GROUP BY "ID"'
+                # Esegui una query per ottenere ultimo stato di tutti i sensori dal database
+                query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code", "active" FROM "status" GROUP BY "ID"'
                 result = self.client.query(query)
                 
                 # Converti il risultato in un formato JSON-friendly
@@ -470,7 +484,8 @@ class dbAdaptor:
                         'name': sensor['name'],
                         'status': sensor['status'],
                         'time':sensor['time'],
-                        'booking_code': sensor.get('booking_code', '')
+                        'booking_code': sensor.get('booking_code', ''),
+                        'active': sensor.get('active', '')
                     })
                 
                 if not sensors:
@@ -483,11 +498,149 @@ class dbAdaptor:
             except Exception as e:
                 error_message = {"error": str(e)}
                 return json.dumps(error_message).encode('utf-8')
+
+        elif len(uri) >= 2 and uri[0] == "sensors" and uri[1] == "occupied":
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_occupied_sensors_by_time(start, end)
+        
+        elif uri[0] == "sensors" and len(uri) == 1:
+            # Endpoint to get all sensor data, with optional time range
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_all_sensors(start, end)
+
+        elif len(uri) == 2 and uri[0] == "sensors":
+            # Endpoint to get sensor data by ID
+            sensor_id = uri[1]
+            return self.get_sensor_by_id(sensor_id)
+        
+        elif len(uri) == 1 and uri[0] == "fees":
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_fees(start, end)
+
+        elif len(uri) ==1 and uri[0] == "durations":
+            start = params.get('start')
+            end = params.get('end')
+            return self.get_durations(start, end)
+        
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")
 
-    
+    def get_fees(self, start=None, end=None):
+        try:
+            query = 'SELECT ID, time, fee FROM "status"'
+            if start and end:
+                query += f' WHERE time >= {start} AND time <= {end}'
+            elif start:
+                query += f' WHERE time >= {start}'
+            elif end:
+                query += f' WHERE time <= {end}'
+            
+            query += ' GROUP BY "ID"'
+            result = self.client.query(query, database = 'prova_stats')
+            #print(result)
+            sensors = []
+            sensors = list(result.get_points())
+            if not sensors:
+                return json.dumps({"message": "No data found in the database for the specified time range"}).encode('utf-8')
+            #print(sensors)
+            return json.dumps(sensors).encode('utf-8')
 
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
+    
+    def get_durations(self, start=None, end=None):
+        try:
+            query = 'SELECT ID, time, "duration" FROM "status"'
+            if start and end:
+                query += f' WHERE time >= {start} AND time <= {end}'
+            elif start:
+                query += f' WHERE time >= {start}'
+            elif end:
+                query += f' WHERE time <= {end}'
+            
+            query += ' GROUP BY "ID"'
+            result = self.client.query(query, database = 'prova_stats')
+            #print(result)
+            sensors = []
+            sensors = list(result.get_points())
+            print(sensors)
+            if not sensors:
+                return json.dumps({"message": "No data found in the database for the specified time range"}).encode('utf-8')
+            #print(sensors)
+            return json.dumps(sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
+
+    def get_all_sensors(self, start=None, end=None):
+        try:
+            # Base query to get the latest status for all sensors
+            query = 'SELECT * FROM "status"'
+
+            # Modify query if start and end times are provided
+            if start and end:
+                query += f' WHERE time >= {start} AND time <= {end}'
+            elif start:
+                query += f' WHERE time >= {start}'
+            elif end:
+                query += f' WHERE time <= {end}'
+            
+            query += ' GROUP BY "ID"'
+
+            result = self.client.query(query)
+            #print(result)
+            sensors = []
+            sensors = list(result.get_points())
+            
+            
+
+            if not sensors:
+                return json.dumps({"message": "No sensors found in the database for the specified time range"}).encode('utf-8')
+            #print(sensors)
+            return json.dumps(sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
+
+    def get_occupied_sensors_by_time(self, start, end):
+        try:
+            query = f'SELECT * FROM "status" WHERE "status" = \'occupied\' AND time >= {start} AND time <= {end}'
+            result = self.client.query(query)
+            
+            occupied_sensors = []
+            occupied_sensors = list(result.get_points())
+            
+            if not occupied_sensors:
+                return json.dumps({"message": "No occupied sensors found in the specified time range"}).encode('utf-8')
+            
+            return json.dumps(occupied_sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
+    
+    def get_sensor_by_id(self, sensor_id):
+        try:
+            query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
+            result = self.client.query(query)
+            
+            sensors = []
+            sensors = list(result.get_points())
+            
+            if not sensors:
+                return json.dumps({"message": f"No data found for sensor ID {sensor_id}"}).encode('utf-8')
+            
+            return json.dumps(sensors).encode('utf-8')
+
+        except Exception as e:
+            error_message = {"error": str(e)}
+            return json.dumps(error_message).encode('utf-8')
 
 if __name__ == "__main__":
 
