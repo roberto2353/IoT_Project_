@@ -146,6 +146,7 @@ class Exit:
             location = selected_device.get('location', 'unknown')
             sensor_type = selected_device.get('type', 'unknown')
             sensor_name = selected_device.get('name', 'unknown')
+            active = selected_device.get('active','unknown')
             
             parking_duration_hours, fee = self.calculate_fee_and_duration(sensor_id)
 
@@ -158,7 +159,8 @@ class Exit:
                 "sensor_id": sensor_id,
                 "location": location,
                 "type": sensor_type,
-                "booking_code": booking_code
+                "booking_code": booking_code,
+                "active": active
             }
             message = {"bn": sensor_name, "e": [event]}
             mqtt_topic_db = f"{self.pubTopic}/{sensor_id}/status"
@@ -175,7 +177,8 @@ class Exit:
                 "message": f"Slot {location} has been successfully  became free.",
                 "slot_id": sensor_id,
                 "parking_duration": str(parking_duration_hours),
-                "parking_fee": fee
+                "parking_fee": fee,
+                "active": active
             }
 
         except requests.exceptions.RequestException as e:
@@ -256,6 +259,7 @@ class Exit:
             return {
                 "parking_duration": str(parking_duration_hours),
                 "parking_fee": fee
+                
             }
 
         except Exception as e:

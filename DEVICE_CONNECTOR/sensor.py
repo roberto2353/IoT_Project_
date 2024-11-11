@@ -41,8 +41,6 @@ class SensorREST(threading.Thread):
         self.entranceAlgorithmService.algorithm.start()
         self.entranceAlgorithmService.sim_loop_start()
 
-        threading.Thread(target=self.entranceAlgorithmService.algorithm.simulate_arrivals_loop, daemon=True).start()  # Avvia simulazione
-
         time.sleep(3)
         self.register_service()
         self.register_parking()
@@ -58,6 +56,7 @@ class SensorREST(threading.Thread):
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
         self.start()
+        threading.Thread(target=self.entranceAlgorithmService.algorithm.simulate_arrivals_loop, daemon=True).start()  # Avvia simulazione
     
     # @cherrypy.expose
     # @cherrypy.tools.json_out()
@@ -90,9 +89,9 @@ class SensorREST(threading.Thread):
     def register_devices(self):
         for device in self.devices:
             device_info = device['deviceInfo']
-            device_info['ID'] = SensorREST.devices_counter
+            device_info['ID'] = self.devices_counter
             device_info['active'] = True
-            SensorREST.devices_counter += 1
+            self.devices_counter += 1
             if device_info['type'] == 'photocell':
                 device_info['commands'] = ['status']
             device_info['last_update'] = time.time()
@@ -244,6 +243,7 @@ class SensorREST(threading.Thread):
                         print("TROVATO!!!!!!!!")
                         device['deviceInfo']['active'] = True if new_status == 'active' else False
                         device['deviceInfo']['last_update'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        #TODO: SEE if necessary to also insert free as status since may be reserved or occupied when becomes not active or maybe force a departure
                         device_found = True
                         
                         break  # Exit loop after updating the device

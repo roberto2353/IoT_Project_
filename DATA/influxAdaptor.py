@@ -145,6 +145,7 @@ class dbAdaptor:
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
+        active = data.get('active')
         json_body = [
                         {
                             "measurement": 'status',
@@ -156,7 +157,8 @@ class dbAdaptor:
                             "fields": {
                                 "booking_code": booking_code,  # Codice di prenotazione
                                 "duration": float(duration),
-                                "fee": float(fee)
+                                "fee": float(fee),
+                                "active": active
                             }
                         }
                     ]
@@ -194,6 +196,7 @@ class dbAdaptor:
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
+                active = event.get('active', '') 
 
                 # Controlla se un sensore con lo stesso ID esiste già nel database
                 check_query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
@@ -214,7 +217,8 @@ class dbAdaptor:
                             "fields": {
                                 "name": data['bn'],  # Nome del sensore o dispositivo
                                 "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
-                                "booking_code": booking_code  # Codice di prenotazione
+                                "booking_code": booking_code,  # Codice di prenotazione
+                                "active": active
                             }
                         }
                     ]
@@ -252,7 +256,7 @@ class dbAdaptor:
         if uri[0] == 'register_device':
             try:
                 device_info = cherrypy.request.json
-                required_fields = ['ID', 'name', 'type', 'location']
+                required_fields = ['ID', 'name', 'type', 'location', 'active']
                 
                 # Verifica che tutti i campi richiesti siano presenti
                 for field in required_fields:
@@ -281,7 +285,8 @@ class dbAdaptor:
                         "fields": {
                             "name": device_info['name'],
                             "status": "free",  # Lo stato è forzato a "free"
-                            "booking_code": device_info.get('booking_code', '')
+                            "booking_code": device_info.get('booking_code', ''),
+                            "active": device_info['active'] 
                         }
                     }
                 ]
@@ -336,7 +341,8 @@ class dbAdaptor:
                         "fields": {
                             "name": device_info['name'],
                             "status": "free",  # Lo stato è forzato a "free"
-                            "booking_code": device_info.get('booking_code', '')
+                            "booking_code": device_info.get('booking_code', ''),
+                            "active": device_info['active']
                         }
                     }
                 ]
@@ -350,7 +356,8 @@ class dbAdaptor:
                     "sensor_id": device_info['ID'],
                     "location": device_info['location'],
                     "type": device_info['type'],
-                    "booking_code": device_info.get('booking_code', '')
+                    "booking_code": device_info.get('booking_code', ''),
+                    "active": device_info.get('active', '')
                     #"floor": self.extract_floor(selected_device['location'])
                     }
             
@@ -370,7 +377,7 @@ class dbAdaptor:
         if uri[0] == 'update_device':
             try:
                 device_info = cherrypy.request.json
-                required_fields = ['ID', 'status', 'last_update', 'booking_code']
+                required_fields = ['ID', 'status', 'last_update', 'booking_code','active']
 
                 # Check for required fields
                 for field in required_fields:
@@ -381,6 +388,7 @@ class dbAdaptor:
                 status = device_info['status']
                 last_update = device_info['last_update']
                 booking_code = device_info['booking_code']
+                active = device_info['active']
 
                 # Update or insert the device status in InfluxDB
                 json_body = [
@@ -392,7 +400,8 @@ class dbAdaptor:
                         "time": last_update,  # Use the provided timestamp
                         "fields": {
                             "status": status,
-                            "booking_code": booking_code
+                            "booking_code": booking_code,
+                            "active": active
                         }
                     }
                 ]
@@ -462,7 +471,7 @@ class dbAdaptor:
         if len(uri) == 0:
             try:
                 # Esegui una query per ottenere ultimo stato di tutti i sensori dal database
-                query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code" FROM "status" GROUP BY "ID"'
+                query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code", "active" FROM "status" GROUP BY "ID"'
                 result = self.client.query(query)
                 
                 # Converti il risultato in un formato JSON-friendly
@@ -475,7 +484,8 @@ class dbAdaptor:
                         'name': sensor['name'],
                         'status': sensor['status'],
                         'time':sensor['time'],
-                        'booking_code': sensor.get('booking_code', '')
+                        'booking_code': sensor.get('booking_code', ''),
+                        'active': sensor.get('active', '')
                     })
                 
                 if not sensors:

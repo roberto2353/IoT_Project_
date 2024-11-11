@@ -12,6 +12,7 @@ import threading
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
+
 SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
 DEVICE_EXPIRATION_THRESHOLD =  120 #Every 2 minutes
 # Class to manage the catalog operations (loading, updating, saving)
@@ -202,8 +203,9 @@ class CatalogManager:
 class CatalogREST(object):
     exposed = True
 
-    def __init__(self, catalog_manager):
+    def __init__(self, catalog_manager,settings):
         self.catalog_manager = catalog_manager
+        self.settings = settings
         
 
     def GET(self, *uri, **params):
@@ -225,13 +227,27 @@ class CatalogREST(object):
 
     def POST(self, *uri, **params):
         """Handle POST requests to add new entries."""
+        
         try:
             body = cherrypy.request.body.read()
             json_body = json.loads(body.decode('utf-8'))
 
             if uri[0] == 'devices':
                 self.catalog_manager.add_device(json_body)
-                return f"Device with ID {json_body['ID']} added"
+    
+                try:
+                    headers = {'Content-Type': 'application/json'}
+                    response = requests.post(
+                        f"{settings['adaptor_url']}/register_device", 
+                        data=json.dumps(json_body), 
+                        headers=headers
+                                            )
+                    response.raise_for_status()  # Raise an exception for HTTP errors
+                    return f"Device with ID {json_body['ID']} added successfully"
+                except requests.exceptions.RequestException as e:
+                    print(f"Error adding device: {e}")
+                    return f"Failed to add device with ID {json_body['ID']}"
+
             elif uri[0] == 'services':
                 print("pippo")
                 self.catalog_manager.add_service(json_body)
@@ -305,6 +321,7 @@ class MySubscriber:
             self.pubTopic = "ParkingLot/alive/#"
             self.messageBroker = settings["messageBroker"]
             self.port = settings["brokerPort"]
+            self.adaptor_url = settings['adaptor_url']
             self.catalog_manager = catalog_manager
 
             self.start()
@@ -341,7 +358,7 @@ if __name__ == '__main__':
 
     settings = json.load(open(SETTINGS))
     catalog_manager = CatalogManager("catalog.json")
-    catalog_rest = CatalogREST(catalog_manager)
+    catalog_rest = CatalogREST(catalog_manager,settings)
     mqtt_subscriber = MySubscriber(catalog_manager, settings)
 
     conf = {
