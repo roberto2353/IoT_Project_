@@ -9,6 +9,7 @@ import sys
 import cherrypy
 import requests  
 import threading
+from threading import Lock
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
@@ -19,19 +20,28 @@ DEVICE_EXPIRATION_THRESHOLD =  120 #Every 2 minutes
 class CatalogManager:
     def __init__(self, catalog_file):
         self.catalog_file = catalog_file
-        self.reset_catalog()
-        self.catalog=self.load_catalog()
+        self.lock = Lock()
+        try:
+            self.reset_catalog()
+        except Exception as e:
+            print(f"Error in reset_catalog: {e}")
+        try:
+            self.catalog=self.load_catalog()
+        except Exception as e:
+            print(f"Failed to load catalog: {e}")
 
         self.expiration_thread_services = threading.Thread(target=self.run_service_expiration_check, daemon=True)
         self.expiration_thread_devices = threading.Thread(target=self.run_device_expiration_check, daemon=True)
         self.expiration_thread_services.start()
         self.expiration_thread_devices.start()
+        
 
     def load_catalog(self):
         """Load the catalog from a JSON file."""
         try:
-            with open(self.catalog_file, 'r') as file:
-                return(json.load(file))
+            with self.lock:
+                with open(self.catalog_file, 'r') as file:
+                    return(json.load(file))
                 
         except Exception as e:
             print(f"Failed to load catalog: {e}")
@@ -39,21 +49,28 @@ class CatalogManager:
     def write_catalog(self):
         """Save the catalog to the JSON file."""
         try:
-            with open(self.catalog_file, 'w') as file:
-                json.dump(self.catalog, file, indent=4)
+            with self.lock:
+                with open(self.catalog_file, 'w') as file:
+                    json.dump(self.catalog, file, indent=4)
         except Exception as e:
             print(f"Failed to save catalog: {e}")
     
     def reset_catalog(self):
-        with open(self.catalog_file, 'r') as f:
-            catalog = json.load(f)
-        catalog['devices'] = []
-        catalog['users'] = []
-        catalog['parkings'] = []
-        catalog['services'] = []
-        with open(self.catalog_file, 'w') as file:
-            json.dump(catalog, file, indent=4)
-        print(f"Catalog is starting...")
+        try:
+            with self.lock:
+                with open(self.catalog_file, 'r') as f:
+                    catalog = json.load(f)
+            catalog['devices'] = []
+            catalog['users'] = []
+            catalog['parkings'] = []
+            catalog['services'] = []
+        
+            with self.lock:
+                with open(self.catalog_file, 'w') as file:
+                    json.dump(catalog, file, indent=4)
+            print(f"Catalog is starting...")
+        except Exception as e:
+            print(f"Error in reset_catalog: {e}")
 
     # Catalog manipulation methods
     def add_device(self, devices_info):
