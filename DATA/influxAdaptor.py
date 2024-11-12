@@ -477,7 +477,7 @@ class dbAdaptor:
         if len(uri) == 0:
             try:
                 # Esegui una query per ottenere ultimo stato di tutti i sensori dal database
-                query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "time", "booking_code", "active" FROM "status" GROUP BY "ID"'
+                query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "parking_id", "time", "booking_code", "active" FROM "status" GROUP BY "ID"'
                 result = self.client.query(query)
                 
                 # Converti il risultato in un formato JSON-friendly
@@ -492,7 +492,7 @@ class dbAdaptor:
                         'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', ''),
                         'active': sensor.get('active', ''),
-                        "parking_id": sensor.get('parking', '')
+                        "parking_id": sensor.get('parking_id', '')
                     })
                 
                 if not sensors:
@@ -509,33 +509,38 @@ class dbAdaptor:
         elif len(uri) >= 2 and uri[0] == "sensors" and uri[1] == "occupied":
             start = params.get('start')
             end = params.get('end')
-            return self.get_occupied_sensors_by_time(start, end)
+            parking_id = params.get('parking_id')
+            return self.get_occupied_sensors_by_time(start, end, parking_id)
         
         elif uri[0] == "sensors" and len(uri) == 1:
             # Endpoint to get all sensor data, with optional time range
             start = params.get('start')
             end = params.get('end')
-            return self.get_all_sensors(start, end)
+            parking_id = params.get('parking_id')
+            return self.get_all_sensors(start, end, parking_id)
 
         elif len(uri) == 2 and uri[0] == "sensors":
             # Endpoint to get sensor data by ID
             sensor_id = uri[1]
-            return self.get_sensor_by_id(sensor_id)
+            parking_id = params.get('parking_id')
+            return self.get_sensor_by_id(sensor_id, parking_id)
         
         elif len(uri) == 1 and uri[0] == "fees":
             start = params.get('start')
             end = params.get('end')
-            return self.get_fees(start, end)
+            parking_id = params.get('parking_id')
+            return self.get_fees(start, end, parking_id)
 
         elif len(uri) ==1 and uri[0] == "durations":
             start = params.get('start')
             end = params.get('end')
-            return self.get_durations(start, end)
+            parking_id = params.get('parking_id')
+            return self.get_durations(start, end, parking_id)
         
         else:
             raise cherrypy.HTTPError(404, "Endpoint not found")
 
-    def get_fees(self, start=None, end=None):
+    def get_fees(self, start=None, end=None, parking_id=None):
         try:
             query = 'SELECT ID, time, fee FROM "status"'
             if start and end:
@@ -544,6 +549,8 @@ class dbAdaptor:
                 query += f' WHERE time >= {start}'
             elif end:
                 query += f' WHERE time <= {end}'
+            if parking_id:
+                query += f' AND parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
             result = self.client.query(query, database = 'prova_stats')
@@ -559,7 +566,7 @@ class dbAdaptor:
             error_message = {"error": str(e)}
             return json.dumps(error_message).encode('utf-8')
     
-    def get_durations(self, start=None, end=None):
+    def get_durations(self, start=None, end=None, parking_id=None):
         try:
             query = 'SELECT ID, time, "duration" FROM "status"'
             if start and end:
@@ -568,6 +575,8 @@ class dbAdaptor:
                 query += f' WHERE time >= {start}'
             elif end:
                 query += f' WHERE time <= {end}'
+            if parking_id:
+                query += f' AND parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
             result = self.client.query(query, database = 'prova_stats')
@@ -584,7 +593,7 @@ class dbAdaptor:
             error_message = {"error": str(e)}
             return json.dumps(error_message).encode('utf-8')
 
-    def get_all_sensors(self, start=None, end=None):
+    def get_all_sensors(self, start=None, end=None, parking_id=None):
         try:
             # Base query to get the latest status for all sensors
             query = 'SELECT * FROM "status"'
@@ -596,6 +605,8 @@ class dbAdaptor:
                 query += f' WHERE time >= {start}'
             elif end:
                 query += f' WHERE time <= {end}'
+            if parking_id:
+                query += f' AND parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
 
@@ -615,9 +626,11 @@ class dbAdaptor:
             error_message = {"error": str(e)}
             return json.dumps(error_message).encode('utf-8')
 
-    def get_occupied_sensors_by_time(self, start, end):
+    def get_occupied_sensors_by_time(self, start, end, parking_id=None):
         try:
             query = f'SELECT * FROM "status" WHERE "status" = \'occupied\' AND time >= {start} AND time <= {end}'
+            if parking_id:
+                query += f' AND parking_id = \'{parking_id}\''
             result = self.client.query(query)
             
             occupied_sensors = []
@@ -632,9 +645,12 @@ class dbAdaptor:
             error_message = {"error": str(e)}
             return json.dumps(error_message).encode('utf-8')
     
-    def get_sensor_by_id(self, sensor_id):
+    def get_sensor_by_id(self, sensor_id, parking_id=None):
         try:
             query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
+            if parking_id:
+                query += f' AND parking_id = \'{parking_id}\''
+                
             result = self.client.query(query)
             
             sensors = []
