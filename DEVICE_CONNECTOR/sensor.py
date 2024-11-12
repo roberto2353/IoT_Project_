@@ -91,6 +91,7 @@ class SensorREST(threading.Thread):
             device_info = device['deviceInfo']
             device_info['ID'] = self.devices_counter
             device_info['active'] = True
+            device_info['parking'] = 'DevConnector1'
             self.devices_counter += 1
             if device_info['type'] == 'photocell':
                 device_info['commands'] = ['status']

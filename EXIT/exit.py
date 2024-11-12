@@ -160,7 +160,8 @@ class Exit:
                 "location": location,
                 "type": sensor_type,
                 "booking_code": booking_code,
-                "active": active
+                "active": active,
+                "parking":name_dev
             }
             message = {"bn": sensor_name, "e": [event]}
             mqtt_topic_db = f"{self.pubTopic}/{sensor_id}/status"

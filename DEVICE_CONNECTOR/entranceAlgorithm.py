@@ -112,8 +112,8 @@ class Algorithm:
                 "fee": device["deviceInfo"]['fee'],
                 "duration":device["deviceInfo"]['duration'],
                 "floor": self.extract_floor(device["deviceInfo"]['location']),
-                "active": device["deviceInfo"]['active']
-                
+                "active": device["deviceInfo"]['active'],
+                "parking":'DevConnector1'
                 }
         else:                          #arrival case
             for dev in data["devices"]:
@@ -137,7 +137,8 @@ class Algorithm:
                 "type": device["deviceInfo"]['type'],
                 "booking_code": device["deviceInfo"]['booking_code'],
                 "floor": self.extract_floor(device["deviceInfo"]['location']),
-                "active": device["deviceInfo"]['active']
+                "active": device["deviceInfo"]['active'],
+                "parking":'DevConnector1'
                 }
             
         message = {"bn": device["deviceInfo"]['name'], "e": [event]}

@@ -144,8 +144,9 @@ class ReservationService:
                 "sensor_id": selected_device['ID'],
                 "location": selected_device['location'],
                 "type": selected_device['type'],
-                "booking_code": selected_device['booking_code']
+                "booking_code": selected_device['booking_code'],
                 #"floor": self.extract_floor(selected_device['location'])
+                "parking":dev_name
                 }
             
                     message = {"bn": selected_device['name'], "e": [event]}

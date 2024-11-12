@@ -141,6 +141,7 @@ class dbAdaptor:
     def update_stats_db(self,data):
         fee = data.get('fee', 'unknown')
         floor = data.get('floor')
+        parking = data.get('parking')
         booking_code = data.get('booking_code', 'unknown')
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -151,6 +152,7 @@ class dbAdaptor:
                             "measurement": 'status',
                             "tags": {
                                 "ID": sensor_id,
+                                "parking_id": parking,
                                 "floor": floor
                             },
                             "time": str(current_time),  # Timestamp corrente
@@ -197,6 +199,7 @@ class dbAdaptor:
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
                 active = event.get('active', '') 
+                parking = event.get('parking', 'unknown')
 
                 # Controlla se un sensore con lo stesso ID esiste già nel database
                 check_query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
@@ -210,6 +213,7 @@ class dbAdaptor:
                             "measurement": 'status',
                             "tags": {
                                 "ID": sensor_id,
+                                "parking_id": parking,
                                 "type": sensor_type,
                                 "location": location
                             },
@@ -256,7 +260,7 @@ class dbAdaptor:
         if uri[0] == 'register_device':
             try:
                 device_info = cherrypy.request.json
-                required_fields = ['ID', 'name', 'type', 'location', 'active']
+                required_fields = ['ID', 'name', 'type', 'location', 'active', 'parking']
                 
                 # Verifica che tutti i campi richiesti siano presenti
                 for field in required_fields:
@@ -278,6 +282,7 @@ class dbAdaptor:
                         "measurement": 'status',
                         "tags": {
                             "ID": str(device_info['ID']),
+                            "parking_id": device_info['parking'],
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
@@ -302,7 +307,7 @@ class dbAdaptor:
         if uri[0] == 'reservation_exp':
             try:
                 device_info = cherrypy.request.json
-                required_fields = ['ID', 'name', 'type', 'location', 'booking_code']
+                required_fields = ['ID', 'name', 'type', 'location', 'booking_code', 'parking']
                 
                 # Verifica che tutti i campi richiesti siano presenti
                 for field in required_fields:
@@ -334,6 +339,7 @@ class dbAdaptor:
                         "measurement": 'status',
                         "tags": {
                             "ID": str(device_info['ID']),
+                            "parking_id": device_info['parking'],
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
@@ -485,7 +491,8 @@ class dbAdaptor:
                         'status': sensor['status'],
                         'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', ''),
-                        'active': sensor.get('active', '')
+                        'active': sensor.get('active', ''),
+                        "parking_id": sensor.get('parking', '')
                     })
                 
                 if not sensors:
