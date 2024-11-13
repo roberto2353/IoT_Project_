@@ -288,7 +288,7 @@ class Algorithm:
             if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) > 6):
                 if random.random() < departure_probability:
                     print("handling departures...")
-                    print(f"found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}")
+                    print(f'found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}')
                     reservation_url = 'http://127.0.0.1:8056/calcola_fee'
                     headers = {'Content-Type': 'application/json'}
 
