@@ -8,16 +8,17 @@ import time
 import random
 import string
 from threading import Timer
+from threading import Lock
 from pathlib import Path
 import uuid
 
 # Percorso al file delle impostazioni
 P = Path(__file__).parent.absolute()
 SETTINGS_PATH = P / 'settings.json'
-
+with Lock():    
 # Carica le impostazioni
-with open(SETTINGS_PATH, 'r') as file:
-    settings = json.load(file)
+    with open(SETTINGS_PATH, 'r') as file:
+        settings = json.load(file)
 
 # Token del bot Telegram
 TOKEN = '7501377611:AAGhXNYizRlkdl3V_BGtiIK-Slb76WcxzZ8'

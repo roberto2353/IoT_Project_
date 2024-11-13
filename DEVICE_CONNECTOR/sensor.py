@@ -7,6 +7,7 @@ import random
 import time
 import threading
 import paho.mqtt.client as PahoMQTT
+from threading import Lock
 from entranceAlgorithm import Algorithm, EntranceAlgorithmService
 
 P = Path(__file__).parent.absolute()
@@ -28,6 +29,7 @@ class SensorREST(threading.Thread):
         self.deviceInfo = []  # Initialize as a list to store multiple device infos
         self.pingInterval = settings["pingInterval"]
         self.updateInterval = settings["updateInterval"]
+        self.lock = Lock()  # Create a lock
         self.register_devices()
         
         # Inizializzazione dell'algoritmo di parcheggio
@@ -39,13 +41,14 @@ class SensorREST(threading.Thread):
 
         self.entranceAlgorithmService = EntranceAlgorithmService()
         self.entranceAlgorithmService.algorithm.start()
+        time.sleep(20)
         self.entranceAlgorithmService.sim_loop_start()
 
         time.sleep(3)
         self.register_service()
         self.register_parking()
         
-        self.topic = "ParkingLot/alive/"
+        self.topic = "ParkingLotFabio/alive/"
         self.messageBroker = broker
         self.port = port
         self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_K")
@@ -54,9 +57,8 @@ class SensorREST(threading.Thread):
 
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
-
         self.start()
-        threading.Thread(target=self.entranceAlgorithmService.algorithm.simulate_arrivals_loop, daemon=True).start()  # Avvia simulazione
+        # threading.Thread(target=self.entranceAlgorithmService.algorithm.simulate_arrivals_loop, daemon=True).start()  # Avvia simulazione
     
     # @cherrypy.expose
     # @cherrypy.tools.json_out()
@@ -73,7 +75,7 @@ class SensorREST(threading.Thread):
             #self.client.start()  # Start MQTT client connection
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
             self.start_periodic_updates()
-            self._paho_mqtt.subscribe('ParkingLot/DevConnector1/+/status', 2)
+            self._paho_mqtt.subscribe('ParkingLotFabio/DevConnector1/+/status', 2)
             self._paho_mqtt.loop_start()
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
         except Exception as e:
@@ -132,7 +134,7 @@ class SensorREST(threading.Thread):
                             }
                         ]
                     }
-                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))  
                     print(f"Published message to {topic}: {message}")
                     time.sleep(self.updateInterval)
@@ -175,8 +177,9 @@ class SensorREST(threading.Thread):
         """Load the catalog from a JSON file."""
         try:
             #with open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json') as file:
-            with open(DEVICES, 'r') as file:    
-                return(json.load(file))
+            with self.lock:
+                with open(DEVICES, 'r') as file:    
+                    return(json.load(file))
                 
         except Exception as e:
             print(f"Failed to load catalog: {e}")
@@ -232,10 +235,10 @@ class SensorREST(threading.Thread):
 
                 if sensor_id is None or new_status is None:
                     raise cherrypy.HTTPError(status=400, message='Missing sensor_id or state in JSON payload')
-
+                with self.lock:
                 # Load the existing device statuses from the file
-                with open(self.setting_status_path, 'r') as file:
-                    devices_data = json.load(file)
+                    with open(self.setting_status_path, 'r') as file:
+                        devices_data = json.load(file)
 
                 # Find and update the specific device's status
                 device_found = False
@@ -252,10 +255,10 @@ class SensorREST(threading.Thread):
                 if not device_found:
                     raise cherrypy.HTTPError(status=404, message='Sensor ID not found')
 
-
+                with self.lock:
                 # Write the updated devices data back to the file
-                with open(self.setting_status_path, 'w') as file:
-                    json.dump(devices_data, file, indent=4)
+                    with open(self.setting_status_path, 'w') as file:
+                        json.dump(devices_data, file, indent=4)
                 
                 device_found = False
                 # In the list of sensors too (for update of active devices)
@@ -322,10 +325,10 @@ class SensorREST(threading.Thread):
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
+                with self.lock:
                 # Carica i dati esistenti
-                with open(self.setting_status_path, 'r') as f:
-                    data = json.load(f)
+                    with open(self.setting_status_path, 'r') as f:
+                        data = json.load(f)
 
                 # Trova e aggiorna solo il dispositivo specifico
                 for dev in data["devices"]:
@@ -335,10 +338,10 @@ class SensorREST(threading.Thread):
                         dev["deviceInfo"]['booking_code'] = booking_code
                         print(status_)
                         break  # Esce dal ciclo una volta trovato il dispositivo
-
+                with self.lock:
                 # Riscrivi solo il dispositivo aggiornato nel file
-                with open(self.setting_status_path, 'w') as f:
-                    json.dump(data, f, indent=4)
+                    with open(self.setting_status_path, 'w') as f:
+                        json.dump(data, f, indent=4)
 
             else:
                 print(f"Final data is not a dictionary: {type(final_data)}")
