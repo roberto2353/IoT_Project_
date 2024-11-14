@@ -10,6 +10,6 @@
     "brokerPort": 1883, 
     "qos": 2,
     "catalog_url": "http://localhost:8090",
-    "baseTopic": "ParkingLotFabio",
+    "baseTopic": "ParkingLot",
     "adaptor_url": "http://localhost:5001"
 }

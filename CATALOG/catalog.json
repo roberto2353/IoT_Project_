@@ -17,13 +17,22 @@
     "services": [],
     "parkings": [
         {
+            "ID": 2,
+            "name": "DevConnector2",
+            "last_update": "",
+            "location": "Torino",
+            "url": "127.0.0.1",
+            "port": "8098",
+            "topic": "ParkingLot/DevConnector2"
+        },
+        {
             "ID": 1,
             "name": "DevConnector1",
             "last_update": "",
             "location": "Torino",
             "url": "127.0.0.1",
             "port": "8083",
-            "topic": "ParkingLotFabio/Dev1"
+            "topic": "ParkingLot/DevConnector1"
         }
     ],
     "users": []

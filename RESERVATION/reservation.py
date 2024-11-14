@@ -84,7 +84,7 @@ class ReservationService:
                             }
                         ]
                     }
-                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
+                    topic = f"ParkingLot/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))  
                     print(f"Published message to {topic}: {message}")
                     time.sleep(self.updateInterval)

@@ -113,7 +113,7 @@ class MySubscriber:
         self.serviceID = self.serviceInfo["ID"]
         self.catalog_address = settings["catalog_url"]
         self.topic = settings["baseTopic"]+"/+/status"
-        self.publish_topic = f"ParkingLotFabio/alive/{self.serviceID}"
+        self.publish_topic = f"ParkingLot/alive/{self.serviceID}"
         self.register_service()
         self.update_interval = settings["updateInterval"]  # Interval for periodic updates
         self.message_callback = message_callback

@@ -328,14 +328,14 @@ class CatalogREST(object):
 
 class MySubscriber:
         def __init__(self, catalog_manager, settings):
-            self.clientID = "CatalogSubscriber_roby"
+            self.clientID = "CatalogSubscriber_R"
 			# create an instance of paho.mqtt.client
             self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID) 
             
 			# register the callback
             self._paho_mqtt.on_connect = self.myOnConnect
             self._paho_mqtt.on_message = self.myOnMessageReceived 
-            self.pubTopic = "ParkingLotFabio/alive/#"
+            self.pubTopic = "Parking/alive/#"
             self.messageBroker = settings["messageBroker"]
             self.port = settings["brokerPort"]
             self.adaptor_url = settings['adaptor_url']
