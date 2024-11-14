@@ -8,8 +8,8 @@
                 "location": "P0-1",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "4e21ba5",
-                "last_update": "2024-11-14 15:56:19"
+                "booking_code": "84d220c",
+                "last_update": "2024-11-14 16:21:06"
             }
         },
         {
@@ -20,8 +20,8 @@
                 "location": "P0-2",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "9a494a8",
-                "last_update": "2024-11-14 15:54:38"
+                "booking_code": "73647c6",
+                "last_update": "2024-11-14 16:18:45"
             }
         },
         {
@@ -32,8 +32,8 @@
                 "location": "P0-3",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "bd817b4",
-                "last_update": "2024-11-14 15:57:19"
+                "booking_code": "b0f9bdc",
+                "last_update": "2024-11-14 16:20:06"
             }
         },
         {
@@ -44,8 +44,8 @@
                 "location": "P0-4",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "ed8291d",
-                "last_update": "2024-11-14 15:55:19"
+                "booking_code": "1561dfd",
+                "last_update": "2024-11-14 16:21:26"
             }
         },
         {
@@ -57,7 +57,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731595377.014893
+                "last_update": 1731596503.7212524
             }
         },
         {
@@ -69,7 +69,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731595377.014893
+                "last_update": 1731596503.7212524
             }
         },
         {
@@ -80,8 +80,8 @@
                 "location": "P1-1",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "e63881a",
-                "last_update": "2024-11-14 15:55:39"
+                "booking_code": "0d58a74",
+                "last_update": "2024-11-14 16:19:46"
             }
         },
         {
@@ -92,8 +92,8 @@
                 "location": "P1-2",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "b4919ce",
-                "last_update": "2024-11-14 15:57:39"
+                "booking_code": "d80fba0",
+                "last_update": "2024-11-14 16:20:46"
             }
         },
         {
@@ -104,8 +104,8 @@
                 "location": "P1-3",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "5f81feb",
-                "last_update": "2024-11-14 15:56:39"
+                "booking_code": "7384dca",
+                "last_update": "2024-11-14 16:09:24"
             }
         },
         {
@@ -116,8 +116,8 @@
                 "location": "P1-4",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "e4492eb",
-                "last_update": "2024-11-14 15:52:38"
+                "booking_code": "ff97665",
+                "last_update": "2024-11-14 16:21:46"
             }
         },
         {
@@ -129,7 +129,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731595377.014893
+                "last_update": 1731596503.7212524
             }
         },
         {
@@ -141,7 +141,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731595377.014893
+                "last_update": 1731596503.7212524
             }
         }
     ]

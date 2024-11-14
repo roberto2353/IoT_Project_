@@ -95,8 +95,7 @@ class Algorithm:
                     print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
-                    booking_code = device["deviceInfo"]['booking_code']
-                    dev["deviceInfo"]['booking_code'] = ""
+                    dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
                     print("\n NUOVI DATI DA INSERIRE NEL DB \n")
                     print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
@@ -234,7 +233,7 @@ class Algorithm:
                     print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
                     flag=1
                     if device:
-                        print(f"Parking found, parking = {device}")
+                        print(f"Parking found, parking = {device["deviceInfo"]['location']}")
                         return device
                     else:
                         print("No free parking found")
@@ -319,12 +318,12 @@ class Algorithm:
 
                                 # Ensure required keys exist in the response data
                                 if 'parking_fee' in response_data and 'parking_duration' in response_data:
-                                    print("pippo sgravato matto\n\n\n\n\n") 
                                     # Update device information
                                     device["deviceInfo"]['status'] = "free"
                                     device["deviceInfo"]['last_update'] = time.time()
                                     device["deviceInfo"]['fee'] = str(response_data['parking_fee'])
                                     device["deviceInfo"]['duration'] = str(response_data['parking_duration'])
+                                    device["deviceInfo"]['booking_code'] = ""
                             
                                     # Send updated status to adaptor
                                     self.update_device_status(device)
@@ -348,7 +347,6 @@ class Algorithm:
         # self.devices = response.json()
         if not self.setting_status_path.exists():
             return
-            # Use map and lambda to add "last_update" and "status" to each device
         else:
             conf = json.load(open(self.setting_status_path))
             self.devices = conf['devices']
