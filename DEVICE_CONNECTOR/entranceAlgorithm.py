@@ -286,7 +286,7 @@ class Algorithm:
         
                 
     def handle_departures(self):
-        departure_probability = 0.1  # 10% chance for any parked car to leave
+        departure_probability = 0.01  # 10% chance for any parked car to leave
         
 
         for device in self.devices:
@@ -347,6 +347,7 @@ class Algorithm:
             self.devices = conf['devices']
             
     def intraloop_update_var(self):
+        print("refreshing devices...\n")
         self.refreshDevices()
         self.countFloors()
         self.countDev()
