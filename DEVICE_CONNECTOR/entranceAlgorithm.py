@@ -110,7 +110,7 @@ class Algorithm:
                 "sensor_id": device["deviceInfo"]['ID'],
                 "location": device["deviceInfo"]['location'],
                 "type": device["deviceInfo"]['type'],
-                "booking_code":device["deviceInfo"]['booking_code'],
+                "booking_code":"",
                 "fee": device["deviceInfo"]['fee'],
                 "duration":device["deviceInfo"]['duration'],
                 "floor": self.extract_floor(device["deviceInfo"]['location']),
