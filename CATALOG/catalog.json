@@ -24,7 +24,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.760298"
+            "last_update": "1731600949.3040159"
         },
         {
             "ID": 2,
@@ -36,7 +36,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.760688"
+            "last_update": "1731600949.304229"
         },
         {
             "ID": 3,
@@ -48,7 +48,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.76098"
+            "last_update": "1731600949.3043132"
         },
         {
             "ID": 4,
@@ -60,7 +60,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.7612958"
+            "last_update": "1731600949.304405"
         },
         {
             "ID": 5,
@@ -72,7 +72,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.7615712"
+            "last_update": "1731600949.304517"
         },
         {
             "ID": 6,
@@ -84,7 +84,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.761729"
+            "last_update": "1731600949.3046389"
         },
         {
             "ID": 7,
@@ -96,7 +96,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.762594"
+            "last_update": "1731600949.304745"
         },
         {
             "ID": 8,
@@ -108,7 +108,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.762829"
+            "last_update": "1731600949.304807"
         },
         {
             "ID": 9,
@@ -120,7 +120,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.762984"
+            "last_update": "1731600949.304907"
         },
         {
             "ID": 10,
@@ -132,7 +132,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.7634282"
+            "last_update": "1731600949.305023"
         },
         {
             "ID": 11,
@@ -144,7 +144,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.763686"
+            "last_update": "1731600949.305114"
         },
         {
             "ID": 12,
@@ -156,7 +156,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592756.763989"
+            "last_update": "1731600949.305166"
         },
         {
             "ID": 13,
@@ -168,7 +168,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.8733811"
+            "last_update": "1731600926.657038"
         },
         {
             "ID": 14,
@@ -180,7 +180,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.873787"
+            "last_update": "1731600926.657473"
         },
         {
             "ID": 15,
@@ -192,7 +192,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.874172"
+            "last_update": "1731600926.657685"
         },
         {
             "ID": 16,
@@ -204,7 +204,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.874558"
+            "last_update": "1731600926.6578932"
         },
         {
             "ID": 17,
@@ -216,7 +216,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.8747818"
+            "last_update": "1731600926.658051"
         },
         {
             "ID": 18,
@@ -228,7 +228,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.874929"
+            "last_update": "1731600926.658178"
         },
         {
             "ID": 19,
@@ -240,7 +240,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.875243"
+            "last_update": "1731600926.658338"
         },
         {
             "ID": 20,
@@ -252,7 +252,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.87566"
+            "last_update": "1731600926.6586041"
         },
         {
             "ID": 21,
@@ -264,7 +264,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.876043"
+            "last_update": "1731600926.658753"
         },
         {
             "ID": 22,
@@ -276,7 +276,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.876292"
+            "last_update": "1731600926.658877"
         },
         {
             "ID": 23,
@@ -288,7 +288,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.876437"
+            "last_update": "1731600926.6590059"
         },
         {
             "ID": 24,
@@ -300,38 +300,38 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1731592761.876566"
+            "last_update": "1731600926.659372"
         }
     ],
     "services": [
         {
             "ID": 1,
             "name": "AdaptorService",
-            "last_update": "1731592788.989661",
+            "last_update": "1731600908.6910248",
             "port": "5001"
         },
         {
             "ID": 5,
             "name": "EntranceService",
-            "last_update": "1731592733.119903",
+            "last_update": "1731600927.0664",
             "port": "8085"
         },
         {
             "ID": 6,
             "name": "ExitService",
-            "last_update": "1731592616.384728",
+            "last_update": "1731600930.275164",
             "port": "8087"
         },
         {
             "ID": 2,
             "name": "DevConnector1Service",
-            "last_update": "1731592766.730485",
+            "last_update": "1731600898.497319",
             "port": "8083"
         },
         {
             "ID": 10,
             "name": "DevConnector2Service",
-            "last_update": "1731592741.850337",
+            "last_update": "1731600905.76062",
             "port": "8083"
         }
     ],
