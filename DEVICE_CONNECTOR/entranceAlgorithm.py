@@ -90,9 +90,9 @@ class Algorithm:
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             for dev in data["devices"]:
-                print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
-                print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
-                if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
+               if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
+                    print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
+                    print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     booking_code = device["deviceInfo"]['booking_code']
@@ -233,7 +233,12 @@ class Algorithm:
                     print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
                     print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
                     flag=1
-                    return device
+                    if device:
+                        print(f"Parking found, parking = {device}")
+                        return device
+                    else:
+                        print("No free parking found")
+                        return None
                 
                 
         if get == 'True':
@@ -314,6 +319,7 @@ class Algorithm:
 
                                 # Ensure required keys exist in the response data
                                 if 'parking_fee' in response_data and 'parking_duration' in response_data:
+                                    print("pippo sgravato matto\n\n\n\n\n") 
                                     # Update device information
                                     device["deviceInfo"]['status'] = "free"
                                     device["deviceInfo"]['last_update'] = time.time()

@@ -8,8 +8,8 @@
                 "location": "P0-1",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "123fb5c",
-                "last_update": "2024-11-14 15:39:27"
+                "booking_code": "4e21ba5",
+                "last_update": "2024-11-14 15:56:19"
             }
         },
         {
@@ -20,8 +20,8 @@
                 "location": "P0-2",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "402afc7",
-                "last_update": "2024-11-14 15:39:07"
+                "booking_code": "9a494a8",
+                "last_update": "2024-11-14 15:54:38"
             }
         },
         {
@@ -32,8 +32,8 @@
                 "location": "P0-3",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "7912ccc",
-                "last_update": "2024-11-14 15:38:47"
+                "booking_code": "bd817b4",
+                "last_update": "2024-11-14 15:57:19"
             }
         },
         {
@@ -43,9 +43,9 @@
                 "type": "photocell",
                 "location": "P0-4",
                 "active": true,
-                "status": "free",
-                "booking_code": "",
-                "last_update": 1731595147.5489442
+                "status": "occupied",
+                "booking_code": "ed8291d",
+                "last_update": "2024-11-14 15:55:19"
             }
         },
         {
@@ -57,7 +57,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731593264.297066
+                "last_update": 1731595377.014893
             }
         },
         {
@@ -69,7 +69,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731593264.297066
+                "last_update": 1731595377.014893
             }
         },
         {
@@ -80,8 +80,8 @@
                 "location": "P1-1",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "c11559c",
-                "last_update": "2024-11-14 15:38:07"
+                "booking_code": "e63881a",
+                "last_update": "2024-11-14 15:55:39"
             }
         },
         {
@@ -91,9 +91,9 @@
                 "type": "photocell",
                 "location": "P1-2",
                 "active": true,
-                "status": "free",
-                "booking_code": "",
-                "last_update": 1731595087.4320927
+                "status": "occupied",
+                "booking_code": "b4919ce",
+                "last_update": "2024-11-14 15:57:39"
             }
         },
         {
@@ -103,9 +103,9 @@
                 "type": "photocell",
                 "location": "P1-3",
                 "active": true,
-                "status": "free",
-                "booking_code": "",
-                "last_update": 1731595047.3227153
+                "status": "occupied",
+                "booking_code": "5f81feb",
+                "last_update": "2024-11-14 15:56:39"
             }
         },
         {
@@ -116,8 +116,8 @@
                 "location": "P1-4",
                 "active": true,
                 "status": "occupied",
-                "booking_code": "3233792",
-                "last_update": "2024-11-14 15:32:06"
+                "booking_code": "e4492eb",
+                "last_update": "2024-11-14 15:52:38"
             }
         },
         {
@@ -129,7 +129,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731593264.297066
+                "last_update": 1731595377.014893
             }
         },
         {
@@ -141,7 +141,7 @@
                 "active": true,
                 "status": "free",
                 "booking_code": "",
-                "last_update": 1731593264.297066
+                "last_update": 1731595377.014893
             }
         }
     ]
