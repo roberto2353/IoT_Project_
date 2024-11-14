@@ -28,7 +28,7 @@ class Exit:
 
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher")
+        self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher_F")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
