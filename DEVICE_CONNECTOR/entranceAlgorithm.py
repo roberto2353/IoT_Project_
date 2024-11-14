@@ -232,9 +232,9 @@ class Algorithm:
                     if device:
                         print(f"Parking found, parking = {device["deviceInfo"]['location']}")
                         return device
-                    else:
-                        print("No free parking found")
-                        return None
+            else:
+                print("No free parking found")
+                return None
                 
                 
         if get == 'True':
