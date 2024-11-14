@@ -335,7 +335,7 @@ class MySubscriber:
 			# register the callback
             self._paho_mqtt.on_connect = self.myOnConnect
             self._paho_mqtt.on_message = self.myOnMessageReceived 
-            self.pubTopic = "Parking/alive/#"
+            self.pubTopic = "ParkingLot/alive/#"
             self.messageBroker = settings["messageBroker"]
             self.port = settings["brokerPort"]
             self.adaptor_url = settings['adaptor_url']
