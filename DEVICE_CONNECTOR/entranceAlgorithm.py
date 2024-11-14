@@ -90,12 +90,19 @@ class Algorithm:
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             for dev in data["devices"]:
+                print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
+                print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
                 if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     booking_code = device["deviceInfo"]['booking_code']
                     dev["deviceInfo"]['booking_code'] = ""
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
+                    print("\n NUOVI DATI DA INSERIRE NEL DB \n")
+                    print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
+                    print("\n PRESI DAL DEVICE PASSATO AD HANDLING DEPARTURE CON VALORI\n")
+                    print(print(f"{device["deviceInfo"]['ID']},{device["deviceInfo"]['status']}, {device["deviceInfo"]['last_update']}, {device["deviceInfo"]['booking_code']}, {device["deviceInfo"]['active']}\n")
+                )
                     break
                 
             with self.lock:    
@@ -308,7 +315,7 @@ class Algorithm:
                                 # Ensure required keys exist in the response data
                                 if 'parking_fee' in response_data and 'parking_duration' in response_data:
                                     # Update device information
-                                    device["deviceInfo"]['status'] = 'free'
+                                    device["deviceInfo"]['status'] = "free"
                                     device["deviceInfo"]['last_update'] = time.time()
                                     device["deviceInfo"]['fee'] = str(response_data['parking_fee'])
                                     device["deviceInfo"]['duration'] = str(response_data['parking_duration'])
