@@ -188,11 +188,11 @@ class Algorithm:
 
 
 
-    def changeDevState(self, device, floor, time):
+    def changeDevState(self, device):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         booking_code_ = str(uuid.uuid4())
         booking_code = booking_code_[:7]
-        if device["deviceInfo"]['status'] == 'free' and int(self.extract_floor(device["deviceInfo"]['location'])) == int(floor):
+        if device["deviceInfo"]['status'] == 'free':
             device["deviceInfo"]['status'] = 'occupied'
             device["deviceInfo"]['last_update'] = str(current_time)
             device["deviceInfo"]['booking_code'] = booking_code
@@ -210,7 +210,7 @@ class Algorithm:
         return None
 
     def routeArrivals(self, get='False'):
-        flag = 0
+        print("trying to route arrivals if present...\n")
         time = datetime.datetime.now()
         if self.arrivals and time >= self.arrivals[0] and get == 'False':
             self.arrivals.pop(0)
@@ -220,18 +220,15 @@ class Algorithm:
                 print(f"posti occupati:{self.n_occ_dev_per_floor[floor]}; thold posti occupati:{int(0.8 * self.n_dev_per_floor[floor])}")
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
                     device = self.get_free_device_on_floor(floor)
-                    if device and self.changeDevState(device, floor, time):
+                    if device and self.changeDevState(device):
                         print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
-                        flag=1
                         return device
-
-            if flag == 0:
-                device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
-                current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                if device and self.changeDevState(device, floor, time):
+            # case above 80%
+            print("All floor are 80perc occupied...")
+            device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
+            if device and self.changeDevState(device):
                     print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
                     print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
-                    flag=1
                     if device:
                         print(f"Parking found, parking = {device["deviceInfo"]['location']}")
                         return device
@@ -245,16 +242,14 @@ class Algorithm:
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
                     device = self.get_free_device_on_floor(floor)
                     if device and device["deviceInfo"]['status'] == 'free':
-                        flag=1
                         print("device found for the registration in route arrivals")
                         return {"message": "Parking found", "parking": device}
                     
 
-            if flag == 0:
-                device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
-                if device:
-                    return {"message": "Parking found", "parking": device}
-                return {"message": "No free parking found"}
+            device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
+            if device:
+                return {"message": "Parking found", "parking": device}
+            return {"message": "No free parking found"}
      
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -320,7 +315,7 @@ class Algorithm:
                                 if 'parking_fee' in response_data and 'parking_duration' in response_data:
                                     # Update device information
                                     device["deviceInfo"]['status'] = "free"
-                                    device["deviceInfo"]['last_update'] = time.time()
+                                    device["deviceInfo"]['last_update'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                                     device["deviceInfo"]['fee'] = str(response_data['parking_fee'])
                                     device["deviceInfo"]['duration'] = str(response_data['parking_duration'])
                                     device["deviceInfo"]['booking_code'] = ""
