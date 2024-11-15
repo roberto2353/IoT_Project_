@@ -193,7 +193,8 @@ class dbAdaptor:
                 # Estrai i dettagli dell'evento
                 sensor_id = event.get('sensor_id', '')
                 status = event.get('v', 'unknown')  # Recupera lo stato
-                if status == 'free':
+                
+                if status == 'free' and event.get('flag', '') != True:
                     self.update_stats_db(event)
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
