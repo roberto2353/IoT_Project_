@@ -11,6 +11,10 @@ from threading import Timer
 from threading import Lock
 from pathlib import Path
 import uuid
+import matplotlib.pyplot as plt
+import numpy as np
+from io import BytesIO
+
 
 # Percorso al file delle impostazioni
 P = Path(__file__).parent.absolute()
@@ -45,6 +49,7 @@ def show_logged_in_menu(chat_id):
         [InlineKeyboardButton(text="Check posti liberi", callback_data='check')],
         [InlineKeyboardButton(text="Prenota un posto", callback_data='book')],
         [InlineKeyboardButton(text="Wallet", callback_data='wallet')],
+        [InlineKeyboardButton(text="Visualizza Grafici", callback_data='show_graphs')],
         [InlineKeyboardButton(text="Logout", callback_data='logout')]
     ])
     bot.sendMessage(chat_id, "Seleziona un'opzione:", reply_markup=keyboard)
@@ -77,6 +82,68 @@ def start(msg):
         show_logged_in_menu(chat_id)
     else:
         choose_parking(chat_id)
+
+def show_graphs(msg):    
+    chat_id = msg['chat']['id']
+    if chat_id not in logged_in_users or not logged_in_users[chat_id]:
+        bot.sendMessage(chat_id, "Esegui il login per visualizzare i grafici.")
+        return
+    
+    try:
+        # URL di base per il servizio REST
+        base_url = 'http://127.0.0.1:5001'
+
+        # Ottieni ID utente
+        user_id = user_data[chat_id].get('ID', '')
+
+        # Recupera transazioni mensili (fees)
+        fees_url = f'{base_url}/fees'
+        fees_params = {'parking_id': user_id}  # Filtriamo usando il parking_id come ID utente
+        fees_response = requests.get(fees_url, params=fees_params)
+        fees_data = fees_response.json()
+
+        # Recupera tempo trascorso mensilmente (durations)
+        durations_url = f'{base_url}/durations'
+        durations_params = {'parking_id': user_id}
+        durations_response = requests.get(durations_url, params=durations_params)
+        durations_data = durations_response.json()
+
+        # Estrarre i dati per i grafici
+        transactions = [item.get('transactions', 0) for item in fees_data] if fees_data else [0] * 12
+        spending = [item.get('spending', 0) for item in fees_data] if fees_data else [0] * 12
+        time_spent = [item.get('duration', 0) for item in durations_data] if durations_data else [0] * 12
+
+        # Etichette dei mesi
+        months = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"]
+
+        # Genera i grafici
+        fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+        
+        axs[0].bar(months, transactions, color='blue')
+        axs[0].set_title('Transazioni Mensili')
+        axs[0].set_ylabel('Numero di Transazioni')
+
+        axs[1].bar(months, spending, color='green')
+        axs[1].set_title('Spese Mensili (€)')
+        axs[1].set_ylabel('Spese Totali (€)')
+
+        axs[2].bar(months, time_spent, color='red')
+        axs[2].set_title('Tempo Trascorso al Parcheggio')
+        axs[2].set_ylabel('Tempo (ore)')
+
+        plt.tight_layout()
+
+        # Salva il grafico in un oggetto BytesIO per l'invio a Telegram
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+
+        # Invia il grafico a Telegram
+        bot.sendPhoto(chat_id, buf)
+        
+    except Exception as e:
+        bot.sendMessage(chat_id, f"Errore nel recupero dei dati: {e}")
+
 
 def on_callback_query(msg):
     query_id, chat_id, query_data = telepot.glance(msg, flavor='callback_query')
@@ -122,6 +189,9 @@ def on_callback_query(msg):
     elif query_data == 'wallet':
         show_wallet({'chat': {'id': chat_id}})
         show_logged_in_menu(chat_id) if chat_id in logged_in_users and logged_in_users[chat_id] else show_initial_menu(chat_id)
+
+    elif query_data == 'show_graphs':
+        show_graphs({'chat': {'id': chat_id}})
 
 def register(msg):
     chat_id = msg['chat']['id']
