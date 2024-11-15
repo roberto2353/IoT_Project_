@@ -13,9 +13,19 @@
     "brokerPort": 1883,
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "devices": [],
-    "services": [],
-    "parkings": [
+    "devices": [
+        {
+            "ID": 1,
+            "name": "sensor1",
+            "type": "photocell",
+            "location": "P0-1",
+            "active": true,
+            "parking": "DevConnector1",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1731601640.53103"
+        },
         {
             "ID": 1,
             "name": "DevConnector1",

@@ -327,7 +327,7 @@ class CatalogREST(object):
 
 class MySubscriber:
         def __init__(self, catalog_manager, settings):
-            self.clientID = "CatalogSubscriber_R"
+            self.clientID = "CatalogSubscriber_F"
 			# create an instance of paho.mqtt.client
             self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID) 
             
