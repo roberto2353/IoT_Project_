@@ -542,7 +542,7 @@ class dbAdaptor:
 
     def get_fees(self, start=None, end=None, parking_id=None):
         try:
-            query = 'SELECT ID, time, fee FROM "status"'
+            query = 'SELECT ID, time, booking_code, fee FROM "status"'
             if start and end:
                 query += f' WHERE time >= {start} AND time <= {end}'
             elif start:
@@ -568,7 +568,7 @@ class dbAdaptor:
     
     def get_durations(self, start=None, end=None, parking_id=None):
         try:
-            query = 'SELECT ID, time, "duration" FROM "status"'
+            query = 'SELECT ID, time, booking_code, "duration" FROM "status"'
             if start and end:
                 query += f' WHERE time >= {start} AND time <= {end}'
             elif start:
