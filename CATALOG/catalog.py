@@ -164,9 +164,9 @@ class CatalogManager:
                 self.write_catalog()
                 return
 
-    def remove_user(self, user_id):
-        self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
-        self.write_catalog()
+   # def remove_user(self, user_id):
+   #     self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
+   #     self.write_catalog()
 
     def add_parking(self, parking_info):
         self.catalog["parkings"].append(parking_info)

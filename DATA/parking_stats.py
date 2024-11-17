@@ -1,10 +1,14 @@
 import json
 from influxdb import InfluxDBClient
+import numpy as np
 import pandas as pd
 import streamlit as st
 import requests
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import plotly.express as px
+import plotly.graph_objects as go
+
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
@@ -38,34 +42,68 @@ class ParkingDashboard(BaseDashboard):
             df = pd.DataFrame(data)            
             if 'time' in df.columns:
                 df['time'] = pd.to_datetime(df['time'])
-            #print("occupied", df)
+            print(df)
             return df
         except requests.exceptions.RequestException as e:
             st.error(f"Error fetching data: {e}")
             return pd.DataFrame()
 
+
     def plot_occupancy(self, df):
         if not df.empty:
+            total_sensors = df['ID'].nunique()
+            df_occupied = df[df['status'] == 'occupied']
+            df_occupied['time'] = df_occupied['time'].dt.floor('T')
+            df_minute_counts = df_occupied.groupby('time').size().reset_index(name='occupied_count')
+            df_minute_counts['hour'] = df_minute_counts['time'].dt.floor('H')
+            df_hourly_avg = df_minute_counts.groupby('hour')['occupied_count'].mean().reset_index()
             
+            df_hourly_avg['occupancy_percentage'] = (df_hourly_avg['occupied_count'] / total_sensors) * 100
+
+            df_hourly_avg['occupied_count'] = df_hourly_avg['occupied_count'].apply(
+            lambda x: np.ceil(x) if x - int(x) >= 0.5 else np.floor(x)
+        )
+
+            fig = go.Figure(data=[
+                go.Scatter(
+                    x=df_hourly_avg['hour'],
+                    y=df_hourly_avg['occupied_count'],  # Average occupancy count per hour
+                    mode='lines+markers',
+                    name="Average Hourly Parking Occupancy",
+                    line=dict(color='royalblue', width=2)
+                )
+            ])
+
+            fig.update_layout(
+                title="Average Hourly Parking Occupancy",
+                xaxis_title="Time",
+                yaxis_title="Average Occupied Parkings",
+                showlegend=False
+            )
+            
+            fig2 = go.Figure(data=[
+            go.Scatter(
+                x=df_hourly_avg['hour'],
+                y=df_hourly_avg['occupancy_percentage'],
+                mode='lines+markers',
+                name="Percentage Hourly Parking Occupancy",
+                line=dict(color='green', width=2))
+            ])
         
-        # Ensure 'time' is in hourly resolution
-            df['time'] = df['time'].dt.floor('T')
-            print(df)
-        # Group by the time column and count occurrences
-            df_grouped = df.groupby('time').size().reset_index(name='occupied_count')
-            print(df_grouped)
-        # Plot if there is data
-            if not df_grouped.empty:
-                st.line_chart(df_grouped.set_index('time')['occupied_count'])
-                st.write("Occupancy count by hour")
-            else:
-                st.write("No data to display for this time range.")
+
+            fig2.update_layout(
+            title="Hourly Percentage of Parking Occupancy",
+            xaxis_title="Time",
+            yaxis_title="Percentage of Occupied Parkings",
+            showlegend=False)   
+            st.plotly_chart(fig)
+            st.plotly_chart(fig2)
         else:
-            st.write("No data to display for this time range.")
+            st.write("No data to display for occupancy.")
 
     def run(self, parking_id):
-        st.title("Parking Occupancy Dashboard")
-        st.write("Visualize the occupancy count of parking sensors over time")
+        st.title("Parking Hourly Occupancy Dashboard")
+        st.write("Visualize the occupancy of parking spots over time")
         start_time, end_time = self.select_time_range()
         df_filtered = self.fetch_data(start=start_time, end=end_time, parking_id=parking_id)
         self.plot_occupancy(df_filtered)
@@ -81,9 +119,11 @@ class FeeDashboard(BaseDashboard):
             response.raise_for_status()
             data = response.json()
             df = pd.DataFrame(data)
-            #print(df)
+
             if 'time' in df.columns:
                 df['time'] = pd.to_datetime(df['time'])
+            df.drop(columns=['booking_code'], inplace=True)
+            print(df)
             return df
         except requests.exceptions.RequestException as e:
             st.error(f"Error fetching fee data: {e}")
@@ -91,12 +131,32 @@ class FeeDashboard(BaseDashboard):
 
     def plot_fees(self, df):
         if not df.empty:
-            df.rename(columns={'fee': 'Fee (Euro)'}, inplace=True)
-            st.bar_chart(df.set_index('time')['Fee (Euro)'])
-            st.write("Fees collected over time")
+   
+            df['time'] = df['time'].dt.floor('H')
+        
+ 
+            df_hourly = df.groupby('time')['fee'].sum().reset_index()
+            df_hourly = df_hourly.set_index('time').resample('H').sum().reset_index()
+
+            fig = go.Figure(data=[
+            go.Bar(
+                x=df_hourly['time'],
+                y=df_hourly['fee'],  
+                name="Total Fees",
+                text=df_hourly['fee'].apply(lambda x: f"€{x:.2f}"),  # Show as currency
+                textposition='auto')
+            ])
+        
+            fig.update_layout(
+            title="Total Fees Collected",
+            xaxis_title="Time",
+            yaxis_title="Total Hourly Fees (Euro)",
+            showlegend=False)
+        
+            st.plotly_chart(fig)
         else:
             st.write("No data to display for fees.")
-
+        
     def run(self, parking_id):
         st.title("Parking Fees Dashboard")
         st.write("Visualize the parking fees collected over time")
@@ -117,27 +177,42 @@ class DurationDashboard(BaseDashboard):
             df = pd.DataFrame(data)
             if 'time' in df.columns:
                 df['time'] = pd.to_datetime(df['time'])
+            df.drop(columns=['booking_code'], inplace=True)
+            print(df)
             return df
         except requests.exceptions.RequestException as e:
             st.error(f"Error fetching duration data: {e}")
             return pd.DataFrame()
-
     def plot_durations(self, df):
         if not df.empty:
-            df['duration_minutes'] = df['duration'] * 60  # Convert hours to minutes
-            #df['durations'] = df['duration_minutes'].apply(
-            #    lambda x: f"{int(x)}m {int((x - int(x)) * 60)}s"
-            #)  # Format as minutes and seconds
-            
-            # Plot using minutes as the y-axis value
-            st.bar_chart(df.set_index('time')['duration_minutes'])
-            
-            
-            # Optionally, display the exact formatted durations in a table
-            #st.write("Exact durations:")
-            #st.write(df[['time', 'durations']])
+            df['total_seconds'] = df['duration'] * 3600 
+            df['minutes'] = (df['total_seconds'] // 60).astype(int) 
+            df['seconds'] = (df['total_seconds'] % 60).astype(int)  
+        
+
+            df['duration_formatted'] = df['minutes'].astype(str) + ' min ' + df['seconds'].astype(str) + ' sec'
+        
+            fig = go.Figure(data=[
+                go.Bar(
+                x=df['time'], 
+                y=df['total_seconds'] / 60, 
+                text=df['duration_formatted'],  
+                textposition='auto',  
+                name="Duration")
+            ])
+        
+        # Customize layout
+            fig.update_layout(
+                title="Parking Duration Over Time",
+                xaxis_title="Time",
+                yaxis_title="Duration of parkings(Minutes)",
+                yaxis_tickformat=",", 
+                showlegend=False)
+        
+            st.plotly_chart(fig)
         else:
             st.write("No data to display for durations.")
+
 
     def run(self, parking_id):
         st.title("Parking Duration Dashboard")
@@ -163,7 +238,6 @@ class ParkingSelector:
 
     def select_parking(self, parkings):
         if parkings:
-            #print(parkings)
             parking_choices = {parking['name']: parking['ID'] for parking in parkings}
             # Display the names in the dropdown
             selected_parking_name = st.sidebar.selectbox("Select Parking", list(parking_choices.keys()))
@@ -182,7 +256,6 @@ def main():
     st.sidebar.title("Navigation")
     dashboard_choice = st.sidebar.selectbox("Choose Dashboard", ["Occupancy", "Fees", "Durations"])
 
-    # URLs for each data source (replace with actual URLs if different)
     OCCUPANCY_URL = f"http://localhost:{adaptor_port}/sensors/occupied"
     FEE_URL = f"http://localhost:{adaptor_port}/fees"
     DURATION_URL = f"http://localhost:{adaptor_port}/durations"
@@ -206,5 +279,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
