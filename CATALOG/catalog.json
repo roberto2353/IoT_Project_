@@ -32,18 +32,26 @@
             "last_update": "",
             "location": "Torino",
             "url": "127.0.0.1",
-            "port": "8083",
-            "topic": "ParkingLot/DevConnector1"
+            "port": "8084",
+            "topic": "ParkingLot/DevConnector2"
         },
         {
-            "ID": 2,
-            "name": "DevConnector2",
+            "ID": 1,
+            "name": "DevConnector1",
             "last_update": "",
             "location": "Torino",
             "url": "127.0.0.1",
-            "port": "8098",
-            "topic": "ParkingLot/DevConnector2"
+            "port": "8083",
+            "topic": "ParkingLot/DevConnector1"
         }
     ],
-    "users": []
+    "users": [
+        {
+            "ID": "40ee73da-be14-4f4f-8f60-9c5f88a975a6",
+            "name": "alex",
+            "surname": "benedetti",
+            "identity": "aaaa12345",
+            "credit_card": "3454323456789087"
+        }
+    ]
 }
