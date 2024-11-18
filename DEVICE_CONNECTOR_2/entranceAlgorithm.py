@@ -23,7 +23,7 @@ class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT(clientID="Simulation_F", broker=broker, port=port, notifier=None)
+        self.client = MyMQTT(clientID="Simulation2_F", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
         self.port = port
         self.devices = devices
@@ -229,7 +229,7 @@ class Algorithm:
                     print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
                     print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
                     if device:
-                        print(f"Parking found, parking = {device["deviceInfo"]['location']}")
+                        print(f'Parking found, parking = {device["deviceInfo"]["location"]}')
                         return device
             else:
                 print("No free parking found")
@@ -454,6 +454,6 @@ if __name__ == '__main__':
     entranceAlgorithmService = EntranceAlgorithmService()
     entranceAlgorithmService.algorithm.start()
     entranceAlgorithmService.sim_loop_start()
-    cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
+    cherrypy.config.update({'server.socket_port': 8092})  # Change to a different port
     cherrypy.quickstart(entranceAlgorithmService)
     

@@ -230,7 +230,7 @@ class Algorithm:
                     print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
                     print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
                     if device:
-                        print(f"Parking found, parking = {device["deviceInfo"]['location']}")
+                        print(f'Parking found, parking = {device["deviceInfo"]["location"]}')
                         return device
             else:
                 print("No free parking found")

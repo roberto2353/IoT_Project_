@@ -124,7 +124,7 @@
         "last_update": "",
         "location":"Torino",
         "url":"127.0.0.1",
-        "port": "8084",
+        "port": "8091",
         "topic":"ParkingLot/DevConnector2"
     },
     "brokerPort": 1883, 
