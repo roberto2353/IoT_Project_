@@ -13,45 +13,27 @@
     "brokerPort": 1883,
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "devices": [
+    "devices": [],
+    "users": [],
+    "parkings": [],
+    "services": [
         {
             "ID": 1,
-            "name": "sensor1",
-            "type": "photocell",
-            "location": "P0-1",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1731601640.53103"
+            "name": "AdaptorService",
+            "last_update": "1731920110.757112",
+            "port": "5001"
         },
         {
-            "ID": 1,
-            "name": "DevConnector1",
-            "last_update": "",
-            "location": "Torino",
-            "url": "127.0.0.1",
-            "port": "8084",
-            "topic": "ParkingLot/DevConnector2"
+            "ID": 5,
+            "name": "EntranceService",
+            "last_update": "1731920116.517489",
+            "port": "8085"
         },
         {
-            "ID": 1,
-            "name": "DevConnector1",
-            "last_update": "",
-            "location": "Torino",
-            "url": "127.0.0.1",
-            "port": "8083",
-            "topic": "ParkingLot/DevConnector1"
-        }
-    ],
-    "users": [
-        {
-            "ID": "40ee73da-be14-4f4f-8f60-9c5f88a975a6",
-            "name": "alex",
-            "surname": "benedetti",
-            "identity": "aaaa12345",
-            "credit_card": "3454323456789087"
+            "ID": 6,
+            "name": "ExitService",
+            "last_update": "1731920121.359288",
+            "port": "8087"
         }
     ]
 }
