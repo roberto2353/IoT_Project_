@@ -286,7 +286,7 @@ class Algorithm:
         
                 
     def handle_departures(self):
-        departure_probability = 0.08  # 10% chance for any parked car to leave
+        departure_probability = 0.06  # 10% chance for any parked car to leave
         
 
         for device in self.devices:
@@ -345,6 +345,37 @@ class Algorithm:
         else:
             conf = json.load(open(self.setting_status_path))
             self.devices = conf['devices']
+    
+    def free_all_parking_on_dbs(self):
+        try:
+            with self.lock:
+                with open(self.setting_status_path, 'r') as f:
+                    data = json.load(f)
+                print("FREE STATUS SET ON DBs\n")
+            
+        except json.JSONDecodeError:
+            print("Error: setting_status.json is corrupted or empty.")
+            
+            
+        for device in data["devices"]:
+            event = {
+                "n": f'{device["deviceInfo"]["ID"]}/status', 
+                "u": "boolean", 
+                "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
+                "v": "free", 
+                "sensor_id": device["deviceInfo"]['ID'],
+                "location": device["deviceInfo"]['location'],
+                "type": device["deviceInfo"]['type'],
+                "booking_code": device["deviceInfo"]['booking_code'],
+                "floor": self.extract_floor(device["deviceInfo"]['location']),
+                "active": device["deviceInfo"]['active'],
+                "parking":'DevConnector1',
+                "flag":True
+                }
+            message = {"bn": device["deviceInfo"]['name'], "e": [event]}
+            mqtt_topic = f'{self.pubTopic}/{str(device["deviceInfo"]["ID"])}/status'
+            self.client.myPublish(mqtt_topic, json.dumps(message))
+            print(f"Messaggio pubblicato su topic {mqtt_topic}")
             
     def intraloop_update_var(self):
         print("refreshing devices...\n")
@@ -440,20 +471,20 @@ class EntranceAlgorithmService:
 
     def sim_loop_start(self):
         threading.Thread(target=self.algorithm.simulate_arrivals_loop, daemon=True).start()
-        
-
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def get_best_parking(self):
         # Assuming get_devices is a method of the Algorithm class
         return self.algorithm.routeArrivals(get='True')
+    
 
 
 if __name__ == '__main__':
     
     entranceAlgorithmService = EntranceAlgorithmService()
     entranceAlgorithmService.algorithm.start()
+    entranceAlgorithmService.algorithm.free_all_parking_on_dbs()
     entranceAlgorithmService.sim_loop_start()
     cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
     cherrypy.quickstart(entranceAlgorithmService)
