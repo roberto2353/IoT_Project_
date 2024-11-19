@@ -39,6 +39,7 @@ class SensorREST(threading.Thread):
 
         self.entranceAlgorithmService = EntranceAlgorithmService()
         self.entranceAlgorithmService.algorithm.start()
+        self.entranceAlgorithmService.algorithm.free_all_parking_on_dbs()
         self.entranceAlgorithmService.sim_loop_start()
 
         time.sleep(3)
