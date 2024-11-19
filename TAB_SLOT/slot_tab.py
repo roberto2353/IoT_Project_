@@ -37,15 +37,26 @@ class SlotBoard:
             #parkings = response.json()
             #print(parkings)
 
-            #TODO do something to deal with more parkings or make more tabslots in main
-            parkings_json = json.dumps(parkings[0], indent=4)
-            print(type(parkings_json))
-            parkings = json.loads(parkings_json)
-            print(parkings)
-            devConnUrl = "http://"+ f"{parkings['url']}"+ f":{parkings['port']}"+"/devices"
-            print(devConnUrl)
+            print("Parcheggi disponibili:")
+            for idx, parking in enumerate(parkings):
+                print(f"{idx + 1}. Nome: {parking['name']}, Indirizzo: {parking['url']}, Porta: {parking['port']}")
+
+            # Chiedi all'utente di selezionare un parcheggio
+            choice = int(input("Seleziona il numero del parcheggio da utilizzare: ")) - 1
+            if choice < 0 or choice >= len(parkings):
+                print("Selezione non valida. Riprova.")
+                return
+
+            # Ottieni i dettagli del parcheggio selezionato
+            selected_parking = parkings[choice]
+            devConnUrl = f"http://{selected_parking['url']}:{selected_parking['port']}/devices"
+            print(f"Connettendosi al parcheggio: {selected_parking['name']}")
+
+            # Ottieni i dispositivi del parcheggio selezionato
             response = requests.get(devConnUrl)
-            response.raise_for_status()  # Check if the response is correct
+            response.raise_for_status()  # Verifica che la risposta sia corretta
+            devices = response.json()
+            print(f"Dispositivi nel parcheggio {selected_parking['name']}: {devices}")
             
             # Get the list of devices from the adaptor
             slots = response.json()
