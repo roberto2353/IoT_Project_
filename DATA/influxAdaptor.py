@@ -41,13 +41,6 @@ class dbAdaptor:
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
-        # if topic is None:
-        #     self.topic = 'ParkingLot/+/status'
-        # else:
-        #     self.topic = topic
-
-        #self.messageBroker = 'localhost'
-
         # Configurazione del client InfluxDB
         self.client = InfluxDBClient(host="localhost", port=self.influx_port, username="root", password="root", database=self.influx_db)
         if {'name': self.influx_db} not in self.client.get_list_database():
@@ -668,6 +661,7 @@ class dbAdaptor:
 if __name__ == "__main__":
 
     settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     test = dbAdaptor(settings)
     test.start()
     
@@ -683,7 +677,7 @@ if __name__ == "__main__":
 
     cherrypy.config.update({
         'server.socket_host': '127.0.0.1',
-        'server.socket_port': 5001,
+        'server.socket_port': service_port,
         'engine.autoreload.on': False
     })
 
@@ -692,7 +686,7 @@ if __name__ == "__main__":
     
     try:
         cherrypy.engine.start()
-        print("dbAdaptor service started on port 5001.")
+        print(f"dbAdaptor service started on port {service_port}.")
         cherrypy.engine.block()
     except KeyboardInterrupt:
         print("Shutting down dbAdaptor service...")
