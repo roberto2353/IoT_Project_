@@ -355,25 +355,27 @@ class Algorithm:
             
         except json.JSONDecodeError:
             print("Error: setting_status.json is corrupted or empty.")
-            for device in data["devices"]:
-                event = {
-                    "n": f'{device["deviceInfo"]["ID"]}/status', 
-                    "u": "boolean", 
-                    "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
-                    "v": "free", 
-                    "sensor_id": device["deviceInfo"]['ID'],
-                    "location": device["deviceInfo"]['location'],
-                    "type": device["deviceInfo"]['type'],
-                    "booking_code": device["deviceInfo"]['booking_code'],
-                    "floor": self.extract_floor(device["deviceInfo"]['location']),
-                    "active": device["deviceInfo"]['active'],
-                    "parking":'DevConnector2',
-                    "flag":True
+            
+            
+        for device in data["devices"]:
+            event = {
+                "n": f'{device["deviceInfo"]["ID"]}/status', 
+                "u": "boolean", 
+                "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
+                "v": "free", 
+                "sensor_id": device["deviceInfo"]['ID'],
+                "location": device["deviceInfo"]['location'],
+                "type": device["deviceInfo"]['type'],
+                "booking_code": device["deviceInfo"]['booking_code'],
+                "floor": self.extract_floor(device["deviceInfo"]['location']),
+                "active": device["deviceInfo"]['active'],
+                "parking":'DevConnector2',
+                "flag":True
                 }
-                message = {"bn": device["deviceInfo"]['name'], "e": [event]}
-                mqtt_topic = f'{self.pubTopic}/{str(device["deviceInfo"]["ID"])}/status'
-                self.client.myPublish(mqtt_topic, json.dumps(message))
-                print(f"Messaggio pubblicato su topic {mqtt_topic}")
+            message = {"bn": device["deviceInfo"]['name'], "e": [event]}
+            mqtt_topic = f'{self.pubTopic}/{str(device["deviceInfo"]["ID"])}/status'
+            self.client.myPublish(mqtt_topic, json.dumps(message))
+            print(f"Messaggio pubblicato su topic {mqtt_topic}")
             
     def intraloop_update_var(self):
         print("refreshing devices...\n")
