@@ -157,7 +157,7 @@ class ReservationService:
         # Invio del messaggio MQTT all'adaptor
                     self.client.myPublish(mqtt_topic_db, json.dumps(message))
                     self.client.myPublish(mqtt_topic_dc, json.dumps(message))
-                    print(f"Messaggio pubblicato su topic")
+                    print(f"Messaggio pubblicato sul topic ",mqtt_topic_dc)
 
 
 

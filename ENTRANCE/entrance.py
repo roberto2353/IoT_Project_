@@ -189,10 +189,12 @@ class Entrance:
 if __name__ == '__main__':
 
     conf = {
-        '/': {
-            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-            'tools.sessions.on': True
-        }
+    '/': {
+        'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+        'tools.sessions.on': True,
+        'tools.response_headers.on': True,
+        'tools.response_headers.headers': [('Content-Type', 'application/json')]
+    }
     }
     settings = json.load(open(SETTINGS))
     en = Entrance(settings)

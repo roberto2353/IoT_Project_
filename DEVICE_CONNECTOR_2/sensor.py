@@ -48,7 +48,7 @@ class SensorREST(threading.Thread):
         self.topic = "ParkingLot/alive/"
         self.messageBroker = broker
         self.port = port
-        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_2")
+        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_2_F")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread(target=self.pingCatalog, daemon=True).start()
 
@@ -365,7 +365,7 @@ if __name__ == '__main__':
         }
     }
     settings = json.load(open(SETTINGS))
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8098})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8091})
     #status = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json'))
     #settings = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json'))
     

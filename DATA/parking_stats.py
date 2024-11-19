@@ -122,6 +122,7 @@ class FeeDashboard(BaseDashboard):
 
             if 'time' in df.columns:
                 df['time'] = pd.to_datetime(df['time'])
+            df.drop(columns=['booking_code'], inplace=True)
             print(df)
             return df
         except requests.exceptions.RequestException as e:
@@ -176,6 +177,7 @@ class DurationDashboard(BaseDashboard):
             df = pd.DataFrame(data)
             if 'time' in df.columns:
                 df['time'] = pd.to_datetime(df['time'])
+            df.drop(columns=['booking_code'], inplace=True)
             print(df)
             return df
         except requests.exceptions.RequestException as e:
@@ -277,5 +279,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

@@ -164,9 +164,9 @@ class CatalogManager:
                 self.write_catalog()
                 return
 
-    def remove_user(self, user_id):
-        self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
-        self.write_catalog()
+   # def remove_user(self, user_id):
+   #     self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
+   #     self.write_catalog()
 
     def add_parking(self, parking_info):
         self.catalog["parkings"].append(parking_info)
@@ -327,7 +327,7 @@ class CatalogREST(object):
 
 class MySubscriber:
         def __init__(self, catalog_manager, settings):
-            self.clientID = "CatalogSubscriber_R"
+            self.clientID = "CatalogSubscriber_F"
 			# create an instance of paho.mqtt.client
             self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID) 
             

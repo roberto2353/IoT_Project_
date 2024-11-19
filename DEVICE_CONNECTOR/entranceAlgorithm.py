@@ -23,7 +23,7 @@ class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT(clientID="Simulation_K", broker=broker, port=port, notifier=None)
+        self.client = MyMQTT(clientID="Simulation_F", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
         self.port = port
         self.devices = devices
@@ -90,12 +90,18 @@ class Algorithm:
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             for dev in data["devices"]:
-                if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
+               if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
+                    print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
+                    print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
-                    booking_code = device["deviceInfo"]['booking_code']
-                    dev["deviceInfo"]['booking_code'] = ""
+                    dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
+                    print("\n NUOVI DATI DA INSERIRE NEL DB \n")
+                    print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
+                    print("\n PRESI DAL DEVICE PASSATO AD HANDLING DEPARTURE CON VALORI\n")
+                    print(print(f'{device["deviceInfo"]["ID"]},{device["deviceInfo"]["status"]}, {device["deviceInfo"]["last_update"]}, {device["deviceInfo"]["booking_code"]}, {device["deviceInfo"]["active"]}\n')
+                )
                     break
                 
             with self.lock:    
@@ -110,7 +116,7 @@ class Algorithm:
                 "sensor_id": device["deviceInfo"]['ID'],
                 "location": device["deviceInfo"]['location'],
                 "type": device["deviceInfo"]['type'],
-                "booking_code": booking_code,
+                "booking_code":"",
                 "fee": device["deviceInfo"]['fee'],
                 "duration":device["deviceInfo"]['duration'],
                 "floor": self.extract_floor(device["deviceInfo"]['location']),
@@ -182,11 +188,11 @@ class Algorithm:
 
 
 
-    def changeDevState(self, device, floor, time):
+    def changeDevState(self, device):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         booking_code_ = str(uuid.uuid4())
         booking_code = booking_code_[:7]
-        if device["deviceInfo"]['status'] == 'free' and int(self.extract_floor(device["deviceInfo"]['location'])) == int(floor):
+        if device["deviceInfo"]['status'] == 'free':
             device["deviceInfo"]['status'] = 'occupied'
             device["deviceInfo"]['last_update'] = str(current_time)
             device["deviceInfo"]['booking_code'] = booking_code
@@ -204,7 +210,7 @@ class Algorithm:
         return None
 
     def routeArrivals(self, get='False'):
-        flag = 0
+        print("trying to route arrivals if present...\n")
         time = datetime.datetime.now()
         if self.arrivals and time >= self.arrivals[0] and get == 'False':
             self.arrivals.pop(0)
@@ -214,19 +220,21 @@ class Algorithm:
                 print(f"posti occupati:{self.n_occ_dev_per_floor[floor]}; thold posti occupati:{int(0.8 * self.n_dev_per_floor[floor])}")
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
                     device = self.get_free_device_on_floor(floor)
-                    if device and self.changeDevState(device, floor, time):
+                    if device and self.changeDevState(device):
                         print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
-                        flag=1
                         return device
-
-            if flag == 0:
-                device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
-                current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                if device and self.changeDevState(device, floor, time):
+            # case above 80%
+            print("All floor are 80perc occupied...")
+            device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
+            if device and self.changeDevState(device):
                     print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
                     print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
-                    flag=1
-                    return device
+                    if device:
+                        print(f'Parking found, parking = {device["deviceInfo"]["location"]}')
+                        return device
+            else:
+                print("No free parking found")
+                return None
                 
                 
         if get == 'True':
@@ -234,16 +242,14 @@ class Algorithm:
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
                     device = self.get_free_device_on_floor(floor)
                     if device and device["deviceInfo"]['status'] == 'free':
-                        flag=1
                         print("device found for the registration in route arrivals")
                         return {"message": "Parking found", "parking": device}
                     
 
-            if flag == 0:
-                device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
-                if device:
-                    return {"message": "Parking found", "parking": device}
-                return {"message": "No free parking found"}
+            device = next((d for d in self.devices if d["deviceInfo"]['status'] == 'free'), None)
+            if device:
+                return {"message": "Parking found", "parking": device}
+            return {"message": "No free parking found"}
      
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -280,7 +286,7 @@ class Algorithm:
         
                 
     def handle_departures(self):
-        departure_probability = 0.1  # 10% chance for any parked car to leave
+        departure_probability = 0.08  # 10% chance for any parked car to leave
         
 
         for device in self.devices:
@@ -308,10 +314,11 @@ class Algorithm:
                                 # Ensure required keys exist in the response data
                                 if 'parking_fee' in response_data and 'parking_duration' in response_data:
                                     # Update device information
-                                    device["deviceInfo"]['status'] = 'free'
-                                    device["deviceInfo"]['last_update'] = time.time()
+                                    device["deviceInfo"]['status'] = "free"
+                                    device["deviceInfo"]['last_update'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                                     device["deviceInfo"]['fee'] = str(response_data['parking_fee'])
                                     device["deviceInfo"]['duration'] = str(response_data['parking_duration'])
+                                    device["deviceInfo"]['booking_code'] = ""
                             
                                     # Send updated status to adaptor
                                     self.update_device_status(device)
@@ -335,12 +342,12 @@ class Algorithm:
         # self.devices = response.json()
         if not self.setting_status_path.exists():
             return
-            # Use map and lambda to add "last_update" and "status" to each device
         else:
             conf = json.load(open(self.setting_status_path))
             self.devices = conf['devices']
             
     def intraloop_update_var(self):
+        print("refreshing devices...\n")
         self.refreshDevices()
         self.countFloors()
         self.countDev()
