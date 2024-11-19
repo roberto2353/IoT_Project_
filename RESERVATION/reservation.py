@@ -190,16 +190,8 @@ if __name__ == '__main__':
     }
 }
     settings = json.load(open(SETTINGS))
-    service_port = int(settings["serviceInfo"]["port"])
     res = ReservationService(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': service_port})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8098})
     cherrypy.tree.mount(res, '/', conf)
-    try:
-        cherrypy.engine.start()
-        print(f"Reservation service started on port {service_port}.")
-        cherrypy.engine.block()
-    except KeyboardInterrupt:
-        print("Shutting down Reservation service...")
-    finally:
-        res.stop()
-        cherrypy.engine.exit()
+    cherrypy.engine.start()
+    cherrypy.quickstart(res)

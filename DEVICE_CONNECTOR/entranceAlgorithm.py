@@ -286,7 +286,7 @@ class Algorithm:
         
                 
     def handle_departures(self):
-        departure_probability = 0.08  # 10% chance for any parked car to leave
+        departure_probability = 0.20  # 10% chance for any parked car to leave
         
 
         for device in self.devices:

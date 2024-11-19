@@ -139,12 +139,12 @@ class dbAdaptor:
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
-        active = data.get('active')
+        active = data.get('active',True)
         json_body = [
                         {
                             "measurement": 'status',
                             "tags": {
-                                "ID": sensor_id,
+                                "sensor_id": sensor_id,
                                 "parking_id": parking,
                                 "floor": floor
                             },
@@ -158,7 +158,7 @@ class dbAdaptor:
                         }
                     ]
         # TODO NON FUNZIONA
-        print(f"\n\n\nDOVREBBE STAMPARE LA FEE = {float(fee)} E LA DURATION = {float(duration)}. DATA TYPE: {type(fee)}\n\n\n")
+       # print(f"\n\n\nDOVREBBE STAMPARE LA FEE = {float(fee)} E LA DURATION = {float(duration)}. DATA TYPE: {type(fee)}\n\n\n")
                     # Scrivi l'aggiornamento su InfluxDB
         self.client.write_points(json_body,time_precision='s', database=self.influx_prova) #influx_stats
         print(f"Updated sensor {sensor_id} in stats db.")
@@ -191,7 +191,7 @@ class dbAdaptor:
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
-                active = event.get('active', '') 
+                active = event.get('active', True) 
                 parking = event.get('parking', 'unknown')
 
                 # Controlla se un sensore con lo stesso ID esiste già nel database
@@ -205,7 +205,7 @@ class dbAdaptor:
                         {
                             "measurement": 'status',
                             "tags": {
-                                "ID": sensor_id,
+                                "sensor_id": sensor_id,
                                 "parking_id": parking,
                                 "type": sensor_type,
                                 "location": location
@@ -213,7 +213,7 @@ class dbAdaptor:
                             "time": str(current_time),  # Timestamp corrente
                             "fields": {
                                 "name": data['bn'],  # Nome del sensore o dispositivo
-                                "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
+                                "status": str (status),  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
                                 "booking_code": booking_code,  # Codice di prenotazione
                                 "active": active
                             }
