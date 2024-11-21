@@ -10,7 +10,7 @@
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
     "catalog_url": "http://localhost:8090",
-    "baseTopic": "ParkingLot",
+    "baseTopic": "ParkingLotFabio",
     "mainDB": "IoT_Smart_Parking",
     "statsDB": "IoT_SP_Stats",
     "provaDB": "prova_stats",

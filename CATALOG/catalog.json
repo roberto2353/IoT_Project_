@@ -84,7 +84,7 @@
             "location": "Torino",
             "url": "127.0.0.1",
             "port": "8083",
-            "topic": "ParkingLot/DevConnector1"
+            "topic": "ParkingLotFabio/DevConnector1"
         },
         {
             "ID": 2,
@@ -93,7 +93,7 @@
             "location": "Torino",
             "url": "127.0.0.1",
             "port": "8091",
-            "topic": "ParkingLot/DevConnector2"
+            "topic": "ParkingLotFabio/DevConnector2"
         }
     ],
     "services": [

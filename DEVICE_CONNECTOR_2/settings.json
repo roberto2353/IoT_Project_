@@ -125,11 +125,11 @@
         "location":"Torino",
         "url":"127.0.0.1",
         "port": "8091",
-        "topic":"ParkingLot/DevConnector2"
+        "topic":"ParkingLotFabio/DevConnector2"
     },
     "brokerPort": 1883, 
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
     "catalog_url": "http://localhost:8090",
-    "baseTopic": "ParkingLot"
+    "baseTopic": "ParkingLotFabio"
 }  
