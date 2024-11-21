@@ -146,7 +146,7 @@ class dbAdaptor:
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
-        active = data.get('active')
+        active = data.get('active', True)
         json_body = [
                         {
                             "measurement": 'status',
@@ -198,7 +198,7 @@ class dbAdaptor:
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
-                active = event.get('active', '') 
+                active = event.get('active', True) 
                 parking = event.get('parking', 'unknown')
 
                 # Controlla se un sensore con lo stesso ID esiste già nel database
@@ -363,7 +363,7 @@ class dbAdaptor:
                     "location": device_info['location'],
                     "type": device_info['type'],
                     "booking_code": device_info.get('booking_code', ''),
-                    "active": device_info.get('active', '')
+                    "active": device_info.get('active', True)
                     #"floor": self.extract_floor(selected_device['location'])
                     }
             
@@ -430,7 +430,7 @@ class dbAdaptor:
 
                 # Query per ottenere tutte le transazioni individuali per il booking_code
                 query_transactions = f"""
-                    SELECT "slot_id", "duration", "fee", time
+                    SELECT "ID", "duration", "fee", time
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
@@ -439,7 +439,7 @@ class dbAdaptor:
                 transactions = []
                 for point in result_transactions.get_points():
                     transactions.append({
-                        "slot_id": point.get("slot_id", "N/A"),
+                        "slot_id": point.get("ID", "N/A"),
                         "duration": point.get("duration", 0),
                         "fee": point.get("fee", 0),
                         "time": point.get("time")  # Facoltativo: data/ora
@@ -491,7 +491,7 @@ class dbAdaptor:
                         'status': sensor['status'],
                         'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', ''),
-                        'active': sensor.get('active', ''),
+                        'active': sensor.get('active', True),
                         "parking_id": sensor.get('parking_id', '')
                     })
                 

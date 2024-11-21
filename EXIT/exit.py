@@ -150,6 +150,12 @@ class Exit:
             
             parking_duration_hours, fee = self.calculate_fee_and_duration(sensor_id)
 
+            @staticmethod
+            def extract_floor(location):
+                if location.startswith("P"):
+                    return location[1]
+                return None
+
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
                 "n": f"{sensor_id}/status", 
@@ -161,7 +167,10 @@ class Exit:
                 "type": sensor_type,
                 "booking_code": booking_code,
                 "active": active,
-                "parking":name_dev
+                "parking":name_dev,
+                "fee": fee,
+                "duration":parking_duration_hours,
+                "floor": extract_floor(selected_device.get('location', 'unknown')),
             }
             message = {"bn": sensor_name, "e": [event]}
             mqtt_topic_db = f"{self.pubTopic}/{sensor_id}/status"
