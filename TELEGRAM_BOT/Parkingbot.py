@@ -125,6 +125,10 @@ def show_graphs(msg):
         fees_params = {'parking_id': user_id}
         fees_response = requests.get(fees_url, params=fees_params)
         fees_data = fees_response.json()
+        total_fees = 0 
+        total_durations = 0
+        count_parkings = 0
+        
 
         # Recupera tempo trascorso settimanalmente (durations)
         durations_url = f'{base_url}/durations'
@@ -151,6 +155,8 @@ def show_graphs(msg):
                 week = date.isocalendar()[1]  # Ottieni la settimana dell'anno
                 weekly_transactions[week] = weekly_transactions.get(week, 0) + 1
                 weekly_spending[week] = weekly_spending.get(week, 0) + entry.get("fee", 0)
+                total_fees += entry.get("fee", 0)
+                count_parkings += 1
             except Exception as e:
                 print(f"Errore nel parsing della data per le transazioni: {e}")
 
@@ -161,6 +167,7 @@ def show_graphs(msg):
                 date = parser.parse(entry.get("time"))  # Metodo 1
                 week = date.isocalendar()[1]
                 weekly_durations[week] = weekly_durations.get(week, 0) + entry.get("duration", 0)
+                total_durations += entry.get("duration", 0)
             except Exception as e:
                 print(f"Errore nel parsing della data per le durate: {e}")
 
@@ -199,8 +206,68 @@ def show_graphs(msg):
         # Invia il grafico a Telegram
         bot.sendPhoto(chat_id, buf)
         
+        
     except Exception as e:
         bot.sendMessage(chat_id, f"Errore nel recupero dei dati: {e}")
+def show_stats(tot_dur,tot_fee,tot_park,chat_id):
+    gas_price_per_litre =1.74
+    diesel_fuel_per_litre =1.64
+    avg_speed = 40
+    co_2_gas = 108 # (g/km)
+    co_2_diesel_fuel = 90
+    diesel_fuel_avg_km_per_litre = 17
+    gas_avg_km_per_litre = 13
+    avg_ext_per_hour_park_fee = 1.5 #euros per hour 
+    bot.sendMessage(chat_id, f"Calculating total stats... ")
+    # STATS TO REACH OUR PARKINGS
+    time_to_reach_parking_wc = 5 # min
+    tot_time_to_reach_parking_wc =time_to_reach_parking_wc * tot_park
+    tot_km_to_reach_parking_wc = tot_park * avg_speed/(60/time_to_reach_parking_wc)
+    tot_money_to_reach_parking_diesel = (tot_km_to_reach_parking_wc/diesel_fuel_avg_km_per_litre) * diesel_fuel_per_litre
+    tot_money_to_reach_parking_gas = (tot_km_to_reach_parking_wc/gas_avg_km_per_litre) * gas_price_per_litre
+    co_2_to_reach_parking_diesel = tot_km_to_reach_parking_wc * co_2_diesel_fuel # (g)
+    co_2_to_reach_parking_gas = tot_km_to_reach_parking_wc * co_2_gas #g
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    # bot.sendMessage(chat_id, f"Total stats while using our: {e}")
+    
+    #STATS NOT USING PARKINGS
+    avg_time_to_park = 15
+    tot_time_to_reach_ext_park =avg_time_to_park * tot_park
+    tot_km_to_reach_ext_park = tot_park * avg_speed/(60/avg_time_to_park)
+    tot_money_to_reach_ext_park_diesel = (tot_km_to_reach_ext_park/diesel_fuel_avg_km_per_litre) * diesel_fuel_per_litre
+    tot_money_to_reach_ext_park_gas = (tot_km_to_reach_ext_park/gas_avg_km_per_litre) * gas_price_per_litre
+    co_2_to_reach_ext_park_diesel = tot_km_to_reach_ext_park * co_2_diesel_fuel # (g)
+    co_2_to_reach_ext_park_gas = tot_km_to_reach_ext_park * co_2_gas #g
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message    
+    
+    
+    #TOTAL MONEY SPENT (INDOOR VS OUTDOOR, DIESEL VS GAS)
+    
+    tot_money_park_plus_reach_indoor_diesel  = tot_money_to_reach_parking_diesel + tot_fee
+    tot_money_park_plus_reach_indoor_gas  =  tot_money_to_reach_parking_gas + tot_fee
+    tot_money_park_plus_reach_outdoor_diesel = tot_money_to_reach_ext_park_diesel + tot_dur *  avg_ext_per_hour_park_fee
+    tot_money_park_plus_reach_outdoor_gas = tot_money_to_reach_ext_park_gas + tot_dur * avg_ext_per_hour_park_fee
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    
+    
+    #TOTAL CO2 EMISSIONS (INDOOR VS OUTDOOR, DIESEL VS GAS)
+    
+    tot_co2_indoor_gas = co_2_to_reach_parking_gas
+    tot_co2_indoor_diesel = co_2_to_reach_parking_diesel
+    tot_co2_outdoor_gas = co_2_to_reach_ext_park_diesel
+    tot_co2_outdoor_diesel = co_2_to_reach_ext_park_diesel
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    
+    # SAVINGS
+    saved_time = tot_time_to_reach_ext_park - tot_time_to_reach_ext_park
+    saved_km = tot_km_to_reach_ext_park - tot_km_to_reach_parking_wc
+    saved_co2_gas = tot_co2_outdoor_gas - tot_co2_indoor_gas
+    saved_co2_diesel = tot_co2_outdoor_diesel - tot_co2_indoor_diesel
+    saved_money_gas = tot_money_park_plus_reach_outdoor_gas - tot_money_park_plus_reach_indoor_gas
+    saved_money_diesel = tot_money_park_plus_reach_outdoor_diesel - tot_money_park_plus_reach_indoor_diesel
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    
+    
 def on_callback_query(msg):
     query_id, chat_id, query_data = telepot.glance(msg, flavor='callback_query')
 
