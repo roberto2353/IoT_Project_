@@ -205,6 +205,7 @@ def show_graphs(msg):
 
         # Invia il grafico a Telegram
         bot.sendPhoto(chat_id, buf)
+        show_stats(total_durations,total_fees,count_parkings,chat_id)
         
         
     except Exception as e:
@@ -228,6 +229,17 @@ def show_stats(tot_dur,tot_fee,tot_park,chat_id):
     co_2_to_reach_parking_diesel = tot_km_to_reach_parking_wc * co_2_diesel_fuel # (g)
     co_2_to_reach_parking_gas = tot_km_to_reach_parking_wc * co_2_gas #g
     # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    print("Parking stats for diesel vehicles: \n")
+    print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
+    print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
+    print(f"Total money to reach our parkings: {tot_money_to_reach_parking_diesel} euros")
+    print(f"Total CO2 emissions: {co_2_to_reach_parking_diesel} g")
+    
+    print("Parking stats for gas vehicles: \n")
+    print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
+    print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
+    print(f"Total money to reach our parkings: {tot_money_to_reach_parking_gas} euros")
+    print(f"Total CO2 emissions: {co_2_to_reach_parking_gas} g")
     # bot.sendMessage(chat_id, f"Total stats while using our: {e}")
     
     #STATS NOT USING PARKINGS
@@ -240,6 +252,17 @@ def show_stats(tot_dur,tot_fee,tot_park,chat_id):
     co_2_to_reach_ext_park_gas = tot_km_to_reach_ext_park * co_2_gas #g
     # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message    
     
+    print("Stats if our parkings were not used - diesel vehicles: \n")
+    print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
+    print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
+    print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_diesel} euros")
+    print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_diesel} g")
+    
+    print("Stats if our parkings were not used - gas vehicles: \n")
+    print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
+    print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
+    print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_gas} euros")
+    print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_gas} g")
     
     #TOTAL MONEY SPENT (INDOOR VS OUTDOOR, DIESEL VS GAS)
     
@@ -248,7 +271,10 @@ def show_stats(tot_dur,tot_fee,tot_park,chat_id):
     tot_money_park_plus_reach_outdoor_diesel = tot_money_to_reach_ext_park_diesel + tot_dur *  avg_ext_per_hour_park_fee
     tot_money_park_plus_reach_outdoor_gas = tot_money_to_reach_ext_park_gas + tot_dur * avg_ext_per_hour_park_fee
     # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
-    
+    print(f"Total money spent while using our services (money to reach parking plus fees) - diesel vehicles :{tot_money_park_plus_reach_indoor_diesel} euros\n")
+    print(f"Total money spent while using our services (money to reach parking plus fees) - gas vehicles :{tot_money_park_plus_reach_indoor_gas} euros\n")
+    print(f"Total money spent if our services were not used (money to find external parkings plus fees) - diesel vehicles :{tot_money_park_plus_reach_outdoor_diesel} euros\n")
+    print(f"Total money spent if our services were not used (money to find external parkings plus fees) - gas vehicles :{tot_money_park_plus_reach_outdoor_gas} euros\n")
     
     #TOTAL CO2 EMISSIONS (INDOOR VS OUTDOOR, DIESEL VS GAS)
     
@@ -257,6 +283,10 @@ def show_stats(tot_dur,tot_fee,tot_park,chat_id):
     tot_co2_outdoor_gas = co_2_to_reach_ext_park_diesel
     tot_co2_outdoor_diesel = co_2_to_reach_ext_park_diesel
     # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    print(f"Total co2 emissions using our services - diesel vehicle: {tot_co2_indoor_diesel} g \m")
+    print(f"Total co2 emissions using our services - gas vehicle: {tot_co2_indoor_gas} g\n")
+    print(f"Total co2 emissions if our services were not used (co2 to find external parkings) - diesel vehicle: {tot_co2_outdoor_diesel} g\n")
+    print(f"Total co2 emissions if our services were not used (co2 to find external parkings) - gas vehicle: {tot_co2_outdoor_gas} g\n")
     
     # SAVINGS
     saved_time = tot_time_to_reach_ext_park - tot_time_to_reach_ext_park
@@ -265,6 +295,14 @@ def show_stats(tot_dur,tot_fee,tot_park,chat_id):
     saved_co2_diesel = tot_co2_outdoor_diesel - tot_co2_indoor_diesel
     saved_money_gas = tot_money_park_plus_reach_outdoor_gas - tot_money_park_plus_reach_indoor_gas
     saved_money_diesel = tot_money_park_plus_reach_outdoor_diesel - tot_money_park_plus_reach_indoor_diesel
+    print("Savings achieved using our services:\n")
+    print(f"Money saved - diesel vehicle: {saved_money_diesel} euros\n")
+    print(f"Money saved - gas vehicle: {saved_money_gas} euros\n")
+    print(f"Distance saved: {saved_km} km\n")
+    print(f"co2 emissions saved - diesel vehicle: {saved_co2_diesel} g\n")
+    print(f"co2 emissions saved - gas vehicle: {saved_co2_gas} g\n")
+    print(f"Time saved: {saved_time} min\n")
+    
     # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
     
     
