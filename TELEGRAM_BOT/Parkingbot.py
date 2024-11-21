@@ -283,7 +283,7 @@ def show_stats(tot_dur,tot_fee,tot_park,chat_id):
     tot_co2_outdoor_gas = co_2_to_reach_ext_park_diesel
     tot_co2_outdoor_diesel = co_2_to_reach_ext_park_diesel
     # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
-    print(f"Total co2 emissions using our services - diesel vehicle: {tot_co2_indoor_diesel} g \m")
+    print(f"Total co2 emissions using our services - diesel vehicle: {tot_co2_indoor_diesel} g \n")
     print(f"Total co2 emissions using our services - gas vehicle: {tot_co2_indoor_gas} g\n")
     print(f"Total co2 emissions if our services were not used (co2 to find external parkings) - diesel vehicle: {tot_co2_outdoor_diesel} g\n")
     print(f"Total co2 emissions if our services were not used (co2 to find external parkings) - gas vehicle: {tot_co2_outdoor_gas} g\n")

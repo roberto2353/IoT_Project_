@@ -48,7 +48,7 @@ class Algorithm:
         """Stop the MQTT client."""
         self.client.stop()  # Stop MQTT client connection
 
-        self.t_hold_time = 15
+        self.t_hold_time = 30
 
     def countFloors(self):
         self.floors=[]
@@ -286,7 +286,7 @@ class Algorithm:
         
                 
     def handle_departures(self):
-        departure_probability = 0.06  # 10% chance for any parked car to leave
+        departure_probability = 0.4  # 10% chance for any parked car to leave
         
 
         for device in self.devices:
