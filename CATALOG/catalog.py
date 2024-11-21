@@ -14,8 +14,8 @@ P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
 
-SERVICE_EXPIRATION_THRESHOLD = 180  # Every 3 minutes old services are removed
-DEVICE_EXPIRATION_THRESHOLD =  120 #Every 2 minutes
+SERVICE_EXPIRATION_THRESHOLD = 120  # Every 2 minutes old services are removed
+DEVICE_EXPIRATION_THRESHOLD =  180 # Every 3 minutes old devices are removed
 # Class to manage the catalog operations (loading, updating, saving)
 class CatalogManager:
     def __init__(self, catalog_file):
@@ -61,7 +61,6 @@ class CatalogManager:
                 with open(self.catalog_file, 'r') as f:
                     catalog = json.load(f)
             catalog['devices'] = []
-            catalog['users'] = []
             catalog['parkings'] = []
             catalog['services'] = []
         
@@ -373,9 +372,13 @@ class MySubscriber:
 if __name__ == '__main__':
 
     settings = json.load(open(SETTINGS))
+    catalog = json.load(open("catalog.json"))
+    service_port = catalog["catalog"]["port"]
+    service_ip = catalog["catalog"]["ip"]
     catalog_manager = CatalogManager("catalog.json")
     catalog_rest = CatalogREST(catalog_manager,settings)
     mqtt_subscriber = MySubscriber(catalog_manager, settings)
+    
 
     conf = {
         '/': {
@@ -384,7 +387,7 @@ if __name__ == '__main__':
         }
     }
 
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8090})
+    cherrypy.config.update({'server.socket_host': service_ip, 'server.socket_port': service_port})
     cherrypy.tree.mount(catalog_rest, '/', conf)
     cherrypy.engine.start()
     cherrypy.engine.block()

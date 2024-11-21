@@ -1,7 +1,7 @@
 {
     "updateInterval": 60,
     "serviceInfo": {
-        "ID": 9,
+        "ID": 7,
         "name": "TabSlotService",
         "last_update": "",
         "port": ""

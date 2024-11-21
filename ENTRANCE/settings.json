@@ -1,7 +1,7 @@
 {
     "updateInterval": 60,
     "serviceInfo": {
-        "ID": 5,
+        "ID": 2,
         "name": "EntranceService",
         "last_update": "",
         "port": "8085"
