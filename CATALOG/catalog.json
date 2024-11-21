@@ -1,10 +1,26 @@
 {
+    "project_name": "IoT4SmartParking",
+    "project_owner": "IoT_Group8",
+    "device_catalog": {
+        "ip": "127.0.0.1",
+        "port": 8090,
+        "methods": [
+            "GET",
+            "POST",
+            "PUT"
+        ]
+    },
+    "brokerPort": 1883,
+    "qos": 2,
+    "messageBroker": "mqtt.eclipseprojects.io",
     "devices": [
         {
-            "ID": 1,
-            "name": "sensor1",
+            "ID": 20,
+            "name": "sensor8",
             "type": "photocell",
-            "location": "P0-1",
+            "location": "P1-2",
+            "active": true,
+            "parking": "DevConnector2",
             "commands": [
                 "status"
             ],

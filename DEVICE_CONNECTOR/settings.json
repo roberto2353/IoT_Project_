@@ -1,4 +1,6 @@
 {
+    "updateInterval": 60,
+    "pingInterval": 30,
     "catalogURL": "http://localhost:8090",
     "devices":[
         {
@@ -6,7 +8,8 @@
             "ID": 1,
             "name": "sensor1",
             "type": "photocell",
-            "location": "P0-1"
+            "location": "P0-1",
+            "active": true
             }
         },
         {
@@ -14,7 +17,8 @@
             "ID": 2,
             "name": "sensor2",
             "type": "photocell",
-            "location": "P0-2"
+            "location": "P0-2",
+            "active": true
             }
         },
         {
@@ -22,7 +26,8 @@
             "ID": 3,
             "name": "sensor3",
             "type": "photocell",
-            "location": "P0-3"
+            "location": "P0-3",
+            "active": true
             }
         },
         {
@@ -30,7 +35,8 @@
             "ID": 4,
             "name": "sensor4",
             "type": "photocell",
-            "location": "P0-4"
+            "location": "P0-4",
+            "active": true
             }
         },
         {
@@ -38,7 +44,8 @@
             "ID": 5,
             "name": "sensor5",
             "type": "photocell",
-            "location": "P0-5"
+            "location": "P0-5",
+            "active": true
             }
         },
         {
@@ -46,7 +53,8 @@
             "ID": 6,
             "name": "sensor6",
             "type": "photocell",
-            "location": "P0-6"
+            "location": "P0-6",
+            "active": true
             }
         },
         {
@@ -54,9 +62,74 @@
             "ID": 7,
             "name": "sensor7",
             "type": "photocell",
-            "location": "P0-7"
+            "location": "P1-1",
+            "active": true
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 8,
+            "name": "sensor8",
+            "type": "photocell",
+            "location": "P1-2",
+            "active": true
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 9,
+            "name": "sensor9",
+            "type": "photocell",
+            "location": "P1-3",
+            "active": true
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 10,
+            "name": "sensor10",
+            "type": "photocell",
+            "location": "P1-4",
+            "active": true
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 11,
+            "name": "sensor11",
+            "type": "photocell",
+            "location": "P1-5",
+            "active": true
+            }
+        },
+        {
+            "deviceInfo":{
+            "ID": 12,
+            "name": "sensor12",
+            "type": "photocell",
+            "location": "P1-6",
+            "active": true
             }
         }
-        
-    ]
+    ],
+    "serviceInfo": {
+        "ID": 2,
+        "name": "DevConnector1Service",
+        "last_update": "",
+        "port": "8083"
+    },
+    "parkingInfo": {
+        "ID": 1,
+        "name": "DevConnector1",
+        "last_update": "",
+        "location":"Torino",
+        "url":"127.0.0.1",
+        "port": "8083",
+        "topic":"ParkingLot/DevConnector1"
+    },
+    "brokerPort": 1883, 
+    "qos": 2,
+    "messageBroker": "mqtt.eclipseprojects.io",
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLot"
 }  

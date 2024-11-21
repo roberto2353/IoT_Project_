@@ -9,7 +9,7 @@ class MyMQTT:
         self.clientID = str(clientID)
         self._topic = ""
         self._isSubscriber = False
-        self._paho_mqtt = PahoMQTT.Client(clientID, True) 
+        self._paho_mqtt = PahoMQTT.Client(PahoMQTT.CallbackAPIVersion.VERSION2) 
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
@@ -17,6 +17,8 @@ class MyMQTT:
         print(f"Connesso a {self.broker} con codice di risultato: {str(rc)}")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
+        # Un nuovo messaggio viene ricevuto
+        #print(f"Topic: '{msg.topic}', QoS: '{msg.qos}', Message: '{msg.payload.decode()}'")
         if self.notifier is not None:
             self.notifier.notify(msg.topic, msg.payload)
 

@@ -1,6 +1,18 @@
 {
-    "messageBroker": "localhost",
+    "updateInterval": 60,
+    "serviceInfo": {
+        "ID": 1,
+        "name": "AdaptorService",
+        "last_update": "",
+        "port": "5001"
+    },
     "brokerPort": 1883, 
     "qos": 2,
-    "catalog_url": "http://localhost:8080"
+    "messageBroker": "mqtt.eclipseprojects.io",
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLot",
+    "mainDB": "IoT_Smart_Parking",
+    "statsDB": "IoT_SP_Stats",
+    "provaDB": "prova_stats",
+    "influxPort": 8086
 }
