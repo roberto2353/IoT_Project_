@@ -26,7 +26,7 @@ class Entrance:
 
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_F")
+        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
@@ -79,7 +79,7 @@ class Entrance:
                             }
                         ]
                     }
-                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
+                    topic = f"ParkingLot/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))  
                     print(f"Published message to {topic}: {message}")
                     time.sleep(self.updateInterval)
@@ -189,10 +189,12 @@ class Entrance:
 if __name__ == '__main__':
 
     conf = {
-        '/': {
-            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-            'tools.sessions.on': True
-        }
+    '/': {
+        'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+        'tools.sessions.on': True,
+        'tools.response_headers.on': True,
+        'tools.response_headers.headers': [('Content-Type', 'application/json')]
+    }
     }
     settings = json.load(open(SETTINGS))
     en = Entrance(settings)

@@ -42,7 +42,7 @@ class dbAdaptor:
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
         # if topic is None:
-        #     self.topic = 'ParkingLotFabio/+/status'
+        #     self.topic = 'ParkingLot/+/status'
         # else:
         #     self.topic = topic
 
@@ -70,7 +70,7 @@ class dbAdaptor:
 
             # Start periodic alive messages
             self.start_periodic_updates()
-            self._paho_mqtt.subscribe('ParkingLotFabio/+/status', 2)
+            self._paho_mqtt.subscribe('ParkingLot/+/status', 2)
             
         except Exception as e:
             print(f"Error starting MQTT client: {e}")
@@ -118,7 +118,7 @@ class dbAdaptor:
                             }
                         ]
                     }
-                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
+                    topic = f"ParkingLot/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))
                     print(f"Published alive message to {topic}: {message}")
                     time.sleep(self.updateInterval)  # Wait before the next update
@@ -429,34 +429,34 @@ class dbAdaptor:
                 if not booking_code:
                     return {"error": "Missing 'booking_code' in request"}, 400
 
-                # Query per sommare la durata e la tariffa totali per il booking_code
-                query = f"""
-                    SELECT SUM("duration") AS total_duration, SUM("fee") AS total_fee
+                # Query per ottenere tutte le transazioni individuali per il booking_code
+                query_transactions = f"""
+                    SELECT "slot_id", "duration", "fee", time
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
-                result = self.client.query(query, database=self.influx_prova) #influx_stats
+                result_transactions = self.client.query(query_transactions, database=self.influx_prova)
 
-                
-                points = list(result.get_points())
-                 
+                transactions = []
+                for point in result_transactions.get_points():
+                    transactions.append({
+                        "slot_id": point.get("slot_id", "N/A"),
+                        "duration": point.get("duration", 0),
+                        "fee": point.get("fee", 0),
+                        "time": point.get("time")  # Facoltativo: data/ora
+                    })
 
-                if not points or (points[0]['total_duration'] is None and points[0]['total_fee'] is None):
-                    return {"message": f"No data found for booking_code {booking_code}"}, 404
+                # Controlla se ci sono transazioni
+                if not transactions:
+                    return {"message": f"No transactions found for booking_code {booking_code}"}, 404
 
-                
-                first_point = points[0]
-
-                total_duration = first_point.get('total_duration', 0)
-                total_fee = first_point.get('total_fee', 0)
-
+                # Risposta solo con transazioni individuali
                 response = {
                     "booking_code": booking_code,
-                    "total_duration": total_duration,
-                    "total_fee": total_fee
+                    "transactions": transactions
                 }
 
-                return response  
+                return response
 
             except Exception as e:
                 print(f"Error retrieving booking info: {e}")
@@ -543,7 +543,7 @@ class dbAdaptor:
 
     def get_fees(self, start=None, end=None, parking_id=None):
         try:
-            query = 'SELECT ID, time, fee FROM "status"'
+            query = 'SELECT ID, time, booking_code, fee FROM "status"'
             if start and end:
                 query += f' WHERE time >= {start} AND time <= {end}'
             elif start:
@@ -569,7 +569,7 @@ class dbAdaptor:
     
     def get_durations(self, start=None, end=None, parking_id=None):
         try:
-            query = 'SELECT ID, time, "duration" FROM "status"'
+            query = 'SELECT ID, time, booking_code, "duration" FROM "status"'
             if start and end:
                 query += f' WHERE time >= {start} AND time <= {end}'
             elif start:

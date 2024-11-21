@@ -23,7 +23,7 @@ class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT(clientID="Simulation_F", broker=broker, port=port, notifier=None)
+        self.client = MyMQTT(clientID="Simulation2_F", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
         self.port = port
         self.devices = devices
@@ -92,16 +92,15 @@ class Algorithm:
             for dev in data["devices"]:
                if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
                     print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
-                    print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
+                    print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
                     print("\n NUOVI DATI DA INSERIRE NEL DB \n")
-                    print(f"{dev["deviceInfo"]['ID']},{dev["deviceInfo"]['status']}, {dev["deviceInfo"]['last_update']}, {dev["deviceInfo"]['booking_code']}, {dev["deviceInfo"]['active']}\n")
+                    print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     print("\n PRESI DAL DEVICE PASSATO AD HANDLING DEPARTURE CON VALORI\n")
-                    print(print(f"{device["deviceInfo"]['ID']},{device["deviceInfo"]['status']}, {device["deviceInfo"]['last_update']}, {device["deviceInfo"]['booking_code']}, {device["deviceInfo"]['active']}\n")
-                )
+                    print(f'{device["deviceInfo"]["ID"]},{device["deviceInfo"]["status"]}, {device["deviceInfo"]["last_update"]}, {device["deviceInfo"]["booking_code"]}, {device["deviceInfo"]["active"]}\n')
                     break
                 
             with self.lock:    
@@ -230,7 +229,7 @@ class Algorithm:
                     print("80 percent of parking from all floors are occupied, returned if possible first free parking.")
                     print(f'Device {device["deviceInfo"]["ID"]} has changed state to {device["deviceInfo"]["status"]}')
                     if device:
-                        print(f"Parking found, parking = {device["deviceInfo"]['location']}")
+                        print(f'Parking found, parking = {device["deviceInfo"]["location"]}')
                         return device
             else:
                 print("No free parking found")
@@ -486,6 +485,6 @@ if __name__ == '__main__':
     entranceAlgorithmService.algorithm.start()
     entranceAlgorithmService.algorithm.free_all_parking_on_dbs()
     entranceAlgorithmService.sim_loop_start()
-    cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
+    cherrypy.config.update({'server.socket_port': 8092})  # Change to a different port
     cherrypy.quickstart(entranceAlgorithmService)
     

@@ -164,9 +164,9 @@ class CatalogManager:
                 self.write_catalog()
                 return
 
-    def remove_user(self, user_id):
-        self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
-        self.write_catalog()
+   # def remove_user(self, user_id):
+   #     self.catalog["users"] = [u for u in self.catalog["users"] if u['ID'] != user_id]
+   #     self.write_catalog()
 
     def add_parking(self, parking_info):
         self.catalog["parkings"].append(parking_info)
@@ -266,7 +266,6 @@ class CatalogREST(object):
                     return f"Failed to add device with ID {json_body['ID']}"
 
             elif uri[0] == 'services':
-                print("pippo")
                 self.catalog_manager.add_service(json_body)
                 return f"Service with ID {json_body['ID']} added"
             elif uri[0] == 'users':
@@ -335,7 +334,7 @@ class MySubscriber:
 			# register the callback
             self._paho_mqtt.on_connect = self.myOnConnect
             self._paho_mqtt.on_message = self.myOnMessageReceived 
-            self.pubTopic = "ParkingLotFabio/alive/#"
+            self.pubTopic = "ParkingLot/alive/+"
             self.messageBroker = settings["messageBroker"]
             self.port = settings["brokerPort"]
             self.adaptor_url = settings['adaptor_url']

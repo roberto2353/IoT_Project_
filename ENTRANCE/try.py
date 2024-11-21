@@ -6,7 +6,7 @@ url = 'http://127.0.0.1:8056/exit'
 
 # Dati da inviare nella richiesta
 data = {
-    "booking_code": "20ad25",
+    "booking_code": "fc10cd",
     "url":"127.0.0.1",
     "port":8083,
     "name":'DevConnector1'
@@ -18,4 +18,3 @@ response = requests.post(url, headers={'Content-Type': 'application/json'}, data
 
 # Stampa la risposta del server
 print(f"Status Code: {response.status_code}")
-print(f"Response: {response.json()}")

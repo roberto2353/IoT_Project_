@@ -1,0 +1,16 @@
+[16/Nov/2024:16:09:50] ENGINE Listening for SIGTERM.
+[16/Nov/2024:16:09:50] ENGINE Listening for SIGHUP.
+[16/Nov/2024:16:09:50] ENGINE Listening for SIGUSR1.
+[16/Nov/2024:16:09:50] ENGINE Bus STARTING
+[16/Nov/2024:16:09:50] ENGINE Started monitor thread 'Autoreloader'.
+[16/Nov/2024:16:09:50] ENGINE Serving on http://127.0.0.1:8087
+[16/Nov/2024:16:09:50] ENGINE Bus STARTED
+[16/Nov/2024:16:23:28] ENGINE Restarting because /Users/alexbenedetti/Desktop/IoT_Project_/EXIT/exit.py changed.
+[16/Nov/2024:16:23:28] ENGINE Stopped thread 'Autoreloader'.
+[16/Nov/2024:16:23:28] ENGINE Bus STOPPING
+[16/Nov/2024:16:23:29] ENGINE HTTP Server cherrypy._cpwsgi_server.CPWSGIServer(('127.0.0.1', 8087)) shut down
+[16/Nov/2024:16:23:29] ENGINE Bus STOPPED
+[16/Nov/2024:16:23:29] ENGINE Bus EXITING
+[16/Nov/2024:16:23:29] ENGINE Bus EXITED
+[16/Nov/2024:16:23:29] ENGINE Waiting for child threads to terminate...
+[16/Nov/2024:16:23:29] ENGINE Re-spawning /opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python exit.py

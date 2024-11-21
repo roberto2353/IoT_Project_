@@ -124,12 +124,12 @@
         "last_update": "",
         "location":"Torino",
         "url":"127.0.0.1",
-        "port": "8098",
-        "topic":"ParkingLotFabio/DevConnector2"
+        "port": "8091",
+        "topic":"ParkingLot/DevConnector2"
     },
     "brokerPort": 1883, 
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
     "catalog_url": "http://localhost:8090",
-    "baseTopic": "ParkingLotFabio"
+    "baseTopic": "ParkingLot"
 }  

@@ -29,7 +29,7 @@ class ReservationService:
         self.register_service()
 
         self._paho_mqtt = PahoMQTT.Client()
-        self.client = MyMQTT("Reservation_F", self.messageBroker, self.port, None)
+        self.client = MyMQTT("Reservation_Kev", self.messageBroker, self.port, None)
 
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
@@ -84,7 +84,7 @@ class ReservationService:
                             }
                         ]
                     }
-                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
+                    topic = f"ParkingLot/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))  
                     print(f"Published message to {topic}: {message}")
                     time.sleep(self.updateInterval)
@@ -157,7 +157,7 @@ class ReservationService:
         # Invio del messaggio MQTT all'adaptor
                     self.client.myPublish(mqtt_topic_db, json.dumps(message))
                     self.client.myPublish(mqtt_topic_dc, json.dumps(message))
-                    print(f"Messaggio pubblicato su topic")
+                    print(f"Messaggio pubblicato sul topic ",mqtt_topic_dc)
 
 
 
