@@ -203,6 +203,7 @@ if __name__ == '__main__':
     cherrypy.tree.mount(en, '/', conf)
     try:
         cherrypy.engine.start()
+        cherrypy.quickstart(en)
         print(f"Entrance service started on port {service_port}.")
         cherrypy.engine.block()
     except KeyboardInterrupt:

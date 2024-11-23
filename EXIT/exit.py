@@ -295,6 +295,7 @@ if __name__ == '__main__':
     cherrypy.tree.mount(ex, '/', conf)
     try:
         cherrypy.engine.start()
+        cherrypy.quickstart(ex)
         print(f"Exit service started on port {service_port}.")
         cherrypy.engine.block()
     except KeyboardInterrupt:

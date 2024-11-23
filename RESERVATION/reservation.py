@@ -196,6 +196,7 @@ if __name__ == '__main__':
     cherrypy.tree.mount(res, '/', conf)
     try:
         cherrypy.engine.start()
+        cherrypy.quickstart(res)
         print(f"Reservation service started on port {service_port}.")
         cherrypy.engine.block()
     except KeyboardInterrupt:

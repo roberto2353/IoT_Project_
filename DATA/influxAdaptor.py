@@ -686,6 +686,7 @@ if __name__ == "__main__":
     
     try:
         cherrypy.engine.start()
+        #cherrypy.quickstart(test)
         print(f"dbAdaptor service started on port {service_port}.")
         cherrypy.engine.block()
     except KeyboardInterrupt:
