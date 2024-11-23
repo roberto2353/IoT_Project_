@@ -1,0 +1,148 @@
+{
+    "devices": [
+        {
+            "deviceInfo": {
+                "ID": 13,
+                "name": "sensor1",
+                "type": "photocell",
+                "location": "P0-1",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "af9bf21",
+                "last_update": "2024-11-23 15:12:53"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 14,
+                "name": "sensor2",
+                "type": "photocell",
+                "location": "P0-2",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "9fa8b81",
+                "last_update": "2024-11-23 15:10:13"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 15,
+                "name": "sensor3",
+                "type": "photocell",
+                "location": "P0-3",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "83d6d39",
+                "last_update": "2024-11-23 15:13:33"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 16,
+                "name": "sensor4",
+                "type": "photocell",
+                "location": "P0-4",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "4fbdeec",
+                "last_update": "2024-11-23 15:10:33"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 17,
+                "name": "sensor5",
+                "type": "photocell",
+                "location": "P0-5",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "787bea9",
+                "last_update": "2024-11-23 15:10:00"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 18,
+                "name": "sensor6",
+                "type": "photocell",
+                "location": "P0-6",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "093dc31",
+                "last_update": "2024-11-23 15:06:59"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 19,
+                "name": "sensor7",
+                "type": "photocell",
+                "location": "P1-1",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "55c6907",
+                "last_update": "2024-11-23 15:12:33"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 20,
+                "name": "sensor8",
+                "type": "photocell",
+                "location": "P1-2",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "3433e82",
+                "last_update": "2024-11-23 15:11:33"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 21,
+                "name": "sensor9",
+                "type": "photocell",
+                "location": "P1-3",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "8f10bf5",
+                "last_update": "2024-11-23 15:12:20"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 22,
+                "name": "sensor10",
+                "type": "photocell",
+                "location": "P1-4",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "4fc895e",
+                "last_update": "2024-11-23 15:12:40"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 23,
+                "name": "sensor11",
+                "type": "photocell",
+                "location": "P1-5",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "4a57dc4",
+                "last_update": "2024-11-23 15:11:13"
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 24,
+                "name": "sensor12",
+                "type": "photocell",
+                "location": "P1-6",
+                "active": true,
+                "status": "occupied",
+                "booking_code": "98b6926",
+                "last_update": "2024-11-23 15:11:40"
+            }
+        }
+    ]
+}

@@ -1,6 +1,15 @@
 {
-    "messageBroker": "localhost",
+    "updateInterval": 60,
+    "serviceInfo": {
+        "ID": 7,
+        "name": "TabSlotService",
+        "last_update": "",
+        "port": ""
+    },
+    "messageBroker": "mqtt.eclipseprojects.io",
     "brokerPort": 1883, 
     "qos": 2,
-    "catalog_url": "http://localhost:8080"
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLot",
+    "adaptor_url": "http://localhost:5001"
 }
