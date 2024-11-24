@@ -13,7 +13,32 @@
     "brokerPort": 1883,
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "devices": [],
+    "devices": [
+        {
+            "ID": 1,
+            "name": "sensor1",
+            "type": "photocell",
+            "location": "P0-1",
+            "active": true,
+            "parking": "DevConnector1",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1732479595.3383303
+        },
+        {
+            "ID": 2,
+            "name": "sensor2",
+            "type": "photocell",
+            "location": "P0-2",
+            "active": true,
+            "parking": "DevConnector1",
+            "commands": [
+                "status"
+            ],
+            "last_update": 1732479599.4278855
+        }
+    ],
     "users": [
         {
             "ID": "b3b7d926-2dfc-41cb-be87-f676133f7cb1",
@@ -48,13 +73,31 @@
             "topic": "ParkingLot/DevConnector1"
         },
         {
-            "ID": 2,
-            "name": "DevConnector2",
+            "ID": 1,
+            "name": "DevConnector1",
             "last_update": "",
             "location": "Torino",
             "url": "127.0.0.1",
-            "port": "8091",
-            "topic": "ParkingLot/DevConnector2"
+            "port": "8083",
+            "topic": "ParkingLot/DevConnector1"
+        },
+        {
+            "ID": 1,
+            "name": "DevConnector1",
+            "last_update": "",
+            "location": "Torino",
+            "url": "127.0.0.1",
+            "port": "8083",
+            "topic": "ParkingLot/DevConnector1"
+        },
+        {
+            "ID": 1,
+            "name": "DevConnector1",
+            "last_update": "",
+            "location": "Torino",
+            "url": "127.0.0.1",
+            "port": "8083",
+            "topic": "ParkingLot/DevConnector1"
         }
     ],
     "services": []

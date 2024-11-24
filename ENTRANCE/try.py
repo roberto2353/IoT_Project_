@@ -2,7 +2,7 @@ import requests
 import json
 
 # URL del server CherryPy
-url = 'http://127.0.0.1:8056/exit'
+url = 'http://127.0.0.1:8085/activate'
 
 # Dati da inviare nella richiesta
 data = {

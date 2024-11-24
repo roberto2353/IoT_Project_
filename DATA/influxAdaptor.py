@@ -136,6 +136,7 @@ class dbAdaptor:
         floor = data.get('floor')
         parking = data.get('parking')
         booking_code = data.get('booking_code', 'unknown')
+        print("BOOKING CODE", booking_code)
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
