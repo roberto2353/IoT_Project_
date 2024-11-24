@@ -537,9 +537,9 @@ def book_slot(msg):
 
         if chat_id in logged_in_users and logged_in_users[chat_id]:
             BC = user_data[chat_id].get('book_code', 'N/A')
-            bot.sendMessage(chat_id, f"Your reserved slot is: {slot_id}. Your booking code is: {BC}. Your parking slot will be reserved for 2 minutes.")
+            bot.sendMessage(chat_id, f"Your reserved slot is: {slot_id}. Your booking code is: {BC}. \n Your parking slot will be reserved for 2 minutes.")
         else:
-            bot.sendMessage(chat_id, f"Your reserved slot is: {slot_id}. Your booking code is: {booking_code}. Your parking slot will be reserved for 2 minutes.")
+            bot.sendMessage(chat_id, f"Your reserved slot is: {slot_id}. Your booking code is: {booking_code}. \n Your parking slot will be reserved for 2 minutes.")
 
         # Timer per la scadenza della prenotazione
         Timer(120, expire_reservation, args=[r, booking_code, msg]).start()
