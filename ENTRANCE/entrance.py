@@ -197,9 +197,17 @@ if __name__ == '__main__':
     }
     }
     settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     en = Entrance(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8085})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': service_port})
     cherrypy.tree.mount(en, '/', conf)
-    cherrypy.engine.start()
-    #cherrypy.engine.block()
-    cherrypy.quickstart(en)
+    try:
+        cherrypy.engine.start()
+        cherrypy.quickstart(en)
+        print(f"Entrance service started on port {service_port}.")
+        cherrypy.engine.block()
+    except KeyboardInterrupt:
+        print("Shutting down Entrance service...")
+    finally:
+        en.stop()
+        cherrypy.engine.exit()

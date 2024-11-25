@@ -1,7 +1,7 @@
 {
     "project_name": "IoT4SmartParking",
     "project_owner": "IoT_Group8",
-    "device_catalog": {
+    "catalog": {
         "ip": "127.0.0.1",
         "port": 8090,
         "methods": [
@@ -13,101 +13,30 @@
     "brokerPort": 1883,
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "devices": [
+    "devices": [],
+    "users": [
         {
-            "ID": 20,
-            "name": "sensor8",
-            "type": "photocell",
-            "location": "P1-2",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1732025430.7633808
+            "ID": "b3b7d926-2dfc-41cb-be87-f676133f7cb1",
+            "name": "kevin",
+            "surname": "gymina",
+            "identity": "123456789",
+            "credit_card": "1234567890123456"
         },
         {
-            "ID": 21,
-            "name": "sensor9",
-            "type": "photocell",
-            "location": "P1-3",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1732025434.90075
+            "ID": "61dd6a89-fe1e-4760-a77a-51667cd38486",
+            "name": "kevin",
+            "surname": "gumina",
+            "identity": "cv35265eg",
+            "credit_card": "5333261647251647"
         },
         {
-            "ID": 22,
-            "name": "sensor10",
-            "type": "photocell",
-            "location": "P1-4",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1732025439.0109515
-        },
-        {
-            "ID": 23,
-            "name": "sensor11",
-            "type": "photocell",
-            "location": "P1-5",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1732025443.13194
-        },
-        {
-            "ID": 24,
-            "name": "sensor12",
-            "type": "photocell",
-            "location": "P1-6",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": 1732025447.2510712
+            "ID": "3c140279-5489-40ae-9c27-ad8f61f70f80",
+            "name": "kevin",
+            "surname": "gumina",
+            "identity": "ct27482gh",
+            "credit_card": "5333728492648297"
         }
     ],
-    "users": [],
-    "parkings": [
-        {
-            "ID": 1,
-            "name": "DevConnector1",
-            "last_update": "",
-            "location": "Torino",
-            "url": "127.0.0.1",
-            "port": "8083",
-            "topic": "ParkingLotFabio/DevConnector1"
-        },
-        {
-            "ID": 2,
-            "name": "DevConnector2",
-            "last_update": "",
-            "location": "Torino",
-            "url": "127.0.0.1",
-            "port": "8091",
-            "topic": "ParkingLotFabio/DevConnector2"
-        }
-    ],
-    "services": [
-        {
-            "ID": 10,
-            "name": "DevConnector2Service",
-            "last_update": "",
-            "port": "8083"
-        },
-        {
-            "ID": 9,
-            "name": "TabSlotService",
-            "last_update": "",
-            "port": ""
-        }
-    ]
+    "parkings": [],
+    "services": []
 }

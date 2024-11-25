@@ -113,7 +113,7 @@
         }
     ],
     "serviceInfo": {
-        "ID": 10,
+        "ID": 6,
         "name": "DevConnector2Service",
         "last_update": "",
         "port": "8083"

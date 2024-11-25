@@ -20,6 +20,9 @@ from dateutil import parser
 from io import BytesIO
 import requests
 
+
+
+
 # Percorso al file delle impostazioni
 P = Path(__file__).parent.absolute()
 SETTINGS_PATH = P / 'settings.json'
@@ -50,22 +53,24 @@ def is_valid_credit_card(card_number):
 
 def show_logged_in_menu(chat_id):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Check posti liberi", callback_data='check')],
-        [InlineKeyboardButton(text="Prenota un posto", callback_data='book')],
-        [InlineKeyboardButton(text="Wallet", callback_data='wallet')],
-        [InlineKeyboardButton(text="Visualizza Grafici", callback_data='show_graphs')],
-        [InlineKeyboardButton(text="Logout", callback_data='logout')]
+        [InlineKeyboardButton(text="🔍 Check free slots", callback_data='check')],
+        [InlineKeyboardButton(text="📅 Book a slot", callback_data='book')],
+        [InlineKeyboardButton(text="💳 Wallet", callback_data='wallet')],
+        [InlineKeyboardButton(text="📊 Statistics visualization", callback_data='show_graphs')],
+        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  # Nuovo tasto
+        [InlineKeyboardButton(text="🔓 Logout", callback_data='logout')]
     ])
-    bot.sendMessage(chat_id, "Seleziona un'opzione:", reply_markup=keyboard)
+    bot.sendMessage(chat_id, "Choose one option:", reply_markup=keyboard)
 
 def show_initial_menu(chat_id):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Check posti liberi", callback_data='check')],
-        [InlineKeyboardButton(text="Prenota un posto", callback_data='book')],
-        [InlineKeyboardButton(text="Registrati", callback_data='register')],
-        [InlineKeyboardButton(text="Login", callback_data='login')]
+        [InlineKeyboardButton(text="🔍 Check free slots", callback_data='check')],
+        [InlineKeyboardButton(text="📅 Book a slot", callback_data='book')],
+        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  # Nuovo tasto
+        [InlineKeyboardButton(text="🔑 Login", callback_data='login')],
+        [InlineKeyboardButton(text="📝 Register to the system", callback_data='register')]
     ])
-    bot.sendMessage(chat_id, 'Benvenuto al Parking Bot! Scegli una delle seguenti opzioni:', reply_markup=keyboard)
+    bot.sendMessage(chat_id, 'Welcome to the IoTSmartParking! Choose one of the following options:', reply_markup=keyboard)
 
 def choose_parking(chat_id):
     catalog_url = settings['catalog_url'] + '/parkings'
@@ -75,7 +80,7 @@ def choose_parking(chat_id):
     try:
         parkings = response.json().get("parkings", [])
         if not parkings:
-            bot.sendMessage(chat_id, "Non ci sono parcheggi disponibili al momento.")
+            bot.sendMessage(chat_id, "There are no more free parking slots now.")
             return
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -83,16 +88,20 @@ def choose_parking(chat_id):
             for parking in parkings
         ])
         
-        bot.sendMessage(chat_id, "Seleziona un parcheggio:", reply_markup=keyboard)
+        bot.sendMessage(chat_id, "Choose a parking:", reply_markup=keyboard)
     except Exception as e:
         bot.sendMessage(chat_id, f"Errore nel recupero dei parcheggi: {e}")
+
+def handle_change_parking(chat_id):
+    bot.sendMessage(chat_id, "Select a parking from the list:")
+    choose_parking(chat_id)
 def start(msg):
     chat_id = msg['chat']['id']
     if chat_id not in user_data or 'parking_name' not in user_data[chat_id]:
-        bot.sendMessage(chat_id, "Ciao! Che parcheggio vuoi scegliere? Una volta selezionato potrai cambiarlo solo scrivendo /parkings.")
+        bot.sendMessage(chat_id, "Hello! Choose the parking you prefer. \nIf you need to change the parking, do it writing /parkings or from the menu button.")
         choose_parking(chat_id)
     else:
-        bot.sendMessage(chat_id, f"Parcheggio selezionato: {user_data[chat_id]['parking_name']}.")
+        bot.sendMessage(chat_id, f"Selected parking: {user_data[chat_id]['parking_name']}.")
         if chat_id in logged_in_users and logged_in_users[chat_id]:
             show_logged_in_menu(chat_id)
         else:
@@ -104,13 +113,13 @@ def reset_parking(msg):
         user_data[chat_id].pop('parking_name', None)
         user_data[chat_id].pop('parking_url', None)
         user_data[chat_id].pop('parking_port', None)
-    bot.sendMessage(chat_id, "Seleziona un nuovo parcheggio:")
+    bot.sendMessage(chat_id, "Select a again the parking:")
     choose_parking(chat_id)
 
-def show_graphs(msg):    
+def show_graphs(msg):
     chat_id = msg['chat']['id']
     if chat_id not in logged_in_users or not logged_in_users[chat_id]:
-        bot.sendMessage(chat_id, "Esegui il login per visualizzare i grafici.")
+        bot.sendMessage(chat_id, "Login is compulsory to see your statistics.")
         return
     
     try:
@@ -145,15 +154,11 @@ def show_graphs(msg):
             return
 
         # Trasforma i dati grezzi nei formati richiesti
-        # Aggrega i dati settimanalmente
-        weekly_transactions = {}
         weekly_spending = {}
         for entry in fees_data:
             try:
-                # Usa il parser per gestire correttamente la data con "T" e "Z"
-                date = parser.parse(entry.get("time"))  # Metodo 1
-                week = date.isocalendar()[1]  # Ottieni la settimana dell'anno
-                weekly_transactions[week] = weekly_transactions.get(week, 0) + 1
+                date = parser.parse(entry.get("time"))
+                week = date.isocalendar()[1]
                 weekly_spending[week] = weekly_spending.get(week, 0) + entry.get("fee", 0)
                 total_fees += entry.get("fee", 0)
                 count_parkings += 1
@@ -163,51 +168,56 @@ def show_graphs(msg):
         weekly_durations = {}
         for entry in durations_data:
             try:
-                # Usa il parser per gestire correttamente la data con "T" e "Z"
-                date = parser.parse(entry.get("time"))  # Metodo 1
+                date = parser.parse(entry.get("time"))
                 week = date.isocalendar()[1]
-                weekly_durations[week] = weekly_durations.get(week, 0) + entry.get("duration", 0)
+                duration = entry.get("duration", 0) or 0
+                weekly_durations[week] = weekly_durations.get(week, 0) + duration
                 total_durations += entry.get("duration", 0)
             except Exception as e:
                 print(f"Errore nel parsing della data per le durate: {e}")
 
         # Prepara i dati per i grafici
-        max_week = max(weekly_transactions.keys() | weekly_durations.keys() | weekly_spending.keys(), default=0)
-        weeks = [f"Settimana {i}" for i in range(1, max_week + 1)]
-        transactions = [weekly_transactions.get(i, 0) for i in range(1, max_week + 1)]
-        spending = [weekly_spending.get(i, 0) for i in range(1, max_week + 1)]
-        time_spent = [weekly_durations.get(i, 0) for i in range(1, max_week + 1)]
+        max_week = max(weekly_durations.keys() | weekly_spending.keys(), default=0)
+        weeks = list(range(1, max_week + 1))
+        spending = [weekly_spending.get(i, 0) for i in weeks]
+        time_spent = [weekly_durations.get(i, 0) for i in weeks]
 
-        # Genera i grafici
-        fig, axs = plt.subplots(3, 1, figsize=(10, 15))
-        
-        axs[0].bar(weeks, transactions, color='blue')
-        axs[0].set_title('Transazioni Settimanali')
-        axs[0].set_ylabel('Numero di Transazioni')
-        axs[0].tick_params(axis='x', rotation=45)
+        # Grafico delle spese
+        fig1, ax1 = plt.subplots(figsize=(10, 6))
+        ax1.plot(weeks, spending, marker='o', color='green', label='Spending (€)')
+        ax1.set_title('Weekly Spending (€)')
+        ax1.set_ylabel('Total Amount (€)')
+        ax1.set_xlabel('Weeks')
+        ax1.grid(True)
+        ax1.legend()
 
-        axs[1].bar(weeks, spending, color='green')
-        axs[1].set_title('Spese Settimanali (€)')
-        axs[1].set_ylabel('Spese Totali (€)')
-        axs[1].tick_params(axis='x', rotation=45)
+        buf1 = BytesIO()
+        plt.savefig(buf1, format='png')
+        buf1.seek(0)
+        plt.close(fig1)
 
-        axs[2].bar(weeks, time_spent, color='red')
-        axs[2].set_title('Tempo Trascorso al Parcheggio (Settimane)')
-        axs[2].set_ylabel('Tempo (ore)')
-        axs[2].tick_params(axis='x', rotation=45)
+        # Grafico del tempo trascorso
+        fig2, ax2 = plt.subplots(figsize=(10, 6))
+        ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (Hours)')
+        ax2.set_title('Time Spent in Parking (Weekly)')
+        ax2.set_ylabel('Time (Hours)')
+        ax2.set_xlabel('Weeks')
+        ax2.grid(True)
+        ax2.legend()
 
-        plt.tight_layout()
+        buf2 = BytesIO()
+        plt.savefig(buf2, format='png')
+        buf2.seek(0)
+        plt.close(fig2)
 
-        # Salva il grafico in un oggetto BytesIO per l'invio a Telegram
-        buf = BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
+        # Invia i grafici a Telegram
+        bot.sendPhoto(chat_id, buf1)
+        bot.sendPhoto(chat_id, buf2)
 
-        # Invia il grafico a Telegram
-        bot.sendPhoto(chat_id, buf)
+        show_logged_in_menu(chat_id)
         show_stats(total_durations,total_fees,count_parkings,chat_id)
         
-        
+
     except Exception as e:
         bot.sendMessage(chat_id, f"Errore nel recupero dei dati: {e}")
 def show_stats(tot_dur,tot_fee,tot_park,chat_id):
@@ -326,14 +336,17 @@ def on_callback_query(msg):
                     "parking_name": parking["name"]
                 })
                 
-                bot.sendMessage(chat_id, f"Parcheggio {parking['name']} selezionato!")
+                bot.sendMessage(chat_id, f"Parking {parking['name']} selected!")
                 
-                # Mostra il menu iniziale o riprendi il processo corrente
-                if 'state' in user_data[chat_id] and user_data[chat_id]['state'] == 'LOGIN_NAME':
-                    bot.sendMessage(chat_id, "Inserisci il tuo nome per il login:")
+                # Mostra il menu aggiornato
+                if chat_id in logged_in_users and logged_in_users[chat_id]:
+                    show_logged_in_menu(chat_id)
                 else:
                     show_initial_menu(chat_id)
                 break
+
+    elif query_data == 'change_parking':
+        handle_change_parking(chat_id)
 
     elif query_data == 'check':
         check_free_slots({'chat': {'id': chat_id}})
@@ -361,7 +374,7 @@ def on_callback_query(msg):
 
 def register(msg):
     chat_id = msg['chat']['id']
-    bot.sendMessage(chat_id, "Inserisci il tuo nome:")
+    bot.sendMessage(chat_id, "Type your name:")
     user_data[chat_id] = {'state': NAME}
 
 def login(msg):
@@ -373,135 +386,125 @@ def login(msg):
     #    return
     
     # Se il parcheggio è selezionato, avvia il processo di login
-    bot.sendMessage(chat_id, "Inserisci il tuo nome per il login:")
+    bot.sendMessage(chat_id, "Type your name for the login process:")
     user_data[chat_id]['state'] = 'LOGIN_NAME'
 def handle_message(msg):
     chat_id = msg['chat']['id']
     text = msg.get('text', '').strip().lower()
 
-    # Se l'utente è in uno stato di registrazione, non chiedere il parcheggio
+    # Se l'utente è loggato
+    if chat_id in logged_in_users and logged_in_users[chat_id]:
+        if text == '/start':
+            show_logged_in_menu(chat_id)
+        else:
+            bot.sendMessage(chat_id, "You are already logged in. Use the menu to choose an option.")
+        return
+
+    # Se l'utente è nel processo di login
     if chat_id in user_data and 'state' in user_data[chat_id]:
         process_state(chat_id, text)
         return
 
-    # Se l'utente non ha un parcheggio selezionato, chiedilo
-    if chat_id not in user_data or 'parking_name' not in user_data[chat_id]:
-        bot.sendMessage(chat_id, "Ciao! Che parcheggio vuoi scegliere? Una volta selezionato potrai cambiarlo solo scrivendo /parkings.")
-        choose_parking(chat_id)
-        return
-
-    # Comandi principali
+    # Se l'utente non è loggato né in login, avvia il menu iniziale
     if text == '/start':
         start(msg)
     elif text == '/parkings':
         reset_parking(msg)
     else:
-        bot.sendMessage(chat_id, "Non ho capito. Usa /start per iniziare o /parkings per cambiare parcheggio.")
+        bot.sendMessage(chat_id, "Use /parkings to begin.")
 def process_state(chat_id, text):
     state = user_data[chat_id]['state']
 
     if state == NAME:
         if is_valid_name(text):
             user_data[chat_id]['name'] = text
-            bot.sendMessage(chat_id, "Inserisci il tuo cognome:")
+            bot.sendMessage(chat_id, "Type your surname:")
             user_data[chat_id]['state'] = SURNAME
         else:
-            bot.sendMessage(chat_id, "Nome non valido. Inserisci un nome valido (solo lettere).")
+            bot.sendMessage(chat_id, "Name is not valid, insert only letters.")
 
     elif state == SURNAME:
         if is_valid_name(text):
             user_data[chat_id]['surname'] = text
-            bot.sendMessage(chat_id, "Inserisci il numero della tua carta di identità (es. AAAA55555):")
+            bot.sendMessage(chat_id, "Type our identity card number (es. AAAA55555):")
             user_data[chat_id]['state'] = IDENTITY
         else:
-            bot.sendMessage(chat_id, "Cognome non valido. Inserisci un cognome valido (solo lettere).")
+            bot.sendMessage(chat_id, "Surname is not valid, insert only letters.")
 
     elif state == IDENTITY:
         if is_valid_identity(text):
             user_data[chat_id]['identity'] = text
-            bot.sendMessage(chat_id, "Inserisci il numero della tua carta di credito (16 cifre):")
+            bot.sendMessage(chat_id, "Type your credit card number (16 numbers):")
             user_data[chat_id]['state'] = CREDIT_CARD
         else:
-            bot.sendMessage(chat_id, "Numero di carta di identità non valido. Reinserisci il numero (9 caratteri alfanumerici).")
+            bot.sendMessage(chat_id, "ID number is not valid. Insert it again.")
 
     elif state == CREDIT_CARD:
         if is_valid_credit_card(text):
             user_data[chat_id]['credit_card'] = text
             id = send_user_data_to_catalog(user_data[chat_id], chat_id)
             if id:
-                bot.sendMessage(chat_id, f"Registrazione completata!\nUsa il tuo numero di carta di identità o il codice associato: {id} per prenotare o accedere al parcheggio.")
+                bot.sendMessage(chat_id, f"Registration process complete!\nUse your card or the associated number: {id} for booking or enter to the parking")
                 logged_in_users[chat_id] = True
                 show_initial_menu(chat_id)
             del user_data[chat_id]['state']
         else:
-            bot.sendMessage(chat_id, "Numero di carta di credito non valido. Reinserisci il numero (16 cifre).")
+            bot.sendMessage(chat_id, "Credit card number is not valid. Insert it again.")
 
     elif state == 'LOGIN_NAME':
         if is_valid_name(text):
             user_data[chat_id]['login_name'] = text
-            bot.sendMessage(chat_id, "Inserisci il numero della tua carta di identità:")
+            bot.sendMessage(chat_id, "Type our identity card number:")
             user_data[chat_id]['state'] = 'LOGIN_IDENTITY'
         else:
-            bot.sendMessage(chat_id, "Nome non valido. Inserisci un nome valido.")
+            bot.sendMessage(chat_id, "Nome not found. Type your name again.")
 
     elif state == 'LOGIN_IDENTITY':
         if is_valid_identity(text):
             user_data[chat_id]['login_identity'] = text
             verify_login(chat_id)
         else:
-            bot.sendMessage(chat_id, "Numero di carta di identità non valido.")
-            user_data[chat_id]['state'] = 'LOGIN_NAME'  # Torna allo stato di inserimento nome
-
+            bot.sendMessage(chat_id, "ID card not found or associated to another person. Type it again")
+            
     else:
-        bot.sendMessage(chat_id, "Benvenuto al Parking Bot!\nPotrai controllare i posti liberi e prenotarli direttamente da qui.\nPer iniziare clicca su /start")
+        bot.sendMessage(chat_id, "Welcome back to IoT_SmartParking bot!\nYou could check avaiable spots and book it here.\nType /start")
 
 def verify_login(chat_id):
     url = f"{settings['catalog_url']}/users"
     headers = {'Content-Type': 'application/json'}
     
-    # Normalizza i dati forniti dall'utente
     login_name = user_data[chat_id].get('login_name', '').strip().lower()
-    login_identity = user_data[chat_id].get('login_identity', '').strip().upper()  # Converti in maiuscolo
+    login_identity = user_data[chat_id].get('login_identity', '').strip().upper()
 
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
         users = response.json().get("users", [])
-        print("Dati ricevuti dal catalogo:", users)  # Debug
 
-        # Log temporaneo per verificare il confronto
-        print(f"Login Name Inserito: {login_name}, Login Identity Inserito: {login_identity}")
-
-        # Cerca l'utente corrispondente
         for user in users:
-            catalog_name = user['name'].strip().lower()  # Normalizza il nome dal catalogo
-            catalog_identity = user['identity'].strip().upper()  # Normalizza l'identità dal catalogo
-
-            print(f"Confrontando con: Name={catalog_name}, Identity={catalog_identity}")
+            catalog_name = user['name'].strip().lower()
+            catalog_identity = user['identity'].strip().upper()
 
             if catalog_name == login_name and catalog_identity == login_identity:
                 logged_in_users[chat_id] = True
                 user_data[chat_id]["book_code"] = user['ID']
-                bot.sendMessage(chat_id, "Login avvenuto con successo!")
+                bot.sendMessage(chat_id, "Login successful!")
                 show_logged_in_menu(chat_id)
                 return 
 
-        # Se non corrisponde
-        bot.sendMessage(chat_id, "Credenziali non valide. Riprova.")
-        user_data[chat_id]['state'] = None
+        # Credenziali non valide
+        bot.sendMessage(chat_id, "Credentials are not valid. Try again.")
         show_initial_menu(chat_id)
 
     except requests.exceptions.RequestException as e:
-        bot.sendMessage(chat_id, f"Errore durante il login: {e}")
-        user_data[chat_id]['state'] = None
+        bot.sendMessage(chat_id, f"Error during the login process: {e}")
         show_initial_menu(chat_id)
 
 def show_wallet(msg):
-    """Mostra solo le transazioni individuali del wallet dell'utente loggato."""
     chat_id = msg['chat']['id']
     if chat_id not in logged_in_users or not logged_in_users[chat_id]:
-        bot.sendMessage(chat_id, "Esegui il login per vedere il tuo wallet.")
+        bot.sendMessage(chat_id, "Login is compulsory to see your wallet.")
         return
 
     url = 'http://127.0.0.1:5001/get_booking_info'
@@ -513,28 +516,32 @@ def show_wallet(msg):
         response.raise_for_status()
 
         response_data = response.json()
-        print("Risposta del server per il wallet:", response_data)  # Debug: stampa la risposta del server
-
-        # Verifica se ci sono transazioni individuali
         if "transactions" in response_data and isinstance(response_data["transactions"], list):
             transactions = response_data["transactions"]
-            message = "Le tue transazioni recenti:\n"
-
+            message = "Your recent transactions:\n"
             for transaction in transactions:
                 slot_id = transaction.get("slot_id", "N/A")
-                duration = round(transaction.get("duration", 0), 2)
+                duration = transaction.get("duration", "N/A")
                 fee = round(transaction.get("fee", 0), 2)
-                time = transaction.get("time", "N/A")  # Facoltativo
-                message += f"Posto: {slot_id}, Durata: {duration} ore, Tariffa: {fee} €, Data: {time}\n"
-
+                time = transaction.get("time", "N/A")
+                message += f"Slot: {slot_id}, Duration: {duration} hours, Fee: {fee} €, Date: {time}\n"
             bot.sendMessage(chat_id, message)
         else:
-            bot.sendMessage(chat_id, "Non ci sono transazioni recenti.")
+            bot.sendMessage(chat_id, "No transactions found.")
+
+        # Mostra il menu principale
+        show_logged_in_menu(chat_id)
 
     except Exception as e:
-        bot.sendMessage(chat_id, f"Errore nel recupero delle transazioni: {e}")
+        bot.sendMessage(chat_id, f"Error retrieving transactions: {e}")
 
-
+def reset_parking(chat_id):
+    if chat_id in user_data:
+        user_data[chat_id].pop('parking_name', None)
+        user_data[chat_id].pop('parking_url', None)
+        user_data[chat_id].pop('parking_port', None)
+    bot.sendMessage(chat_id, "Parking reset. Please select a new parking:")
+    choose_parking(chat_id)
 
 
 
@@ -567,17 +574,17 @@ def send_user_data_to_catalog(user_data, chat_id):
 def logout(chat_id):
     if chat_id in logged_in_users:
         del logged_in_users[chat_id]
-        bot.sendMessage(chat_id, "Logout avvenuto con successo.")
+        bot.sendMessage(chat_id, "Logout successful.")
     else:
-        bot.sendMessage(chat_id, "Non sei loggato.")
-    
-    show_initial_menu(chat_id)
+        bot.sendMessage(chat_id, "You are not logged in the system.")
 
+    show_initial_menu(chat_id)
+    
 def check_free_slots(msg):
     chat_id = msg['chat']['id']
     
     if chat_id not in user_data or 'parking_url' not in user_data[chat_id] or 'parking_port' not in user_data[chat_id]:
-        bot.sendMessage(chat_id, "Per favore, seleziona prima un parcheggio.")
+        bot.sendMessage(chat_id, "Plese select a parking before continue.")
         choose_parking(chat_id)
         return
     
@@ -604,9 +611,9 @@ def check_free_slots(msg):
         
         if free_slots:
             slots_info = "\n".join([f"ID: {slot['location']}, Nome: {slot['name']}" for slot in free_slots])
-            bot.sendMessage(chat_id, f'Posti liberi:\n{slots_info}')
+            bot.sendMessage(chat_id, f'Avaiable slots:\n{slots_info}')
         else:
-            bot.sendMessage(chat_id, 'Nessun posto libero al momento.')
+            bot.sendMessage(chat_id, 'There are no more avaiable parking slots now.')
     except Exception as e:
         bot.sendMessage(chat_id, f'Errore nel recupero dei dati dei posti: {e}')
 
@@ -620,7 +627,7 @@ def book_slot(msg):
     name_dev = user_data.get(chat_id, {}).get('parking_name', 'guest')  # Nome predefinito per utenti non registrati
 
     if not parking_url or not parking_port:
-        bot.sendMessage(chat_id, "Errore: Devi selezionare un parcheggio prima di prenotare.")
+        bot.sendMessage(chat_id, "Error: Plese select a parking before book.")
         return
 
     url = f'http://{parking_url}:{parking_port}/get_best_parking'
@@ -638,13 +645,18 @@ def book_slot(msg):
 
         r = book_response.json()
         slot_id = r.get('slot_id', 'N/A')
+        location = r.get('location', 'N/A')
+        name= r.get('name', 'N/A')
+        print(f"Slot ID: {slot_id}, Location: {location}, Name: {name}")
+        
         booking_code = r.get('booking_code', 'N/A')
+        
 
         if chat_id in logged_in_users and logged_in_users[chat_id]:
             BC = user_data[chat_id].get('book_code', 'N/A')
-            bot.sendMessage(chat_id, f"Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {BC}. La prenotazione è valida per 2 minuti.")
+            bot.sendMessage(chat_id, f"Your reserved slot is: {location}. Your booking code is: {BC}. \n Your parking slot will be reserved for 2 minutes.")
         else:
-            bot.sendMessage(chat_id, f"Il tuo posto prenotato è: {slot_id}. Il codice di prenotazione è: {booking_code}. La prenotazione è valida per 2 minuti.")
+            bot.sendMessage(chat_id, f"Your reserved slot is: {location}. Your booking code is: {booking_code}. \n Your parking slot will be reserved for 2 minutes.")
 
         # Timer per la scadenza della prenotazione
         Timer(120, expire_reservation, args=[r, booking_code, msg]).start()

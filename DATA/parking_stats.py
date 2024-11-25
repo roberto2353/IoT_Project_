@@ -252,6 +252,7 @@ def main():
 
     parking_selector = ParkingSelector(catalog_url)
     available_parkings = parking_selector.fetch_parkings()
+    #print(available_parkings)
     selected_parking_id = parking_selector.select_parking(available_parkings['parkings'])
     st.sidebar.title("Navigation")
     dashboard_choice = st.sidebar.selectbox("Choose Dashboard", ["Occupancy", "Fees", "Durations"])

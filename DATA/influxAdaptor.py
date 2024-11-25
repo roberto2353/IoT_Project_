@@ -41,13 +41,6 @@ class dbAdaptor:
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
-        # if topic is None:
-        #     self.topic = 'ParkingLotFabio/+/status'
-        # else:
-        #     self.topic = topic
-
-        #self.messageBroker = 'localhost'
-
         # Configurazione del client InfluxDB
         self.client = InfluxDBClient(host="localhost", port=self.influx_port, username="root", password="root", database=self.influx_db)
         if {'name': self.influx_db} not in self.client.get_list_database():
@@ -143,10 +136,11 @@ class dbAdaptor:
         floor = data.get('floor')
         parking = data.get('parking')
         booking_code = data.get('booking_code', 'unknown')
+        print("BOOKING CODE", booking_code)
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
-        active = data.get('active')
+        active = data.get('active', True)
         json_body = [
                         {
                             "measurement": 'status',
@@ -199,7 +193,7 @@ class dbAdaptor:
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
-                active = event.get('active', '') 
+                active = event.get('active', True) 
                 parking = event.get('parking', 'unknown')
 
                 # Controlla se un sensore con lo stesso ID esiste già nel database
@@ -364,7 +358,7 @@ class dbAdaptor:
                     "location": device_info['location'],
                     "type": device_info['type'],
                     "booking_code": device_info.get('booking_code', ''),
-                    "active": device_info.get('active', '')
+                    "active": device_info.get('active', True)
                     #"floor": self.extract_floor(selected_device['location'])
                     }
             
@@ -431,7 +425,7 @@ class dbAdaptor:
 
                 # Query per ottenere tutte le transazioni individuali per il booking_code
                 query_transactions = f"""
-                    SELECT "slot_id", "duration", "fee", time
+                    SELECT "ID", "duration", "fee", time
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
@@ -440,7 +434,7 @@ class dbAdaptor:
                 transactions = []
                 for point in result_transactions.get_points():
                     transactions.append({
-                        "slot_id": point.get("slot_id", "N/A"),
+                        "slot_id": point.get("ID", "N/A"),
                         "duration": point.get("duration", 0),
                         "fee": point.get("fee", 0),
                         "time": point.get("time")  # Facoltativo: data/ora
@@ -492,7 +486,7 @@ class dbAdaptor:
                         'status': sensor['status'],
                         'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', ''),
-                        'active': sensor.get('active', ''),
+                        'active': sensor.get('active', True),
                         "parking_id": sensor.get('parking_id', '')
                     })
                 
@@ -669,6 +663,7 @@ class dbAdaptor:
 if __name__ == "__main__":
 
     settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     test = dbAdaptor(settings)
     test.start()
     
@@ -684,7 +679,7 @@ if __name__ == "__main__":
 
     cherrypy.config.update({
         'server.socket_host': '127.0.0.1',
-        'server.socket_port': 5001,
+        'server.socket_port': service_port,
         'engine.autoreload.on': False
     })
 
@@ -693,7 +688,8 @@ if __name__ == "__main__":
     
     try:
         cherrypy.engine.start()
-        print("dbAdaptor service started on port 5001.")
+        #cherrypy.quickstart(test)
+        print(f"dbAdaptor service started on port {service_port}.")
         cherrypy.engine.block()
     except KeyboardInterrupt:
         print("Shutting down dbAdaptor service...")

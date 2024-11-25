@@ -245,7 +245,6 @@ class SensorREST(threading.Thread):
                 device_found = False
                 for device in devices_data['devices']:
                     if device['deviceInfo']['ID'] == int(sensor_id):
-                        print("TROVATO!!!!!!!!")
                         device['deviceInfo']['active'] = True if new_status == 'active' else False
                         device['deviceInfo']['last_update'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         #TODO: SEE if necessary to also insert free as status since may be reserved or occupied when becomes not active or maybe force a departure
@@ -360,6 +359,8 @@ class SensorREST(threading.Thread):
 
 
 if __name__ == '__main__':
+    settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -369,10 +370,10 @@ if __name__ == '__main__':
         }
     }
 
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8083})
+    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': service_port})
     #status = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json'))
     #settings = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json'))
-    settings = json.load(open(SETTINGS))
+    
     #status = json.load(open(DEVICES))
     s = SensorREST(settings)
     cherrypy.tree.mount(s, '/', conf)
