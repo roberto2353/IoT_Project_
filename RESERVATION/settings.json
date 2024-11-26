@@ -1,0 +1,16 @@
+{
+    "updateInterval": 60,
+    "serviceInfo": {
+        "ID": 4,
+        "name": "ReservationService",
+        "last_update": "",
+        "port": 8098
+    },
+    "brokerPort": 1883, 
+    "qos": 2,
+    "messageBroker": "mqtt.eclipseprojects.io",
+    "catalog_url": "http://localhost:8090",
+    "baseTopic": "ParkingLotFabio",
+    "adaptor_url": "http://localhost:5001",
+    "devConn_url": "http://127.0.0.1:8083/devices"
+}
