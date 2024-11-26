@@ -125,19 +125,37 @@ def show_graphs(msg):
     try:
         # URL di base per il servizio REST
         base_url = 'http://127.0.0.1:5001'
-
+        
         # Ottieni ID utente
-        user_id = user_data[chat_id].get('ID', '')
-        parking_id = user_data[chat_id].get('parking_name','')
-        name = user_data[chat_id].get('name','')
-        surname = user_data[chat_id].get('surname','')
+        user_id = user_data[chat_id].get('book_code', '')
+        print("ID utente:", user_id)
+        parking_id = user_data[chat_id].get('parking_name', '')
+        name = user_data[chat_id].get('login_name', '')
+        surname = user_data[chat_id].get('surname', '')
 
         # Recupera transazioni settimanali (fees)
         fees_url = f'{base_url}/fees'
         fees_params = {'parking_id': parking_id}
         fees_response = requests.get(fees_url, params=fees_params)
-        fees_data = fees_response.json()
-        total_fees = 0 
+        fees_response.raise_for_status()  # Lancia un'eccezione se la richiesta non va a buon fine
+        fees_datalist = fees_response.json()
+
+        # Recupera tempo trascorso settimanalmente (durations)
+        durations_url = f'{base_url}/durations'
+        durations_params = {'parking_id': parking_id}
+        durations_response = requests.get(durations_url, params=durations_params)
+        durations_response.raise_for_status()
+        durations_datalist = durations_response.json()
+
+        # Validazione delle risposte
+        if not isinstance(fees_datalist, list):
+            bot.sendMessage(chat_id, "Errore: i dati delle transazioni non sono nel formato corretto.")
+            return
+        if not isinstance(durations_datalist, list):
+            bot.sendMessage(chat_id, "Errore: i dati delle durate non sono nel formato corretto.")
+            return
+
+        total_fees = 0
         user_fees = 0
         user_fees_weekly = {}
         total_durations = 0
@@ -146,25 +164,10 @@ def show_graphs(msg):
         count_parkings = 0
         count_parkings_user = 0
         count_parkings_weekly_user = {}
-        
 
-        # Recupera tempo trascorso settimanalmente (durations)
-        durations_url = f'{base_url}/durations'
-        durations_params = {'parking_id': parking_id}
-        durations_response = requests.get(durations_url, params=durations_params)
-        durations_data = durations_response.json()
-
-        # Gestione degli errori nelle risposte
-        if isinstance(fees_data, dict) and 'error' in fees_data:
-            bot.sendMessage(chat_id, "Errore durante il recupero dei dati delle transazioni.")
-            return
-        if isinstance(durations_data, dict) and 'error' in durations_data:
-            bot.sendMessage(chat_id, "Errore durante il recupero dei dati delle durate.")
-            return
-
-        # Trasforma i dati grezzi nei formati richiesti
+        # Elaborazione dei dati delle transazioni
         weekly_spending = {}
-        for entry in fees_data:
+        for entry in fees_datalist:
             try:
                 date = parser.parse(entry.get("time"))
                 week = date.isocalendar()[1]
@@ -174,36 +177,40 @@ def show_graphs(msg):
                 if entry.get("booking_code", "") == user_id:
                     user_fees += entry.get("fee", 0)
                     count_parkings_user += 1
-                    count_parkings_weekly_user = count_parkings_weekly_user.get(week,0) + 1
-                    user_fees_weekly[week] = user_fees_weekly.get(week, 0) + entry.get("fee", 0) 
+                    
+                    
+                    count_parkings_weekly_user[week] = count_parkings_weekly_user.get(week, 0) + 1
+                    user_fees_weekly[week] = user_fees_weekly.get(week, 0) + entry.get("fee", 0)
             except Exception as e:
                 print(f"Errore nel parsing della data per le transazioni: {e}")
 
+        # Elaborazione dei dati delle durate
         weekly_durations = {}
-        for entry in durations_data:
+        for entry in durations_datalist:
             try:
                 date = parser.parse(entry.get("time"))
                 week = date.isocalendar()[1]
                 duration = entry.get("duration", 0) or 0
                 weekly_durations[week] = weekly_durations.get(week, 0) + duration
-                total_durations += entry.get("duration", 0)
-                if entry.get("booking_code","") == user_id:
-                    user_durations+= entry.get("duration", 0)
-                    user_durations_weekly[week] = user_durations_weekly.get(week, 0) + entry.get("duration",0)
-                    
+                total_durations += duration
+                if entry.get("booking_code", "") == user_id:
+                    user_durations += duration
+                    user_durations_weekly[week] = user_durations_weekly.get(week, 0) + duration
             except Exception as e:
                 print(f"Errore nel parsing della data per le durate: {e}")
-                
 
-        plot_stats_manager(weekly_durations, weekly_spending, chat_id) # plot of all stats in db NOT USER ORIENTED
-        plot_stats_user(user_durations_weekly, user_fees_weekly, chat_id, name, surname) #plot of user stats
+        # Generazione dei grafici e invio
+        plot_stats_manager(weekly_durations, weekly_spending, chat_id)
+        plot_stats_user(user_durations_weekly, user_fees_weekly, chat_id, name, surname)
         show_logged_in_menu(chat_id)
-        show_stats_manager(total_durations,total_fees,count_parkings,chat_id)
-        show_stats_user(user_durations,user_fees,count_parkings_user,chat_id, name, surname)
-        
+        show_stats_manager(total_durations, total_fees, count_parkings, chat_id)
+        show_stats_user(user_durations, user_fees, count_parkings_user, chat_id, name, surname)
 
+    except requests.exceptions.RequestException as e:
+        bot.sendMessage(chat_id, f"Errore nella richiesta al servizio REST: {e}")
     except Exception as e:
-        bot.sendMessage(chat_id, f"Errore nel recupero dei dati: {e}")
+        bot.sendMessage(chat_id, f"Errore generale: {e}")
+
         
 def plot_stats_manager(weekly_durations, weekly_spending,chat_id):
     # Prepara i dati per i grafici
@@ -228,9 +235,9 @@ def plot_stats_manager(weekly_durations, weekly_spending,chat_id):
 
     # Grafico del tempo trascorso
     fig2, ax2 = plt.subplots(figsize=(10, 6))
-    ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (min)')
+    ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (hours)')
     ax2.set_title('Time Spent in Parking (Weekly)')
-    ax2.set_ylabel('Time (min)')
+    ax2.set_ylabel('Time (hours)')
     ax2.set_xlabel('Weeks')
     ax2.grid(True)
     ax2.legend()
@@ -249,7 +256,7 @@ def plot_stats_user(user_weekly_duration, user_weekly_spending, chat_id, name, s
     max_week = max(user_weekly_duration.keys() | user_weekly_spending.keys(), default=0)
     weeks = list(range(1, max_week + 1))
     spending = [user_weekly_spending.get(i, 0) for i in weeks]
-    time_spent = [user_weekly_duration.get(i, 0) for i in weeks]
+    time_spent = [user_weekly_duration.get(i, 0) for i in weeks]*60
 
     # Grafico delle spese
     fig1, ax1 = plt.subplots(figsize=(10, 6))
@@ -268,7 +275,7 @@ def plot_stats_user(user_weekly_duration, user_weekly_spending, chat_id, name, s
     # Grafico del tempo trascorso
     fig2, ax2 = plt.subplots(figsize=(10, 6))
     ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (min)')
-    ax2.set_title('Time Spent in Parking by {name} {surname}(Weekly)')
+    ax2.set_title(f'Time Spent in Parking by {name} {surname}(Weekly)')
     ax2.set_ylabel('Time (min)')
     ax2.set_xlabel('Weeks')
     ax2.grid(True)

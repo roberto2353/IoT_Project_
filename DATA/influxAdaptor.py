@@ -547,7 +547,7 @@ class dbAdaptor:
             elif end:
                 query += f' WHERE time <= {end}'
             if parking_id:
-                query += f' AND parking_id = \'{parking_id}\''
+                query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
             result = self.client.query(query, database = 'prova_stats')
@@ -573,7 +573,7 @@ class dbAdaptor:
             elif end:
                 query += f' WHERE time <= {end}'
             if parking_id:
-                query += f' AND parking_id = \'{parking_id}\''
+                query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
             result = self.client.query(query, database = 'prova_stats')
