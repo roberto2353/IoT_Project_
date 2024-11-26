@@ -128,20 +128,29 @@ def show_graphs(msg):
 
         # Ottieni ID utente
         user_id = user_data[chat_id].get('ID', '')
+        parking_id = user_data[chat_id].get('parking_name','')
+        name = user_data[chat_id].get('name','')
+        surname = user_data[chat_id].get('surname','')
 
         # Recupera transazioni settimanali (fees)
         fees_url = f'{base_url}/fees'
-        fees_params = {'parking_id': user_id}
+        fees_params = {'parking_id': parking_id}
         fees_response = requests.get(fees_url, params=fees_params)
         fees_data = fees_response.json()
         total_fees = 0 
+        user_fees = 0
+        user_fees_weekly = {}
         total_durations = 0
+        user_durations = 0
+        user_durations_weekly = {}
         count_parkings = 0
+        count_parkings_user = 0
+        count_parkings_weekly_user = {}
         
 
         # Recupera tempo trascorso settimanalmente (durations)
         durations_url = f'{base_url}/durations'
-        durations_params = {'parking_id': user_id}
+        durations_params = {'parking_id': parking_id}
         durations_response = requests.get(durations_url, params=durations_params)
         durations_data = durations_response.json()
 
@@ -162,6 +171,11 @@ def show_graphs(msg):
                 weekly_spending[week] = weekly_spending.get(week, 0) + entry.get("fee", 0)
                 total_fees += entry.get("fee", 0)
                 count_parkings += 1
+                if entry.get("booking_code", "") == user_id:
+                    user_fees += entry.get("fee", 0)
+                    count_parkings_user += 1
+                    count_parkings_weekly_user = count_parkings_weekly_user.get(week,0) + 1
+                    user_fees_weekly[week] = user_fees_weekly.get(week, 0) + entry.get("fee", 0) 
             except Exception as e:
                 print(f"Errore nel parsing della data per le transazioni: {e}")
 
@@ -173,54 +187,195 @@ def show_graphs(msg):
                 duration = entry.get("duration", 0) or 0
                 weekly_durations[week] = weekly_durations.get(week, 0) + duration
                 total_durations += entry.get("duration", 0)
+                if entry.get("booking_code","") == user_id:
+                    user_durations+= entry.get("duration", 0)
+                    user_durations_weekly[week] = user_durations_weekly.get(week, 0) + entry.get("duration",0)
+                    
             except Exception as e:
                 print(f"Errore nel parsing della data per le durate: {e}")
+                
 
-        # Prepara i dati per i grafici
-        max_week = max(weekly_durations.keys() | weekly_spending.keys(), default=0)
-        weeks = list(range(1, max_week + 1))
-        spending = [weekly_spending.get(i, 0) for i in weeks]
-        time_spent = [weekly_durations.get(i, 0) for i in weeks]
-
-        # Grafico delle spese
-        fig1, ax1 = plt.subplots(figsize=(10, 6))
-        ax1.plot(weeks, spending, marker='o', color='green', label='Spending (€)')
-        ax1.set_title('Weekly Spending (€)')
-        ax1.set_ylabel('Total Amount (€)')
-        ax1.set_xlabel('Weeks')
-        ax1.grid(True)
-        ax1.legend()
-
-        buf1 = BytesIO()
-        plt.savefig(buf1, format='png')
-        buf1.seek(0)
-        plt.close(fig1)
-
-        # Grafico del tempo trascorso
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
-        ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (Hours)')
-        ax2.set_title('Time Spent in Parking (Weekly)')
-        ax2.set_ylabel('Time (Hours)')
-        ax2.set_xlabel('Weeks')
-        ax2.grid(True)
-        ax2.legend()
-
-        buf2 = BytesIO()
-        plt.savefig(buf2, format='png')
-        buf2.seek(0)
-        plt.close(fig2)
-
-        # Invia i grafici a Telegram
-        bot.sendPhoto(chat_id, buf1)
-        bot.sendPhoto(chat_id, buf2)
-
+        plot_stats_manager(weekly_durations, weekly_spending, chat_id) # plot of all stats in db NOT USER ORIENTED
+        plot_stats_user(user_durations_weekly, user_fees_weekly, chat_id, name, surname) #plot of user stats
         show_logged_in_menu(chat_id)
-        show_stats(total_durations,total_fees,count_parkings,chat_id)
+        show_stats_manager(total_durations,total_fees,count_parkings,chat_id)
+        show_stats_user(user_durations,user_fees,count_parkings_user,chat_id, name, surname)
         
 
     except Exception as e:
         bot.sendMessage(chat_id, f"Errore nel recupero dei dati: {e}")
-def show_stats(tot_dur,tot_fee,tot_park,chat_id):
+        
+def plot_stats_manager(weekly_durations, weekly_spending,chat_id):
+    # Prepara i dati per i grafici
+    max_week = max(weekly_durations.keys() | weekly_spending.keys(), default=0)
+    weeks = list(range(1, max_week + 1))
+    spending = [weekly_spending.get(i, 0) for i in weeks]
+    time_spent = [weekly_durations.get(i, 0) for i in weeks]
+
+    # Grafico delle spese
+    fig1, ax1 = plt.subplots(figsize=(10, 6))
+    ax1.plot(weeks, spending, marker='o', color='green', label='Spending (€)')
+    ax1.set_title('Weekly Spending (€)')
+    ax1.set_ylabel('Total Amount (€)')
+    ax1.set_xlabel('Weeks')
+    ax1.grid(True)
+    ax1.legend()
+
+    buf1 = BytesIO()
+    plt.savefig(buf1, format='png')
+    buf1.seek(0)
+    plt.close(fig1)
+
+    # Grafico del tempo trascorso
+    fig2, ax2 = plt.subplots(figsize=(10, 6))
+    ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (min)')
+    ax2.set_title('Time Spent in Parking (Weekly)')
+    ax2.set_ylabel('Time (min)')
+    ax2.set_xlabel('Weeks')
+    ax2.grid(True)
+    ax2.legend()
+
+    buf2 = BytesIO()
+    plt.savefig(buf2, format='png')
+    buf2.seek(0)
+    plt.close(fig2)
+
+    # Invia i grafici a Telegram
+    bot.sendPhoto(chat_id, buf1)
+    bot.sendPhoto(chat_id, buf2)        
+        
+def plot_stats_user(user_weekly_duration, user_weekly_spending, chat_id, name, surname):
+    # Prepara i dati per i grafici
+    max_week = max(user_weekly_duration.keys() | user_weekly_spending.keys(), default=0)
+    weeks = list(range(1, max_week + 1))
+    spending = [user_weekly_spending.get(i, 0) for i in weeks]
+    time_spent = [user_weekly_duration.get(i, 0) for i in weeks]
+
+    # Grafico delle spese
+    fig1, ax1 = plt.subplots(figsize=(10, 6))
+    ax1.plot(weeks, spending, marker='o', color='green', label='Spending (€)')
+    ax1.set_title(f'Weekly Spending of {name} {surname}(€)')
+    ax1.set_ylabel('Total Amount (€)')
+    ax1.set_xlabel('Weeks')
+    ax1.grid(True)
+    ax1.legend()
+
+    buf1 = BytesIO()
+    plt.savefig(buf1, format='png')
+    buf1.seek(0)
+    plt.close(fig1)
+
+    # Grafico del tempo trascorso
+    fig2, ax2 = plt.subplots(figsize=(10, 6))
+    ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (min)')
+    ax2.set_title('Time Spent in Parking by {name} {surname}(Weekly)')
+    ax2.set_ylabel('Time (min)')
+    ax2.set_xlabel('Weeks')
+    ax2.grid(True)
+    ax2.legend()
+
+    buf2 = BytesIO()
+    plt.savefig(buf2, format='png')
+    buf2.seek(0)
+    plt.close(fig2)
+
+    # Invia i grafici a Telegram
+    bot.sendPhoto(chat_id, buf1)
+    bot.sendPhoto(chat_id, buf2)        
+def show_stats_user(tot_dur_usr, tot_fee_usr, tot_park_usr, chat_id, name, surname):
+    gas_price_per_litre =1.74
+    diesel_fuel_per_litre =1.64
+    avg_speed = 40
+    co_2_gas = 108 # (g/km)
+    co_2_diesel_fuel = 90
+    diesel_fuel_avg_km_per_litre = 17
+    gas_avg_km_per_litre = 13
+    avg_ext_per_hour_park_fee = 1.5 #euros per hour 
+    bot.sendMessage(chat_id, f"Calculating total stats for user {name} {surname}... ")
+    # STATS TO REACH OUR PARKINGS
+    time_to_reach_parking_wc = 5 # min
+    tot_time_to_reach_parking_wc =time_to_reach_parking_wc * tot_park_usr
+    tot_km_to_reach_parking_wc = tot_park_usr * avg_speed/(60/time_to_reach_parking_wc)
+    tot_money_to_reach_parking_diesel = (tot_km_to_reach_parking_wc/diesel_fuel_avg_km_per_litre) * diesel_fuel_per_litre
+    tot_money_to_reach_parking_gas = (tot_km_to_reach_parking_wc/gas_avg_km_per_litre) * gas_price_per_litre
+    co_2_to_reach_parking_diesel = tot_km_to_reach_parking_wc * co_2_diesel_fuel # (g)
+    co_2_to_reach_parking_gas = tot_km_to_reach_parking_wc * co_2_gas #g
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    print("Parking stats for diesel vehicles: \n")
+    print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
+    print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
+    print(f"Total money to reach our parkings: {tot_money_to_reach_parking_diesel} euros")
+    print(f"Total CO2 emissions: {co_2_to_reach_parking_diesel} g")
+    
+    print("Parking stats for gas vehicles: \n")
+    print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
+    print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
+    print(f"Total money to reach our parkings: {tot_money_to_reach_parking_gas} euros")
+    print(f"Total CO2 emissions: {co_2_to_reach_parking_gas} g")
+    # bot.sendMessage(chat_id, f"Total stats while using our: {e}")
+    
+    #STATS NOT USING PARKINGS
+    avg_time_to_park = 15
+    tot_time_to_reach_ext_park =avg_time_to_park * tot_park_usr
+    tot_km_to_reach_ext_park = tot_park_usr * avg_speed/(60/avg_time_to_park)
+    tot_money_to_reach_ext_park_diesel = (tot_km_to_reach_ext_park/diesel_fuel_avg_km_per_litre) * diesel_fuel_per_litre
+    tot_money_to_reach_ext_park_gas = (tot_km_to_reach_ext_park/gas_avg_km_per_litre) * gas_price_per_litre
+    co_2_to_reach_ext_park_diesel = tot_km_to_reach_ext_park * co_2_diesel_fuel # (g)
+    co_2_to_reach_ext_park_gas = tot_km_to_reach_ext_park * co_2_gas #g
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message    
+    
+    print("Stats if our parkings were not used - diesel vehicles: \n")
+    print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
+    print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
+    print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_diesel} euros")
+    print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_diesel} g")
+    
+    print("Stats if our parkings were not used - gas vehicles: \n")
+    print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
+    print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
+    print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_gas} euros")
+    print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_gas} g")
+    
+    #TOTAL MONEY SPENT (INDOOR VS OUTDOOR, DIESEL VS GAS)
+    
+    tot_money_park_plus_reach_indoor_diesel  = tot_money_to_reach_parking_diesel + tot_fee_usr
+    tot_money_park_plus_reach_indoor_gas  =  tot_money_to_reach_parking_gas + tot_fee_usr
+    tot_money_park_plus_reach_outdoor_diesel = tot_money_to_reach_ext_park_diesel + tot_dur_usr *  avg_ext_per_hour_park_fee
+    tot_money_park_plus_reach_outdoor_gas = tot_money_to_reach_ext_park_gas + tot_dur_usr * avg_ext_per_hour_park_fee
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    print(f"Total money spent while using our services (money to reach parking plus fees) - diesel vehicles :{tot_money_park_plus_reach_indoor_diesel} euros\n")
+    print(f"Total money spent while using our services (money to reach parking plus fees) - gas vehicles :{tot_money_park_plus_reach_indoor_gas} euros\n")
+    print(f"Total money spent if our services were not used (money to find external parkings plus fees) - diesel vehicles :{tot_money_park_plus_reach_outdoor_diesel} euros\n")
+    print(f"Total money spent if our services were not used (money to find external parkings plus fees) - gas vehicles :{tot_money_park_plus_reach_outdoor_gas} euros\n")
+    
+    #TOTAL CO2 EMISSIONS (INDOOR VS OUTDOOR, DIESEL VS GAS)
+    
+    tot_co2_indoor_gas = co_2_to_reach_parking_gas
+    tot_co2_indoor_diesel = co_2_to_reach_parking_diesel
+    tot_co2_outdoor_gas = co_2_to_reach_ext_park_diesel
+    tot_co2_outdoor_diesel = co_2_to_reach_ext_park_diesel
+    # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
+    print(f"Total co2 emissions using our services - diesel vehicle: {tot_co2_indoor_diesel} g \n")
+    print(f"Total co2 emissions using our services - gas vehicle: {tot_co2_indoor_gas} g\n")
+    print(f"Total co2 emissions if our services were not used (co2 to find external parkings) - diesel vehicle: {tot_co2_outdoor_diesel} g\n")
+    print(f"Total co2 emissions if our services were not used (co2 to find external parkings) - gas vehicle: {tot_co2_outdoor_gas} g\n")
+    
+    # SAVINGS
+    saved_time = tot_time_to_reach_ext_park - tot_time_to_reach_ext_park
+    saved_km = tot_km_to_reach_ext_park - tot_km_to_reach_parking_wc
+    saved_co2_gas = tot_co2_outdoor_gas - tot_co2_indoor_gas
+    saved_co2_diesel = tot_co2_outdoor_diesel - tot_co2_indoor_diesel
+    saved_money_gas = tot_money_park_plus_reach_outdoor_gas - tot_money_park_plus_reach_indoor_gas
+    saved_money_diesel = tot_money_park_plus_reach_outdoor_diesel - tot_money_park_plus_reach_indoor_diesel
+    print("Savings achieved using our services:\n")
+    print(f"Money saved - diesel vehicle: {saved_money_diesel} euros\n")
+    print(f"Money saved - gas vehicle: {saved_money_gas} euros\n")
+    print(f"Distance saved: {saved_km} km\n")
+    print(f"co2 emissions saved - diesel vehicle: {saved_co2_diesel} g\n")
+    print(f"co2 emissions saved - gas vehicle: {saved_co2_gas} g\n")
+    print(f"Time saved: {saved_time} min\n")
+
+def show_stats_manager(tot_dur,tot_fee,tot_park,chat_id):
     gas_price_per_litre =1.74
     diesel_fuel_per_litre =1.64
     avg_speed = 40

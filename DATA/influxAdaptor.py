@@ -524,12 +524,14 @@ class dbAdaptor:
             start = params.get('start')
             end = params.get('end')
             parking_id = params.get('parking_id')
+            print("prova query fees su adaptor via db prova stats")
             return self.get_fees(start, end, parking_id)
 
         elif len(uri) ==1 and uri[0] == "durations":
             start = params.get('start')
             end = params.get('end')
             parking_id = params.get('parking_id')
+            print("prova query durations su adaptor via db prova stats")
             return self.get_durations(start, end, parking_id)
         
         else:

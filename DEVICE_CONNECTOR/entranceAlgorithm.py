@@ -95,7 +95,7 @@ class Algorithm:
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
-                    dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
+                    dev["deviceInfo"]['booking_code'] = ""
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
                     print("\n NUOVI DATI DA INSERIRE NEL DB \n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')

@@ -38,5 +38,12 @@
         }
     ],
     "parkings": [],
-    "services": []
+    "services": [
+        {
+            "ID": 2,
+            "name": "EntranceService",
+            "last_update": "",
+            "port": "8085"
+        }
+    ]
 }
