@@ -79,35 +79,103 @@ class SensorDashboard:
                         st.error("Failed to update sensor state")
 
     def run(self):
-        st.title("Parking Sensor Dashboard")
-        
-        # Step 1: Select parking from catalog
-        data = self.fetch_parkings()
-        if data:
-            parkings = {parking['ID']: parking['name'] for parking in data['parkings']}
-            parking_name = st.sidebar.selectbox("Select Parking", list(parkings.values()))
-            st.write(f"Selected Parking: {parking_name}")
-            if 'current_parking' not in st.session_state or st.session_state.current_parking != parking_name:
-                st.session_state.current_parking = parking_name
-                st.session_state.current_parking_changed = True
+        if st.session_state.logged_in:
+            st.title("Parking Sensor Dashboard")
+            
+            # Step 1: Select parking from catalog
+            data = self.fetch_parkings()
+            if data:
+                parkings = {parking['ID']: parking['name'] for parking in data['parkings']}
+                parking_name = st.sidebar.selectbox("Select Parking", list(parkings.values()))
+                st.write(f"Selected Parking: {parking_name}")
+                if 'current_parking' not in st.session_state or st.session_state.current_parking != parking_name:
+                    st.session_state.current_parking = parking_name
+                    st.session_state.current_parking_changed = True
 
-            selected_parking = next(parking for parking in data['parkings'] if parking['name'] == parking_name)
-            self.devConn_url = f"http://{selected_parking['url']}:{selected_parking['port']}"
-            # Step 2: Fetch and display sensors for selected parking
-            sensors = self.fetch_sensors(parking_name)
-            if not sensors.empty:
-                self.display_sensors(sensors)
+                selected_parking = next(parking for parking in data['parkings'] if parking['name'] == parking_name)
+                self.devConn_url = f"http://{selected_parking['url']}:{selected_parking['port']}"
+                # Step 2: Fetch and display sensors for selected parking
+                sensors = self.fetch_sensors(parking_name)
+                if not sensors.empty:
+                    self.display_sensors(sensors)
+                else:
+                    st.write("No sensor data available for the selected parking.")
             else:
-                st.write("No sensor data available for the selected parking.")
+                st.write("No parkings available.")
         else:
-            st.write("No parkings available.")
+            st.title("Login to access administrator priviledges")
+
+class UserAuthentication:
+        def __init__(self, catalog_url):
+            self.catalog_url = catalog_url
+
+        def fetch_users(self):
+            """Fetch all users from the catalog."""
+            try:
+                response = requests.get(f"{self.catalog_url}/users")
+                response.raise_for_status()
+                #st.write(response.json())
+                #print("response:", response.json())
+                return response.json().get("users", [])
+            except requests.exceptions.RequestException as e:
+                #print("pippo")
+                st.error(f"Error fetching users: {e}")
+                return []
+            
+        def login_user(self, identity):
+            """Validate user credentials and check privileges."""
+            users = self.fetch_users()
+            for user in users:
+                if user["identity"] == identity:
+                    #print(user["account"])
+                    return user["account"]
+            st.error("User not found! Please register.")
+            return None
+
+def login(authenticator):
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+
+    if not st.session_state.logged_in:
+        st.sidebar.title("Login, or first register in stats website if you are not.")
+        identity = st.sidebar.text_input("Identity Card", key="identity_input")
+        if st.sidebar.button("Log in"):
+            if identity:
+                privileges = authenticator.login_user(identity)
+                if privileges:
+                    if privileges != "admin":
+                        st.error("Access denied! Admin privileges required to view the dashboards.")
+                    else:
+                        st.session_state.logged_in = True
+                        st.session_state.user_privileges = privileges
+                        st.success("Login successful!")
+                else:
+                    st.error("Invalid credentials! Please try again.")
+            else:
+                st.error("Please enter your Identity Card.")
+    else:
+        st.sidebar.title("User Menu")
+        st.sidebar.button("Logout", on_click=logout)
+        st.sidebar.success("You are logged in.")
+
+
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.user_privileges = None
+    st.sidebar.warning("You have been logged out.")
+
 
 def main():
     settings = json.load(open(SETTINGS))
     adaptor_port = settings['serviceInfo']['port'] 
     catalog_url = settings['catalog_url']
-    adaptor_url = f"http://localhost:{adaptor_port}"  # Replace with the actual adaptor URL
+    adaptor_url = f"http://localhost:{adaptor_port}"  
 
+
+    authenticator = UserAuthentication(catalog_url)  # Assuming an authenticator class
+    login(authenticator)
+
+    
     dashboard = SensorDashboard(catalog_url, adaptor_url)
     dashboard.run()
 
