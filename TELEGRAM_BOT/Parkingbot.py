@@ -57,7 +57,7 @@ def show_logged_in_menu(chat_id):
         [InlineKeyboardButton(text="📅 Book a slot", callback_data='book')],
         [InlineKeyboardButton(text="💳 Wallet", callback_data='wallet')],
         [InlineKeyboardButton(text="📊 Statistics visualization", callback_data='show_graphs')],
-        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  # Nuovo tasto
+        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  
         [InlineKeyboardButton(text="🔓 Logout", callback_data='logout')]
     ])
     bot.sendMessage(chat_id, "Choose one option:", reply_markup=keyboard)
@@ -66,7 +66,7 @@ def show_initial_menu(chat_id):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔍 Check free slots", callback_data='check')],
         [InlineKeyboardButton(text="📅 Book a slot", callback_data='book')],
-        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  # Nuovo tasto
+        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  
         [InlineKeyboardButton(text="🔑 Login", callback_data='login')],
         [InlineKeyboardButton(text="📝 Register to the system", callback_data='register')]
     ])
@@ -692,7 +692,7 @@ def show_wallet(msg):
             bot.sendMessage(chat_id, "No transactions found.")
 
         # Mostra il menu principale
-        show_logged_in_menu(chat_id)
+        #show_logged_in_menu(chat_id)
 
     except Exception as e:
         bot.sendMessage(chat_id, f"Error retrieving transactions: {e}")
