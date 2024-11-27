@@ -95,7 +95,7 @@ class Algorithm:
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
-                    dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
+                    dev["deviceInfo"]['booking_code'] = ""
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
                     print("\n NUOVI DATI DA INSERIRE NEL DB \n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
@@ -116,7 +116,7 @@ class Algorithm:
                 "sensor_id": device["deviceInfo"]['ID'],
                 "location": device["deviceInfo"]['location'],
                 "type": device["deviceInfo"]['type'],
-                "booking_code":"",
+                "booking_code":device["deviceInfo"]['booking_code'],
                 "fee": device["deviceInfo"]['fee'],
                 "duration":device["deviceInfo"]['duration'],
                 "floor": self.extract_floor(device["deviceInfo"]['location']),
@@ -318,7 +318,7 @@ class Algorithm:
                                     device["deviceInfo"]['last_update'] = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                                     device["deviceInfo"]['fee'] = str(response_data['parking_fee'])
                                     device["deviceInfo"]['duration'] = str(response_data['parking_duration'])
-                                    device["deviceInfo"]['booking_code'] = ""
+                                    #device["deviceInfo"]['booking_code'] = ""
                             
                                     # Send updated status to adaptor
                                     self.update_device_status(device)
