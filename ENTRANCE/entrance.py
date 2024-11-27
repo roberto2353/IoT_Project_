@@ -26,7 +26,7 @@ class Entrance:
 
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher")
+        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_F")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
@@ -79,7 +79,7 @@ class Entrance:
                             }
                         ]
                     }
-                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))  
                     print(f"Published message to {topic}: {message}")
                     time.sleep(self.updateInterval)
@@ -200,6 +200,13 @@ if __name__ == '__main__':
     en = Entrance(settings)
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8085})
     cherrypy.tree.mount(en, '/', conf)
-    cherrypy.engine.start()
-    #cherrypy.engine.block()
-    cherrypy.quickstart(en)
+    try:
+        cherrypy.engine.start()
+        cherrypy.quickstart(en)
+        print(f"Entrance service started on port {service_port}.")
+        cherrypy.engine.block()
+    except KeyboardInterrupt:
+        print("Shutting down Entrance service...")
+    finally:
+        en.stop()
+        cherrypy.engine.exit()

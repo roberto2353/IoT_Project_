@@ -63,7 +63,7 @@ class dbAdaptor:
 
             # Start periodic alive messages
             self.start_periodic_updates()
-            self._paho_mqtt.subscribe('ParkingLot/+/status', 2)
+            self._paho_mqtt.subscribe('ParkingLotFabio/+/status', 2)
             
         except Exception as e:
             print(f"Error starting MQTT client: {e}")
@@ -111,7 +111,7 @@ class dbAdaptor:
                             }
                         ]
                     }
-                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))
                     print(f"Published alive message to {topic}: {message}")
                     time.sleep(self.updateInterval)  # Wait before the next update
@@ -136,10 +136,15 @@ class dbAdaptor:
         floor = data.get('floor')
         parking = data.get('parking')
         booking_code = data.get('booking_code', 'unknown')
+        print("BOOKING CODE", booking_code)
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
+<<<<<<< HEAD
         active = data.get('active',True)
+=======
+        active = data.get('active', True)
+>>>>>>> 42f06a6fb9cbd01b2b1463424d2a3f9fa3291179
         json_body = [
                         {
                             "measurement": 'status',
@@ -186,7 +191,8 @@ class dbAdaptor:
                 # Estrai i dettagli dell'evento
                 sensor_id = event.get('sensor_id', '')
                 status = event.get('v', 'unknown')  # Recupera lo stato
-                if status == 'free':
+                
+                if status == 'free' and event.get('flag', '') != True:
                     self.update_stats_db(event)
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
@@ -356,7 +362,7 @@ class dbAdaptor:
                     "location": device_info['location'],
                     "type": device_info['type'],
                     "booking_code": device_info.get('booking_code', ''),
-                    "active": device_info.get('active', '')
+                    "active": device_info.get('active', True)
                     #"floor": self.extract_floor(selected_device['location'])
                     }
             
@@ -423,7 +429,7 @@ class dbAdaptor:
 
                 # Query per ottenere tutte le transazioni individuali per il booking_code
                 query_transactions = f"""
-                    SELECT "slot_id", "duration", "fee", time
+                    SELECT "ID", "duration", "fee", time
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
@@ -432,7 +438,7 @@ class dbAdaptor:
                 transactions = []
                 for point in result_transactions.get_points():
                     transactions.append({
-                        "slot_id": point.get("slot_id", "N/A"),
+                        "slot_id": point.get("ID", "N/A"),
                         "duration": point.get("duration", 0),
                         "fee": point.get("fee", 0),
                         "time": point.get("time")  # Facoltativo: data/ora
@@ -484,7 +490,7 @@ class dbAdaptor:
                         'status': sensor['status'],
                         'time':sensor['time'],
                         'booking_code': sensor.get('booking_code', ''),
-                        'active': sensor.get('active', ''),
+                        'active': sensor.get('active', True),
                         "parking_id": sensor.get('parking_id', '')
                     })
                 
@@ -522,12 +528,14 @@ class dbAdaptor:
             start = params.get('start')
             end = params.get('end')
             parking_id = params.get('parking_id')
+            print("prova query fees su adaptor via db prova stats")
             return self.get_fees(start, end, parking_id)
 
         elif len(uri) ==1 and uri[0] == "durations":
             start = params.get('start')
             end = params.get('end')
             parking_id = params.get('parking_id')
+            print("prova query durations su adaptor via db prova stats")
             return self.get_durations(start, end, parking_id)
         
         else:
@@ -543,7 +551,7 @@ class dbAdaptor:
             elif end:
                 query += f' WHERE time <= {end}'
             if parking_id:
-                query += f' AND parking_id = \'{parking_id}\''
+                query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
             result = self.client.query(query, database = 'prova_stats')
@@ -569,7 +577,7 @@ class dbAdaptor:
             elif end:
                 query += f' WHERE time <= {end}'
             if parking_id:
-                query += f' AND parking_id = \'{parking_id}\''
+                query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
             result = self.client.query(query, database = 'prova_stats')
@@ -686,6 +694,7 @@ if __name__ == "__main__":
     
     try:
         cherrypy.engine.start()
+        #cherrypy.quickstart(test)
         print(f"dbAdaptor service started on port {service_port}.")
         cherrypy.engine.block()
     except KeyboardInterrupt:

@@ -39,13 +39,14 @@ class SensorREST(threading.Thread):
 
         self.entranceAlgorithmService = EntranceAlgorithmService()
         self.entranceAlgorithmService.algorithm.start()
+        self.entranceAlgorithmService.algorithm.free_all_parking_on_dbs()
         self.entranceAlgorithmService.sim_loop_start()
 
         time.sleep(3)
         self.register_service()
         self.register_parking()
         
-        self.topic = "ParkingLot/alive/"
+        self.topic = "ParkingLotFabio/alive/"
         self.messageBroker = broker
         self.port = port
         self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_2_F")
@@ -73,7 +74,7 @@ class SensorREST(threading.Thread):
             #self.client.start()  # Start MQTT client connection
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
             self.start_periodic_updates()
-            self._paho_mqtt.subscribe('ParkingLot/DevConnector2/+/status', 2)
+            self._paho_mqtt.subscribe('ParkingLotFabio/DevConnector2/+/status', 2)
             self._paho_mqtt.loop_start()
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
         except Exception as e:
@@ -132,7 +133,7 @@ class SensorREST(threading.Thread):
                             }
                         ]
                     }
-                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))  
                     print(f"Published message to {topic}: {message}")
                     time.sleep(self.updateInterval)

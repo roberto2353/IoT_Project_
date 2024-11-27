@@ -28,7 +28,7 @@ class Exit:
 
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher")
+        self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher_F")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
@@ -52,7 +52,7 @@ class Exit:
                             }
                         ]
                     }
-                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))  
                     print(f"Published message to {topic}: {message}")
                     time.sleep(self.updateInterval)
@@ -150,6 +150,12 @@ class Exit:
             
             parking_duration_hours, fee = self.calculate_fee_and_duration(sensor_id)
 
+            @staticmethod
+            def extract_floor(location):
+                if location.startswith("P"):
+                    return location[1]
+                return None
+
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
                 "n": f"{sensor_id}/status", 
@@ -162,8 +168,9 @@ class Exit:
                 "booking_code": booking_code,
                 "active": active,
                 "parking":name_dev,
-                "duration": str(parking_duration_hours),
-                "fee": fee
+                "fee": fee,
+                "duration":parking_duration_hours,
+                "floor": extract_floor(selected_device.get('location', 'unknown')),
             }
             message = {"bn": sensor_name, "e": [event]}
             mqtt_topic_db = f"{self.pubTopic}/{sensor_id}/status"
@@ -285,6 +292,13 @@ if __name__ == '__main__':
     ex = Exit(settings)
     cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8056})
     cherrypy.tree.mount(ex, '/', conf)
-    cherrypy.engine.start()
-    #cherrypy.engine.block()
-    cherrypy.quickstart(ex)
+    try:
+        cherrypy.engine.start()
+        cherrypy.quickstart(ex)
+        print(f"Exit service started on port {service_port}.")
+        cherrypy.engine.block()
+    except KeyboardInterrupt:
+        print("Shutting down Exit service...")
+    finally:
+        ex.stop()
+        cherrypy.engine.exit()

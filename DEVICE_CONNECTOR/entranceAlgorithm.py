@@ -48,7 +48,7 @@ class Algorithm:
         """Stop the MQTT client."""
         self.client.stop()  # Stop MQTT client connection
 
-        self.t_hold_time = 15
+        self.t_hold_time = 30
 
     def countFloors(self):
         self.floors=[]
@@ -96,6 +96,7 @@ class Algorithm:
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     dev["deviceInfo"]['booking_code'] = ""
+                    dev["deviceInfo"]['booking_code'] = ""
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
                     print("\n NUOVI DATI DA INSERIRE NEL DB \n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
@@ -116,6 +117,7 @@ class Algorithm:
                 "sensor_id": device["deviceInfo"]['ID'],
                 "location": device["deviceInfo"]['location'],
                 "type": device["deviceInfo"]['type'],
+                "booking_code":device["deviceInfo"]['booking_code'],
                 "booking_code":device["deviceInfo"]['booking_code'],
                 "fee": device["deviceInfo"]['fee'],
                 "duration":device["deviceInfo"]['duration'],
@@ -290,8 +292,8 @@ class Algorithm:
         
 
         for device in self.devices:
-            #print(f" last update:{device['last_update']}")
-            if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) > 6):
+            print("booking_code: ", device['deviceInfo']['booking_code'])
+            if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) >= 7):
                 if random.random() < departure_probability:
                     print("handling departures...")
                     print(f'found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}')
@@ -319,6 +321,7 @@ class Algorithm:
                                     device["deviceInfo"]['fee'] = str(response_data['parking_fee'])
                                     device["deviceInfo"]['duration'] = str(response_data['parking_duration'])
                                     #device["deviceInfo"]['booking_code'] = ""
+                                    #device["deviceInfo"]['booking_code'] = ""
                             
                                     # Send updated status to adaptor
                                     self.update_device_status(device)
@@ -345,6 +348,37 @@ class Algorithm:
         else:
             conf = json.load(open(self.setting_status_path))
             self.devices = conf['devices']
+    
+    def free_all_parking_on_dbs(self):
+        try:
+            with self.lock:
+                with open(self.setting_status_path, 'r') as f:
+                    data = json.load(f)
+                print("FREE STATUS SET ON DBs\n")
+            
+        except json.JSONDecodeError:
+            print("Error: setting_status.json is corrupted or empty.")
+            
+            
+        for device in data["devices"]:
+            event = {
+                "n": f'{device["deviceInfo"]["ID"]}/status', 
+                "u": "boolean", 
+                "t": str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), 
+                "v": "free", 
+                "sensor_id": device["deviceInfo"]['ID'],
+                "location": device["deviceInfo"]['location'],
+                "type": device["deviceInfo"]['type'],
+                "booking_code": device["deviceInfo"]['booking_code'],
+                "floor": self.extract_floor(device["deviceInfo"]['location']),
+                "active": device["deviceInfo"]['active'],
+                "parking":'DevConnector1',
+                "flag":True
+                }
+            message = {"bn": device["deviceInfo"]['name'], "e": [event]}
+            mqtt_topic = f'{self.pubTopic}/{str(device["deviceInfo"]["ID"])}/status'
+            self.client.myPublish(mqtt_topic, json.dumps(message))
+            print(f"Messaggio pubblicato su topic {mqtt_topic}")
             
     def intraloop_update_var(self):
         print("refreshing devices...\n")
@@ -440,20 +474,20 @@ class EntranceAlgorithmService:
 
     def sim_loop_start(self):
         threading.Thread(target=self.algorithm.simulate_arrivals_loop, daemon=True).start()
-        
-
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def get_best_parking(self):
         # Assuming get_devices is a method of the Algorithm class
         return self.algorithm.routeArrivals(get='True')
+    
 
 
 if __name__ == '__main__':
     
     entranceAlgorithmService = EntranceAlgorithmService()
     entranceAlgorithmService.algorithm.start()
+    entranceAlgorithmService.algorithm.free_all_parking_on_dbs()
     entranceAlgorithmService.sim_loop_start()
     cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
     cherrypy.quickstart(entranceAlgorithmService)
