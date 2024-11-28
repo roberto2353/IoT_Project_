@@ -257,11 +257,7 @@ def plot_stats_user(user_weekly_duration, user_weekly_spending, chat_id, name, s
     max_week = max(user_weekly_duration.keys() | user_weekly_spending.keys(), default=0)
     weeks = list(range(1, max_week + 1))
     spending = [user_weekly_spending.get(i, 0) for i in weeks]
-<<<<<<< HEAD
     time_spent = [user_weekly_duration.get(i, 0) for i in weeks]*60
-=======
-    time_spent = [user_weekly_duration.get(i, 0) for i in weeks]
->>>>>>> 4eb11c90bc3d26c69c1ede3800069c1266e2f790
 
     # Grafico delle spese
     fig1, ax1 = plt.subplots(figsize=(10, 6))
