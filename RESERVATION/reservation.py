@@ -160,6 +160,34 @@ class ReservationService:
                     print(f"Messaggio pubblicato sul topic ",mqtt_topic_dc)
 
 
+                    if booking_code.isupper():
+                        url = 'http://127.0.0.1:8085/activate'
+
+                        # Dati da inviare nella richiesta
+                        data = {
+                            "booking_code": booking_code,
+                            "url":data['url'],
+                            "port":data['port'],
+                            "name":data['name']
+
+                        }
+
+                        # Invio della richiesta POST
+                        response = requests.post(url, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
+
+                        # Stampa la risposta del server
+                        #print(f"Status Code: {response.status_code}")
+
+                        return {
+                        "message": f"Go to the parking slot: {selected_device['location']}.",
+                        "booking_code": booking_code,
+                        "slot_id": selected_device['ID'],
+                        "type": selected_device.get('type', 'unknown'),
+                        "name": selected_device.get('name', 'unknown'),
+                        "location": selected_device.get('location', 'unknown')
+                        }
+
+
 
                     return {
                         "message": f"Slot {selected_device['location']} successfully booked.",
