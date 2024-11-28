@@ -90,7 +90,7 @@ class Algorithm:
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             for dev in data["devices"]:
-               if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
+                if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
                     print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
@@ -100,7 +100,8 @@ class Algorithm:
                     print("\n NUOVI DATI DA INSERIRE NEL DB \n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     print("\n PRESI DAL DEVICE PASSATO AD HANDLING DEPARTURE CON VALORI\n")
-                    print(f'{device["deviceInfo"]["ID"]},{device["deviceInfo"]["status"]}, {device["deviceInfo"]["last_update"]}, {device["deviceInfo"]["booking_code"]}, {device["deviceInfo"]["active"]}\n')
+                    print(print(f'{device["deviceInfo"]["ID"]},{device["deviceInfo"]["status"]}, {device["deviceInfo"]["last_update"]}, {device["deviceInfo"]["booking_code"]}, {device["deviceInfo"]["active"]}\n')
+                )
                     break
                 
             with self.lock:    
@@ -397,7 +398,7 @@ class Algorithm:
             self.intraloop_update_var()
             self.arrival_time()
             self.routeArrivals()
-            time.sleep(20)
+            time.sleep(60)
 
 
 class EntranceAlgorithmService:

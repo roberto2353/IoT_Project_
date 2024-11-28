@@ -14,5 +14,7 @@
     "mainDB": "IoT_Smart_Parking",
     "statsDB": "IoT_SP_Stats",
     "provaDB": "prova_stats",
+    "sim_prova_statsDB": "sim_stats_db",
+    "sim_provaDB": "sim_db",
     "influxPort": 8086
 }

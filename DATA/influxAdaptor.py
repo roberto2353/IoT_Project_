@@ -22,7 +22,11 @@ class dbAdaptor:
         self.influx_stats = settings["statsDB"]
         self.influx_db = settings["mainDB"]
         self.influx_prova = settings["provaDB"]
-
+        self.influx_sim = settings["sim_provaDB"]
+        self.influx_sim_stats = settings["sim_prova_statsDB"]
+        
+        
+        
         self.pubTopic = settings["baseTopic"]
         self.catalog_address = settings['catalog_url']
         self.messageBroker = settings["messageBroker"]
@@ -49,6 +53,10 @@ class dbAdaptor:
             self.client.create_database(self.influx_stats)
         if {'name': self.influx_prova} not in self.client.get_list_database():
             self.client.create_database(self.influx_prova)
+        if {'name': self.influx_sim} not in self.client.get_list_database():
+            self.client.create_database(self.influx_sim)
+        if {'name': self.influx_sim_stats} not in self.client.get_list_database():
+            self.client.create_database(self.influx_sim_stats)
 
     def start(self):
         """Start the MQTT client."""
@@ -162,6 +170,7 @@ class dbAdaptor:
         print(f"\n\n\nDOVREBBE STAMPARE LA FEE = {float(fee)} E LA DURATION = {float(duration)}. DATA TYPE: {type(fee)}\n\n\n")
                     # Scrivi l'aggiornamento su InfluxDB
         self.client.write_points(json_body,time_precision='s', database=self.influx_prova) #influx_stats
+        self.client.write_points(json_body, time_precision='s', database=self.influx_sim_stats) 
         print(f"Updated sensor {sensor_id} in stats db.")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
@@ -192,7 +201,10 @@ class dbAdaptor:
                     self.update_stats_db(event)
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
-                booking_code = event.get('booking_code', '')
+                if status == 'free':
+                    booking_code = ""
+                else:
+                    booking_code = event.get('booking_code', '')
                 active = event.get('active', True) 
                 parking = event.get('parking', 'unknown')
 
@@ -223,6 +235,7 @@ class dbAdaptor:
                     ]
                     # Scrivi l'aggiornamento su InfluxDB
                     self.client.write_points(json_body, time_precision='s', database=self.influx_db)
+                    self.client.write_points(json_body, time_precision='s', database=self.influx_sim)
                     print(f"Updated sensor {sensor_id} status to {status}.")
                 else:
                     print(f"Sensor with ID {sensor_id} not found in the database.")
@@ -292,6 +305,7 @@ class dbAdaptor:
                 ]
                 # Scrivi i dati su InfluxDB
                 self.client.write_points(json_body, database= self.influx_db)
+                self.client.write_points(json_body, database= self.influx_sim)
                 print(f"Registered device with ID {device_info['ID']} on InfluxDB.")
                 return {"message": f"Device with ID {device_info['ID']} registered successfully."}, 201
             
@@ -349,6 +363,7 @@ class dbAdaptor:
                 ]
                 # Scrivi i dati su InfluxDB
                 self.client.write_points(json_body, database=self.influx_db)
+                self.client.write_points(json_body, database=self.influx_sim)
                 event = {
                     "n": f"{str(device_info['ID'])}/status", 
                     "u": "boolean", 
@@ -408,6 +423,7 @@ class dbAdaptor:
                 ]
                 # Write the update to InfluxDB
                 self.client.write_points(json_body, database= self.influx_db)
+                self.client.write_points(json_body, database=self.influx_sim)
                 print(f"Updated device {sensor_id} status to {status}.")
                 return {"message": f"Device {sensor_id} updated successfully."}, 200
             
@@ -550,7 +566,8 @@ class dbAdaptor:
                 query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
-            result = self.client.query(query, database = 'prova_stats')
+            # result = self.client.query(query, database = 'prova_stats')
+            result = self.client.query(query, database = 'sim_stats_db')
             #print(result)
             sensors = []
             sensors = list(result.get_points())
@@ -576,7 +593,8 @@ class dbAdaptor:
                 query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
-            result = self.client.query(query, database = 'prova_stats')
+            # result = self.client.query(query, database = 'prova_stats')
+            result = self.client.query(query, database = 'sim_stats_db')            
             #print(result)
             sensors = []
             sensors = list(result.get_points())

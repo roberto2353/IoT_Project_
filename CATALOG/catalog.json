@@ -13,296 +13,7 @@
     "brokerPort": 1883,
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "devices": [
-        {
-            "ID": 1,
-            "name": "sensor1",
-            "type": "photocell",
-            "location": "P0-1",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.216628"
-        },
-        {
-            "ID": 2,
-            "name": "sensor2",
-            "type": "photocell",
-            "location": "P0-2",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2172503"
-        },
-        {
-            "ID": 3,
-            "name": "sensor3",
-            "type": "photocell",
-            "location": "P0-3",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2192822"
-        },
-        {
-            "ID": 4,
-            "name": "sensor4",
-            "type": "photocell",
-            "location": "P0-4",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2192822"
-        },
-        {
-            "ID": 5,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P0-5",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2192822"
-        },
-        {
-            "ID": 6,
-            "name": "sensor6",
-            "type": "photocell",
-            "location": "P0-6",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2233052"
-        },
-        {
-            "ID": 7,
-            "name": "sensor7",
-            "type": "photocell",
-            "location": "P1-1",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2233052"
-        },
-        {
-            "ID": 8,
-            "name": "sensor8",
-            "type": "photocell",
-            "location": "P1-2",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2233052"
-        },
-        {
-            "ID": 9,
-            "name": "sensor9",
-            "type": "photocell",
-            "location": "P1-3",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2273085"
-        },
-        {
-            "ID": 10,
-            "name": "sensor10",
-            "type": "photocell",
-            "location": "P1-4",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2273085"
-        },
-        {
-            "ID": 11,
-            "name": "sensor11",
-            "type": "photocell",
-            "location": "P1-5",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2273085"
-        },
-        {
-            "ID": 12,
-            "name": "sensor12",
-            "type": "photocell",
-            "location": "P1-6",
-            "active": true,
-            "parking": "DevConnector1",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722974.2313042"
-        },
-        {
-            "ID": 13,
-            "name": "sensor1",
-            "type": "photocell",
-            "location": "P0-1",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2661297"
-        },
-        {
-            "ID": 14,
-            "name": "sensor2",
-            "type": "photocell",
-            "location": "P0-2",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2661297"
-        },
-        {
-            "ID": 15,
-            "name": "sensor3",
-            "type": "photocell",
-            "location": "P0-3",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2678308"
-        },
-        {
-            "ID": 16,
-            "name": "sensor4",
-            "type": "photocell",
-            "location": "P0-4",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2686648"
-        },
-        {
-            "ID": 17,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P0-5",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.269404"
-        },
-        {
-            "ID": 18,
-            "name": "sensor6",
-            "type": "photocell",
-            "location": "P0-6",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2702456"
-        },
-        {
-            "ID": 19,
-            "name": "sensor7",
-            "type": "photocell",
-            "location": "P1-1",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2702456"
-        },
-        {
-            "ID": 20,
-            "name": "sensor8",
-            "type": "photocell",
-            "location": "P1-2",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2720194"
-        },
-        {
-            "ID": 21,
-            "name": "sensor9",
-            "type": "photocell",
-            "location": "P1-3",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2726076"
-        },
-        {
-            "ID": 22,
-            "name": "sensor10",
-            "type": "photocell",
-            "location": "P1-4",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2726076"
-        },
-        {
-            "ID": 23,
-            "name": "sensor11",
-            "type": "photocell",
-            "location": "P1-5",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.2726076"
-        },
-        {
-            "ID": 24,
-            "name": "sensor12",
-            "type": "photocell",
-            "location": "P1-6",
-            "active": true,
-            "parking": "DevConnector2",
-            "commands": [
-                "status"
-            ],
-            "last_update": "1732722998.275116"
-        }
-    ],
+    "devices": [],
     "users": [
         {
             "ID": "b3b7d926-2dfc-41cb-be87-f676133f7cb1",
@@ -329,22 +40,31 @@
     ],
     "parkings": [
         {
-            "ID": 1,
-            "name": "DevConnector1",
-            "last_update": "",
-            "location": "Torino",
-            "url": "127.0.0.1",
-            "port": "8083",
-            "topic": "ParkingLot/DevConnector1"
-        },
-        {
             "ID": 2,
             "name": "DevConnector2",
             "last_update": "",
             "location": "Torino",
             "url": "127.0.0.1",
             "port": "8091",
-            "topic": "ParkingLot/DevConnector2"
+            "topic": "ParkingLotFabio/DevConnector2"
+        },
+        {
+            "ID": 1,
+            "name": "DevConnector1",
+            "last_update": "",
+            "location": "Torino",
+            "url": "127.0.0.1",
+            "port": "8083",
+            "topic": "ParkingLotFabio/DevConnector1"
+        },
+        {
+            "ID": 1,
+            "name": "DevConnector1",
+            "last_update": "",
+            "location": "Torino",
+            "url": "127.0.0.1",
+            "port": "8083",
+            "topic": "ParkingLotFabio/DevConnector1"
         }
     ],
     "services": []

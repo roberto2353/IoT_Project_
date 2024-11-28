@@ -396,7 +396,7 @@ class Algorithm:
             self.intraloop_update_var()
             self.arrival_time()
             self.routeArrivals()
-            time.sleep(20)
+            time.sleep(60)
 
 
 class EntranceAlgorithmService:
