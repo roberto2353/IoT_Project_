@@ -1,4 +1,5 @@
 import json
+import uuid
 from influxdb import InfluxDBClient
 import numpy as np
 import pandas as pd
@@ -244,11 +245,126 @@ class ParkingSelector:
             return selected_parking_name
         return print("No parkings in the catalog!")
 
+class UserAuthentication:
+    def __init__(self, catalog_url):
+        self.catalog_url = catalog_url
+
+    def fetch_users(self):
+        """Fetch all users from the catalog."""
+        try:
+            response = requests.get(f"{self.catalog_url}/users")
+            response.raise_for_status()
+            #st.write(response.json())
+            #print("response:", response.json())
+            return response.json().get("users", [])
+        except requests.exceptions.RequestException as e:
+            #print("pippo")
+            st.error(f"Error fetching users: {e}")
+            return []
+
+    def register_user(self, name, surname, identity):
+        """Register a new user with admin privileges."""
+        user_data = {
+            "ID": str(uuid.uuid4()),
+            "name": name,
+            "surname": surname,
+            "identity": identity,
+            "account": "admin"
+        }
+        try:
+            response = requests.post(f"{self.catalog_url}/users", json=user_data)
+            response.raise_for_status()
+            st.success("Registration successful! Please log in.")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error registering user: {e}")
+
+    def login_user(self, identity):
+        """Validate user credentials and check privileges."""
+        users = self.fetch_users()
+        for user in users:
+            if user["identity"] == identity:
+                #print(user["account"])
+                return user["account"]
+        st.error("User not found! Please register.")
+        return None
+
+
+def login_or_register(authenticator):
+    """Handle login or registration."""
+    # Initialize session state for login/registration management
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+    if "registration_step" not in st.session_state:
+        st.session_state.registration_step = 0
+    if "user_privileges" not in st.session_state:
+        st.session_state.user_privileges = None
+
+    # If the user is logged in, show only a logout button
+    if st.session_state.logged_in:
+        st.sidebar.button("Logout", on_click=logout)  # Add logout button in the sidebar
+        st.success("You are logged in!")
+        return True
+
+    # Display login or registration options
+    st.title("Welcome to the Parking Dashboards!")
+    auth_mode = st.radio("Select an Action", ["Login", "Register"], index=0)
+
+    if auth_mode == "Login":
+        identity = st.text_input("Insert your Identity Card number")
+        if st.button("Log in"):
+            if identity:
+                privileges = authenticator.login_user(identity)
+                if privileges:
+                    if privileges != "admin":
+                        st.error("Access denied! Admin privileges required to view the dashboards.")
+                    else:
+                        st.session_state.logged_in = True
+                        st.session_state.user_privileges = privileges
+                        st.session_state.show_login = False  # Hide login UI
+                #else:
+                #    st.error("Invalid identity card! Please try again or register if you did not.")
+            #else:
+            #    st.error("Please enter your Identity Card number.")
+
+    elif auth_mode == "Register":
+        if st.session_state.registration_step == 0:
+            if st.button("Proceed to registration"):
+                st.session_state.registration_step = 1
+
+        if st.session_state.registration_step == 1:
+            name = st.text_input("Name")
+            surname = st.text_input("Surname")
+            identity = st.text_input("Identity Card")
+            if st.button("Register"):
+                if name and surname and identity:
+                    authenticator.register_user(name, surname, identity)
+                    st.success("Registration successful!")
+                    st.session_state.registration_step = 0  # Reset after successful registration
+                else:
+                    st.error("Please fill in all fields.")
+
+    return False
+
+
+def logout():
+    """Handle user logout."""
+    st.session_state.logged_in = False
+    st.session_state.user_privileges = None
+    st.session_state.registration_step = 0  # Reset registration step
+
+
+
+
 # Streamlit app with sidebar to navigate between dashboards
 def main():
     settings = json.load(open(SETTINGS))
     adaptor_port = settings['serviceInfo']['port'] 
     catalog_url = settings['catalog_url']
+
+    authenticator = UserAuthentication(catalog_url)
+
+    if not login_or_register(authenticator):
+        st.stop()
 
     parking_selector = ParkingSelector(catalog_url)
     available_parkings = parking_selector.fetch_parkings()

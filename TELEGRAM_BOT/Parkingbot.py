@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from dateutil import parser
 from io import BytesIO
 import requests
+from dateutil import parser
 
 
 
@@ -57,7 +58,7 @@ def show_logged_in_menu(chat_id):
         [InlineKeyboardButton(text="📅 Book a slot", callback_data='book')],
         [InlineKeyboardButton(text="💳 Wallet", callback_data='wallet')],
         [InlineKeyboardButton(text="📊 Statistics visualization", callback_data='show_graphs')],
-        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  # Nuovo tasto
+        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  
         [InlineKeyboardButton(text="🔓 Logout", callback_data='logout')]
     ])
     bot.sendMessage(chat_id, "Choose one option:", reply_markup=keyboard)
@@ -66,7 +67,7 @@ def show_initial_menu(chat_id):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔍 Check free slots", callback_data='check')],
         [InlineKeyboardButton(text="📅 Book a slot", callback_data='book')],
-        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  # Nuovo tasto
+        [InlineKeyboardButton(text="🚗 Parking (Change)", callback_data='change_parking')],  
         [InlineKeyboardButton(text="🔑 Login", callback_data='login')],
         [InlineKeyboardButton(text="📝 Register to the system", callback_data='register')]
     ])
@@ -256,7 +257,11 @@ def plot_stats_user(user_weekly_duration, user_weekly_spending, chat_id, name, s
     max_week = max(user_weekly_duration.keys() | user_weekly_spending.keys(), default=0)
     weeks = list(range(1, max_week + 1))
     spending = [user_weekly_spending.get(i, 0) for i in weeks]
+<<<<<<< HEAD
     time_spent = [user_weekly_duration.get(i, 0) for i in weeks]*60
+=======
+    time_spent = [user_weekly_duration.get(i, 0) for i in weeks]
+>>>>>>> 4eb11c90bc3d26c69c1ede3800069c1266e2f790
 
     # Grafico delle spese
     fig1, ax1 = plt.subplots(figsize=(10, 6))
@@ -606,10 +611,11 @@ def process_state(chat_id, text):
             user_data[chat_id]['credit_card'] = text
             id = send_user_data_to_catalog(user_data[chat_id], chat_id)
             if id:
-                bot.sendMessage(chat_id, f"Registration process complete!\nUse your card or the associated number: {id} for booking or enter to the parking")
-                logged_in_users[chat_id] = True
+                bot.sendMessage(chat_id, f"Registration process complete!\nUse your card or the associated number: {id} for login in the system and access your wallet ,statistics and book a slot.")
+                del user_data[chat_id]['state']
                 show_initial_menu(chat_id)
-            del user_data[chat_id]['state']
+            if 'state' in user_data[chat_id]:
+                del user_data[chat_id]['state']
         else:
             bot.sendMessage(chat_id, "Credit card number is not valid. Insert it again.")
 
@@ -663,6 +669,34 @@ def verify_login(chat_id):
         bot.sendMessage(chat_id, f"Error during the login process: {e}")
         show_initial_menu(chat_id)
 
+def format_duration(duration):
+    """Converte una durata in ore in un formato leggibile."""
+    if duration == "N/A" or duration is None:
+        return "N/A"
+
+    try:
+        total_seconds = duration * 3600  # Converti ore in secondi
+        if total_seconds >= 3600:  # Se è più di un'ora
+            hours = int(total_seconds // 3600)
+            minutes = int((total_seconds % 3600) // 60)
+            return f"{hours} hours and {minutes} minutes"
+        elif total_seconds >= 60:  # Se è più di un minuto
+            minutes = int(total_seconds // 60)
+            seconds = int(total_seconds % 60)
+            return f"{minutes} minutes and {seconds} seconds"
+        else:  # Altrimenti in secondi
+            return f"{int(total_seconds)} seconds"
+    except Exception as e:
+        return "Invalid duration"
+
+def format_datetime(datetime_str):
+    """Converte una stringa datetime ISO in un formato leggibile."""
+    try:
+        dt = parser.parse(datetime_str)
+        return dt.strftime("On: %d-%m-%Y  %H:%M:%S")
+    except Exception as e:
+        return "Invalid date and time"
+
 def show_wallet(msg):
     chat_id = msg['chat']['id']
     if chat_id not in logged_in_users or not logged_in_users[chat_id]:
@@ -683,31 +717,18 @@ def show_wallet(msg):
             message = "Your recent transactions:\n"
             for transaction in transactions:
                 slot_id = transaction.get("slot_id", "N/A")
-                duration = transaction.get("duration", "N/A")
+                raw_duration = transaction.get("duration", "N/A")
+                formatted_duration = format_duration(raw_duration)
                 fee = round(transaction.get("fee", 0), 2)
-                time = transaction.get("time", "N/A")
-                message += f"Slot: {slot_id}, Duration: {duration} hours, Fee: {fee} €, Date: {time}\n"
+                raw_time = transaction.get("time", "N/A")
+                formatted_time = format_datetime(raw_time)
+                message += f"Slot: {slot_id}, Duration: {formatted_duration}, Fee: {fee} €,\n{formatted_time}\n"
             bot.sendMessage(chat_id, message)
         else:
             bot.sendMessage(chat_id, "No transactions found.")
 
-        # Mostra il menu principale
-        show_logged_in_menu(chat_id)
-
     except Exception as e:
         bot.sendMessage(chat_id, f"Error retrieving transactions: {e}")
-
-def reset_parking(chat_id):
-    if chat_id in user_data:
-        user_data[chat_id].pop('parking_name', None)
-        user_data[chat_id].pop('parking_url', None)
-        user_data[chat_id].pop('parking_port', None)
-    bot.sendMessage(chat_id, "Parking reset. Please select a new parking:")
-    choose_parking(chat_id)
-
-
-
-
 def send_user_data_to_catalog(user_data, chat_id):
     url = settings['catalog_url'] + '/users'
     headers = {'Content-Type': 'application/json'}

@@ -153,6 +153,12 @@ class CatalogManager:
 
 
     def add_user(self, user_info):
+        for user in self.catalog["users"]:
+            if user['identity'] == user_info["identity"]:
+                return ValueError(f"User already registered")
+        if 'account' not in user_info or not user_info['account']:
+            user_info['account'] = 'user'
+        print("New user ", user_info)
         self.catalog["users"].append(user_info)
         self.write_catalog()
 
