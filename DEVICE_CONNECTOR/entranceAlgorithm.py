@@ -34,7 +34,7 @@ class Algorithm:
         self.floors = []
         self.tot_occupied = 0
         self.arrivals = []
-        self.t_hold_time = 15
+        self.t_hold_time = 900 # 15 min
         
         self.lock = Lock()  # Create a lock
 
@@ -48,7 +48,7 @@ class Algorithm:
         """Stop the MQTT client."""
         self.client.stop()  # Stop MQTT client connection
 
-        self.t_hold_time = 30
+        # self.t_hold_time = 30
 
     def countFloors(self):
         self.floors=[]
@@ -174,15 +174,11 @@ class Algorithm:
 
     def arrival_time(self):
         current_hour = datetime.datetime.now().hour
-        if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev:
-            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(2, self.t_hold_time))
+        if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev: #an arrival every 7.5-15 min during 0-6
+            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(self.t_hold_time/2, self.t_hold_time))
             self.arrivals.append(next_arrival_time)
-            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(2, self.t_hold_time))
-            self.arrivals.append(next_arrival_time)
-        elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev:
-            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(2, int(self.t_hold_time/2)))
-            self.arrivals.append(next_arrival_time)
-            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(2, int(self.t_hold_time/2)))
+        elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev: # an arrival every 1-3.75 min during day (6-24)
+            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(60, int(self.t_hold_time/4)))
             self.arrivals.append(next_arrival_time)
         self.arrivals.sort()
 
@@ -286,14 +282,19 @@ class Algorithm:
         
                 
     def handle_departures(self):
-        departure_probability = 0.09  # 10% chance for any parked car to leave
-        
-
+        departure_probability = 0.1  # 10% chance for any parked car to leave
+        time = datetime.datetime.now()
+        current_hour = time.hour
+        threshold = 0 #min
+        if current_hour in range(0, 6):
+            threshold = 60
+        else:
+            threshold = 30
         for device in self.devices:
             print("booking_code: ", device['deviceInfo']['booking_code'])
             if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) >= 7):
-                if random.random() < departure_probability:
-                    print("handling departures...")
+                if random.random() < departure_probability and (time - datetime.datetime.strptime(device["deviceInfo"]["last_update"], "%Y-%m-%d %H:%M:%S"))>= datetime.timedelta(minutes=threshold):
+                    print(f"handling departures of cars altready parked for more than {threshold} min...")
                     print(f'found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}')
                     reservation_url = 'http://127.0.0.1:8056/calcola_fee'
                     headers = {'Content-Type': 'application/json'}
