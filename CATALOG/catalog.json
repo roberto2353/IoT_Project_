@@ -24,7 +24,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.71779"
+            "last_update": "1732904913.0954485"
         },
         {
             "ID": 2,
@@ -36,7 +36,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.71779"
+            "last_update": "1732904913.0954485"
         },
         {
             "ID": 3,
@@ -48,7 +48,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7203937"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 4,
@@ -60,7 +60,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7203937"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 5,
@@ -72,7 +72,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7203937"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 6,
@@ -84,7 +84,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7203937"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 7,
@@ -96,7 +96,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7203937"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 8,
@@ -108,7 +108,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7229037"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 9,
@@ -120,7 +120,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7229037"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 10,
@@ -132,7 +132,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7247891"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 11,
@@ -144,7 +144,7 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7247891"
+            "last_update": "1732904913.0989666"
         },
         {
             "ID": 12,
@@ -156,7 +156,151 @@
             "commands": [
                 "status"
             ],
-            "last_update": "1732618740.7258542"
+            "last_update": "1732904913.0989666"
+        },
+        {
+            "ID": 13,
+            "name": "sensor1",
+            "type": "photocell",
+            "location": "P0-1",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6898003"
+        },
+        {
+            "ID": 14,
+            "name": "sensor2",
+            "type": "photocell",
+            "location": "P0-2",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.689981"
+        },
+        {
+            "ID": 15,
+            "name": "sensor3",
+            "type": "photocell",
+            "location": "P0-3",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.689981"
+        },
+        {
+            "ID": 16,
+            "name": "sensor4",
+            "type": "photocell",
+            "location": "P0-4",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 17,
+            "name": "sensor5",
+            "type": "photocell",
+            "location": "P0-5",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 18,
+            "name": "sensor6",
+            "type": "photocell",
+            "location": "P0-6",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 19,
+            "name": "sensor7",
+            "type": "photocell",
+            "location": "P1-1",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 20,
+            "name": "sensor8",
+            "type": "photocell",
+            "location": "P1-2",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 21,
+            "name": "sensor9",
+            "type": "photocell",
+            "location": "P1-3",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 22,
+            "name": "sensor10",
+            "type": "photocell",
+            "location": "P1-4",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 23,
+            "name": "sensor11",
+            "type": "photocell",
+            "location": "P1-5",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
+        },
+        {
+            "ID": 24,
+            "name": "sensor12",
+            "type": "photocell",
+            "location": "P1-6",
+            "active": true,
+            "parking": "DevConnector2",
+            "commands": [
+                "status"
+            ],
+            "last_update": "1732904884.6929917"
         }
     ],
     "users": [
@@ -168,18 +312,19 @@
             "credit_card": "1234567890123456"
         },
         {
-            "ID": "61dd6a89-fe1e-4760-a77a-51667cd38486",
-            "name": "kevin",
-            "surname": "gumina",
-            "identity": "cv35265eg",
-            "credit_card": "5333261647251647"
+            "ID": "c4deefcf-7e70-483d-b396-5412730dffb8",
+            "name": "Roberto",
+            "surname": "Bratu",
+            "identity": "1234567890",
+            "account": "admin"
         },
         {
-            "ID": "3c140279-5489-40ae-9c27-ad8f61f70f80",
-            "name": "kevin",
-            "surname": "gumina",
-            "identity": "ct27482gh",
-            "credit_card": "5333728492648297"
+            "ID": "5e3e0825-4588-48e3-8354-f5e4ff211dae",
+            "name": "fernando",
+            "surname": "alonso",
+            "identity": "147258369",
+            "credit_card": "5333214569874521",
+            "account": "user"
         }
     ],
     "parkings": [
@@ -191,31 +336,52 @@
             "url": "127.0.0.1",
             "port": "8083",
             "topic": "ParkingLot/DevConnector1"
+        },
+        {
+            "ID": 2,
+            "name": "DevConnector2",
+            "last_update": "",
+            "location": "Torino",
+            "url": "127.0.0.1",
+            "port": "8091",
+            "topic": "ParkingLot/DevConnector2"
         }
     ],
     "services": [
         {
             "ID": 1,
             "name": "AdaptorService",
-            "last_update": "1732618762.581704",
+            "last_update": "1732904910.4987612",
             "port": "5001"
         },
         {
             "ID": 3,
             "name": "ExitService",
-            "last_update": "1732618713.3479903",
+            "last_update": "1732904861.6055117",
             "port": "8056"
+        },
+        {
+            "ID": 2,
+            "name": "EntranceService",
+            "last_update": "1732904891.0755103",
+            "port": "8085"
         },
         {
             "ID": 4,
             "name": "ReservationService",
-            "last_update": "1732618761.6457372",
+            "last_update": "1732904889.3804376",
             "port": 8098
         },
         {
             "ID": 5,
             "name": "DevConnector1Service",
-            "last_update": "1732618750.6835756",
+            "last_update": "1732904892.678004",
+            "port": "8083"
+        },
+        {
+            "ID": 6,
+            "name": "DevConnector2Service",
+            "last_update": "1732904864.2975729",
             "port": "8083"
         }
     ]

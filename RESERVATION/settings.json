@@ -11,6 +11,5 @@
     "messageBroker": "mqtt.eclipseprojects.io",
     "catalog_url": "http://localhost:8090",
     "baseTopic": "ParkingLot",
-    "adaptor_url": "http://localhost:5001",
-    "devConn_url": "http://127.0.0.1:8083/devices"
+    "adaptor_url": "http://localhost:5001"
 }
