@@ -96,7 +96,7 @@ class Entrance:
     @cherrypy.tools.allow(methods=['POST']) 
     def activate(self):
         try:
-            print("RICHIESTA OKS")
+            #print("RICHIESTA OKS")
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
             url_ = input_data.get('url')
@@ -104,7 +104,6 @@ class Entrance:
             url= f"http://{url_}:{port}/devices"
             name_dev = input_data.get('name')
             print('url:::',url)
-            #adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
             response = requests.get(url)
             response.raise_for_status()  
 
@@ -199,7 +198,7 @@ if __name__ == '__main__':
     settings = json.load(open(SETTINGS))
     service_port = int(settings["serviceInfo"]["port"])
     en = Entrance(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': service_port})
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(en, '/', conf)
     try:
         cherrypy.engine.start()

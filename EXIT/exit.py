@@ -100,7 +100,6 @@ class Exit:
     def exit(self):
         try:
 
-            #adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
             input_data = cherrypy.request.json 
             url_ = input_data.get('url')
             port= input_data.get('port')
@@ -210,7 +209,7 @@ class Exit:
         """
         try:
             # Fetch sensor data from the adaptor
-            url = f"http://127.0.0.1:5001/"
+            url = self.adaptor_url
             response = requests.get(url)
             response.raise_for_status()
             sensors = response.json()
@@ -291,7 +290,7 @@ if __name__ == '__main__':
     settings = json.load(open(SETTINGS))
     service_port = int(settings["serviceInfo"]["port"])
     ex = Exit(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8056})
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(ex, '/', conf)
     try:
         cherrypy.engine.start()

@@ -42,7 +42,7 @@ class dbAdaptor:
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
         # Configurazione del client InfluxDB
-        self.client = InfluxDBClient(host="localhost", port=self.influx_port, username="root", password="root", database=self.influx_db)
+        self.client = InfluxDBClient(host="influxdb", port=self.influx_port, username="root", password="root", database=self.influx_db)
         if {'name': self.influx_db} not in self.client.get_list_database():
             self.client.create_database(self.influx_db)
         if {'name': self.influx_stats} not in self.client.get_list_database():
@@ -537,14 +537,19 @@ class dbAdaptor:
     def get_fees(self, start=None, end=None, parking_id=None):
         try:
             query = 'SELECT ID, time, booking_code, fee FROM "status"'
+            
             if start and end:
                 query += f' WHERE time >= {start} AND time <= {end}'
+                query += f' AND parking_id = \'{parking_id}\''
             elif start:
                 query += f' WHERE time >= {start}'
+                query += f' AND parking_id = \'{parking_id}\''
             elif end:
                 query += f' WHERE time <= {end}'
-            if parking_id:
+                query += f' AND parking_id = \'{parking_id}\''
+            else:
                 query += f' WHERE parking_id = \'{parking_id}\''
+            
             
             query += ' GROUP BY "ID"'
             result = self.client.query(query, database = 'prova_stats')
@@ -565,11 +570,14 @@ class dbAdaptor:
             query = 'SELECT ID, time, booking_code, "duration" FROM "status"'
             if start and end:
                 query += f' WHERE time >= {start} AND time <= {end}'
+                query += f' AND parking_id = \'{parking_id}\''
             elif start:
                 query += f' WHERE time >= {start}'
+                query += f' AND parking_id = \'{parking_id}\''
             elif end:
                 query += f' WHERE time <= {end}'
-            if parking_id:
+                query += f' AND parking_id = \'{parking_id}\''
+            else:
                 query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
@@ -677,7 +685,7 @@ if __name__ == "__main__":
     }
 
     cherrypy.config.update({
-        'server.socket_host': '127.0.0.1',
+        'server.socket_host': '0.0.0.0',
         'server.socket_port': service_port,
         'engine.autoreload.on': False
     })

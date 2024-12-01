@@ -8,10 +8,6 @@ import paho.mqtt.client as PahoMQTT
 from datetime import datetime
 import sys
 
-# Percorso assoluto alla cartella del progetto
-#sys.path.append('/Users/alexbenedetti/Desktop/IoT_Project_')
-
-#from DATA.event_logger import EventLogger
 
 P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
@@ -29,7 +25,7 @@ class SlotBoard:
     def initialize_board(self):
         """Inizializza il tabellone con il numero di posti totali, liberi e occupati."""
         try:
-            #adaptor_url = 'http://127.0.0.1:8083/devices'  # Updated URL to match the CherryPy server
+            
             parking_url = self.catalogUrl+"/parkings"
             response = requests.get(parking_url)
             response.raise_for_status()

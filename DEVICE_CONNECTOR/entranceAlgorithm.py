@@ -21,6 +21,10 @@ SETTINGS = P / 'settings.json'
 
 class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
+        conf = json.load(open(SETTINGS))
+        self.catalog_url = conf["catalog_url"]
+        self.adaptor_url = conf["adaptor_url"]
+        self.exit_url = conf["exit_url"]
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
         self.client = MyMQTT(clientID="Simulation_F", broker=broker, port=port, notifier=None)
@@ -295,7 +299,7 @@ class Algorithm:
                 if random.random() < departure_probability:
                     print("handling departures...")
                     print(f'found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}')
-                    reservation_url = 'http://127.0.0.1:8056/calcola_fee'
+                    exit_url = f'{self.exit_url}/calcola_fee'
                     headers = {'Content-Type': 'application/json'}
 
                     reservation_data = {
@@ -304,7 +308,7 @@ class Algorithm:
 
                     try:
                         
-                        req = requests.post(reservation_url, headers=headers, json=reservation_data)
+                        req = requests.post(exit_url, headers=headers, json=reservation_data)
                         # Only proceed if the response status code is 200 (OK)
                         if req.status_code == 200:
                             try:
@@ -369,7 +373,7 @@ class Algorithm:
 
 class EntranceAlgorithmService:
     def __init__(self):
-        adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
+        #adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
         # response = requests.get(adaptor_url)
         # response.raise_for_status()  # Check if response is correct
         # devices = response.json()  # Fetch devices from adaptor
@@ -383,7 +387,8 @@ class EntranceAlgorithmService:
         baseTopic = conf["baseTopic"]
         broker = conf["messageBroker"]
         port = conf["brokerPort"]
-        catalog_url = conf["catalog_url"]
+        #catalog_url = conf["catalog_url"]
+        #adaptor_url = conf["adaptor_url"]
         self.setting_status_path = P / 'settings_status.json'
         self.reset_file(self.setting_status_path)
         
@@ -400,7 +405,7 @@ class EntranceAlgorithmService:
             
         except json.JSONDecodeError:
             print("Error: setting_status.json is corrupted or empty.")
-        self.algorithm = Algorithm(devices,baseTopic, broker, port)  # Create Algorithm instance
+        self.algorithm = Algorithm(devices, baseTopic, broker, port)  # Create Algorithm instance
     
     def reset_file(self, filepath):
         try:
@@ -455,6 +460,6 @@ if __name__ == '__main__':
     entranceAlgorithmService = EntranceAlgorithmService()
     entranceAlgorithmService.algorithm.start()
     entranceAlgorithmService.sim_loop_start()
-    cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
-    cherrypy.quickstart(entranceAlgorithmService)
+    #cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
+    #cherrypy.quickstart(entranceAlgorithmService)
     

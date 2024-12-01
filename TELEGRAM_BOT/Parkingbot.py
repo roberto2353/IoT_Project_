@@ -1,4 +1,5 @@
 import logging
+import dateutil
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -21,6 +22,11 @@ from io import BytesIO
 import requests
 from dateutil import parser
 
+print("Requests version:", requests.__version__)
+print("Matplotlib version:", matplotlib.__version__)
+print("Numpy version:", np.__version__)
+print("Telepot version:", telepot.__version__)
+print("Dateutil version:", dateutil.__version__)
 
 
 
@@ -125,7 +131,7 @@ def show_graphs(msg):
     
     try:
         # URL di base per il servizio REST
-        base_url = 'http://127.0.0.1:5001'
+        base_url = 'http://adaptor:5001'
         
         # Ottieni ID utente
         user_id = user_data[chat_id].get('book_code', '')
@@ -699,7 +705,7 @@ def show_wallet(msg):
         bot.sendMessage(chat_id, "Login is compulsory to see your wallet.")
         return
 
-    url = 'http://127.0.0.1:5001/get_booking_info'
+    url = 'http://adaptor:5001/get_booking_info'
     headers = {'Content-Type': 'application/json'}
     data = {"booking_code": user_data[chat_id].get('book_code', '')}
 
@@ -798,7 +804,7 @@ def check_free_slots(msg):
 
 def book_slot(msg):
     chat_id = msg['chat']['id']
-    book_url = 'http://127.0.0.1:8098/book'
+    book_url = 'http://reservation:8098/book'
 
     # Controllo se l'utente ha selezionato un parcheggio
     parking_url = user_data.get(chat_id, {}).get('parking_url')
@@ -848,7 +854,7 @@ def book_slot(msg):
 
 def expire_reservation(selected_device, booking_code, msg):
     chat_id = msg['chat']['id']
-    reservation_url = 'http://127.0.0.1:5001/reservation_exp'
+    reservation_url = 'http://adaptor:5001/reservation_exp'
     headers = {'Content-Type': 'application/json'}
 
     # Verifica che 'name_dev' esista in user_data

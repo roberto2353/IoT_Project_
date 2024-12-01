@@ -23,7 +23,8 @@ class ReservationService:
         self.serviceID = self.serviceInfo['ID']
         self.updateInterval = settings["updateInterval"]
         self.adaptor_url = settings['adaptor_url']
-
+	    
+        self.entrance_url = settings['entrance_url']
         self.register_service()
 
         self._paho_mqtt = PahoMQTT.Client()
@@ -148,7 +149,7 @@ class ReservationService:
 
 
                     if booking_code.isupper():
-                        url = 'http://127.0.0.1:8085/activate'
+                        url = f'{self.entrance_url}/activate'
 
                         # Dati da inviare nella richiesta
                         data = {
@@ -204,7 +205,7 @@ if __name__ == '__main__':
     settings = json.load(open(SETTINGS))
     service_port = int(settings["serviceInfo"]["port"])
     res = ReservationService(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': service_port})
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(res, '/', conf)
     try:
         cherrypy.engine.start()

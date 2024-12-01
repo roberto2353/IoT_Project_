@@ -2,7 +2,7 @@
     "project_name": "IoT4SmartParking",
     "project_owner": "IoT_Group8",
     "catalog": {
-        "ip": "127.0.0.1",
+        "ip": "0.0.0.0",
         "port": 8090,
         "methods": [
             "GET",
@@ -333,7 +333,7 @@
             "name": "DevConnector1",
             "last_update": "",
             "location": "Torino",
-            "url": "127.0.0.1",
+            "url": "dev_conn_1",
             "port": "8083",
             "topic": "ParkingLot/DevConnector1"
         },
@@ -342,7 +342,7 @@
             "name": "DevConnector2",
             "last_update": "",
             "location": "Torino",
-            "url": "127.0.0.1",
+            "url": "dev_conn_2",
             "port": "8091",
             "topic": "ParkingLot/DevConnector2"
         }
