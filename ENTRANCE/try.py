@@ -6,7 +6,7 @@ url = 'http://127.0.0.1:8085/activate'
 
 # Dati da inviare nella richiesta
 data = {
-    "booking_code": "5e3e0825-4588-48e3-8354-f5e4ff211dae",
+    "booking_code": "9032df51-c683-4024-bb57-0c0152922e4b",
     "url":"127.0.0.1",
     "port":8083,
     "name":'DevConnector1'

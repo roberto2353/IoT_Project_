@@ -165,6 +165,8 @@ class Entrance:
             self._paho_mqtt.publish(mqtt_topic_db, json.dumps(message))
             self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
             print(f"Messaggio pubblicato sui topic")
+            print(mqtt_topic_db)
+            print(mqtt_topic_dc)
 
 
             # Successful response to the frontend

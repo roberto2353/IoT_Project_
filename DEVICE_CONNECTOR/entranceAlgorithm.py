@@ -208,7 +208,7 @@ class Algorithm:
     def routeArrivals(self, get='False'):
         print("trying to route arrivals if present...\n")
         time = datetime.datetime.now()
-        if self.arrivals and time >= self.arrivals[0] and get == 'False':
+        if self.arrivals and time >= self.arrivals[0] and get == 'False' and self.tot_occupied < self.n_tot_dev:
             self.arrivals.pop(0)
             for floor in range(self.n_floors):
                 print(f"current floor:{floor}")

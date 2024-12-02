@@ -81,7 +81,7 @@ class ParkingBot:
         self.query_data = None
         self.chat_id = None
         self.query_id = None
-        self.settings = loadSettings
+        self.settings = loadSettings()
         # Token del bot Telegram
         self.TOKEN = '7501377611:AAGhXNYizRlkdl3V_BGtiIK-Slb76WcxzZ8'
 
@@ -293,7 +293,7 @@ class ParkingBot:
         elif state == self.CREDIT_CARD:
             if is_valid_credit_card(text):
                 self.user_data[self.chat_id]['credit_card'] = text
-                id = self.send_user_data_to_catalog(self.user_data, self.chat_id)
+                id = self.send_user_data_to_catalog()
                 if id:
                     bot.sendMessage(self.chat_id,
                                     f"Registration process complete!\nUse your card or the associated number: {id} for login in the system and access your wallet ,statistics and book a slot.")
@@ -388,17 +388,17 @@ class ParkingBot:
         except Exception as e:
             bot.sendMessage(self.chat_id, f"Error retrieving transactions: {e}")
 
-    def send_user_data_to_catalog(self, user_data, chat_id):
+    def send_user_data_to_catalog(self):
         url = self.settings['catalog_url'] + '/users'
         headers = {'Content-Type': 'application/json'}
         id = str(uuid.uuid4())
 
         user_info = {
             "ID": id,
-            "name": user_data['name'],
-            "surname": user_data['surname'],
-            "identity": user_data['identity'],
-            "credit_card": user_data['credit_card']
+            "name": self.user_data[self.chat_id]['name'],
+            "surname": self.user_data[self.chat_id]['surname'],
+            "identity": self.user_data[self.chat_id]['identity'],
+            "credit_card": self.user_data[self.chat_id]['credit_card']
         }
 
         try:
@@ -407,9 +407,9 @@ class ParkingBot:
             return id
 
         except requests.exceptions.HTTPError as http_err:
-            bot.sendMessage(chat_id, f"Errore HTTP: {http_err}")
+            bot.sendMessage(self.chat_id, f"Errore HTTP: {http_err}")
         except Exception as err:
-            bot.sendMessage(chat_id, f"Errore: {err}")
+            bot.sendMessage(self.chat_id, f"Errore: {err}")
 
         return None
 
@@ -680,7 +680,7 @@ class ParkingBot:
         max_week = max(user_weekly_duration.keys() | user_weekly_spending.keys(), default=0)
         weeks = list(range(1, max_week + 1))
         spending = [user_weekly_spending.get(i, 0) for i in weeks]
-        time_spent = [user_weekly_duration.get(i, 0) for i in weeks] * 60
+        time_spent = [user_weekly_duration.get(i, 0) for i in weeks]
 
         # Grafico delle spese
         fig1, ax1 = plt.subplots(figsize=(10, 6))
