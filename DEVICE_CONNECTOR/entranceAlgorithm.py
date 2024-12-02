@@ -174,11 +174,11 @@ class Algorithm:
 
     def arrival_time(self):
         current_hour = datetime.datetime.now().hour
-        if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev: #an arrival every 7.5-15 min during 0-6
+        if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev - 1: #an arrival every 7.5-15 min during 0-6
             next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(self.t_hold_time/2, self.t_hold_time))
             self.arrivals.append(next_arrival_time)
-        elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev: # an arrival every 1-3.75 min during day (6-24)
-            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(60, int(self.t_hold_time/4)))
+        elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev - 1: # an arrival every 2-7 min during day (6-24)
+            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(120, int(self.t_hold_time/2)))
             self.arrivals.append(next_arrival_time)
         self.arrivals.sort()
 
