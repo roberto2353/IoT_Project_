@@ -125,7 +125,7 @@
         "location":"Torino",
         "url":"dev_conn_1",
         "port": "8083",
-        "topic":"ParkingLotFabio/DevConnector1"
+        "topic":"ParkingLot/DevConnector1"
     },
     "brokerPort": 1883, 
     "qos": 2,

@@ -71,7 +71,7 @@ class dbAdaptor:
 
             # Start periodic alive messages
             self.start_periodic_updates()
-            self._paho_mqtt.subscribe('ParkingLotFabio/+/status', 2)
+            self._paho_mqtt.subscribe('ParkingLot/+/status', 2)
             
         except Exception as e:
             print(f"Error starting MQTT client: {e}")
@@ -119,7 +119,7 @@ class dbAdaptor:
                             }
                         ]
                     }
-                    topic = f"ParkingLotFabio/alive/{self.serviceID}"
+                    topic = f"ParkingLot/alive/{self.serviceID}"
                     self._paho_mqtt.publish(topic, json.dumps(message))
                     print(f"Published alive message to {topic}: {message}")
                     time.sleep(self.updateInterval)  # Wait before the next update
