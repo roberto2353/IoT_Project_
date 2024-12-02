@@ -23,9 +23,8 @@ class ReservationService:
         self.serviceID = self.serviceInfo['ID']
         self.updateInterval = settings["updateInterval"]
         self.adaptor_url = settings['adaptor_url']
-        self.device_connector_url = settings["devConn_url"]
-
-        self.entrance_algorithm_url = "http://127.0.0.1:8081/get_best_parking"
+	    
+        self.entrance_url = settings['entrance_url']
         self.register_service()
 
         self._paho_mqtt = PahoMQTT.Client()
@@ -100,17 +99,16 @@ class ReservationService:
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
     def book(self):
-        print("CIaoo")
         try:
             data = cherrypy.request.json
             booking_code = data['booking_code']
             url = data['url']
             dev_name = data['name']
-            print("passed: booking_code ", booking_code)
-            print("passed: url ", url)
+            #print("passed: booking_code ", booking_code)
+            #print("passed: url ", url)
             response = requests.get(url)
             if response.status_code == 200:
-                print(response.json())
+                #print(response.json())
                 selected_device_ = response.json().get("parking")
                 selected_device = selected_device_.get("deviceInfo", {})
                 print(f"selected device for current booking: {selected_device['ID']}")
@@ -124,29 +122,19 @@ class ReservationService:
                     selected_device['booking_code'] = booking_code
                     selected_device['last_update'] = str(current_time)
 
-                    # # Send reservation data to adaptor
-                    # reservation_url = 'http://127.0.0.1:5000/reservation'
-                    # headers = {'Content-Type': 'application/json'}
-                    # reservation_data = {
-                    #     "ID": selected_device['ID'],
-                    #     "name": selected_device.get('name', 'unknown'),
-                    #     "type": selected_device.get('type', 'unknown'),
-                    #     "location": selected_device.get('location', 'unknown'),
-                    #     "booking_code": booking_code
-                    # }
-                    # requests.post(reservation_url, headers=headers, json=reservation_data)
+                    
 
                     event = {
-                "n": f"{selected_device['ID']}/status", 
-                "u": "boolean", 
-                #"t": str(datetime.datetime.now()), 
-                "v": selected_device['status'],  # Cambiamo lo stato in 'reserved'
-                "sensor_id": selected_device['ID'],
-                "location": selected_device['location'],
-                "type": selected_device['type'],
-                "booking_code": selected_device['booking_code'],
-                #"floor": self.extract_floor(selected_device['location'])
-                "parking":dev_name
+                        "n": f"{selected_device['ID']}/status", 
+                        "u": "boolean", 
+                        #"t": str(datetime.datetime.now()), 
+                        "v": selected_device['status'],  # Cambiamo lo stato in 'reserved'
+                        "sensor_id": selected_device['ID'],
+                        "location": selected_device['location'],
+                        "type": selected_device['type'],
+                        "booking_code": selected_device['booking_code'],
+                        #"floor": self.extract_floor(selected_device['location'])
+                        "parking":dev_name
                 }
             
                     message = {"bn": selected_device['name'], "e": [event]}
@@ -154,14 +142,14 @@ class ReservationService:
                     mqtt_topic_dc = f"{self.pubTopic}/{dev_name}/{str(selected_device['ID'])}/status"
 
 
-        # Invio del messaggio MQTT all'adaptor
+                    # Invio del messaggio MQTT all'adaptor
                     self.client.myPublish(mqtt_topic_db, json.dumps(message))
                     self.client.myPublish(mqtt_topic_dc, json.dumps(message))
-                    print(f"Messaggio pubblicato sul topic ",mqtt_topic_dc)
+                    print(f"Messaggio pubblicato sul topic ", mqtt_topic_dc)
 
 
                     if booking_code.isupper():
-                        url = 'http://127.0.0.1:8085/activate'
+                        url = f'{self.entrance_url}/activate'
 
                         # Dati da inviare nella richiesta
                         data = {
@@ -175,11 +163,8 @@ class ReservationService:
                         # Invio della richiesta POST
                         response = requests.post(url, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
 
-                        # Stampa la risposta del server
-                        #print(f"Status Code: {response.status_code}")
-
                         return {
-                        "message": f"Go to the parking slot: {selected_device['location']}.",
+                        "message": f"Go to the parking slot: {selected_device['location']}. \n Use this booking code {booking_code} to exit to the parking",
                         "booking_code": booking_code,
                         "slot_id": selected_device['ID'],
                         "type": selected_device.get('type', 'unknown'),
@@ -220,7 +205,7 @@ if __name__ == '__main__':
     settings = json.load(open(SETTINGS))
     service_port = int(settings["serviceInfo"]["port"])
     res = ReservationService(settings)
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': service_port})
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(res, '/', conf)
     try:
         cherrypy.engine.start()

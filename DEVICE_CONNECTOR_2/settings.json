@@ -1,7 +1,7 @@
 {
     "updateInterval": 60,
     "pingInterval": 30,
-    "catalogURL": "http://localhost:8090",
+    "catalogURL": "http://catalog:8090",
     "devices":[
         {
             "deviceInfo":{
@@ -116,20 +116,22 @@
         "ID": 6,
         "name": "DevConnector2Service",
         "last_update": "",
-        "port": "8083"
+        "port": "8091"
     },
     "parkingInfo": {
         "ID": 2,
         "name": "DevConnector2",
         "last_update": "",
         "location":"Torino",
-        "url":"127.0.0.1",
+        "url":"dev_conn_2",
         "port": "8091",
         "topic":"ParkingLotFabio/DevConnector2"
     },
     "brokerPort": 1883, 
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
-    "catalog_url": "http://localhost:8090",
-    "baseTopic": "ParkingLotFabio"
+    "catalog_url": "http://catalog:8090",
+    "exit_url": "http://exit:8056",
+    "adaptor_url": "http://adaptor:5001",
+    "baseTopic": "ParkingLot"
 }  

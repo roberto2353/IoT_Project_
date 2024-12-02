@@ -311,7 +311,7 @@ class SensorREST(threading.Thread):
 
             # Assicurati che 'final_data' sia un dizionario
             if isinstance(final_data, dict):
-                print("E SIAMO QUA'''")
+                #print("E SIAMO QUA'''")
                 data = final_data
                 event = data.get('e', [])[0]
                 print(f"Extracted event: {event}")
@@ -357,6 +357,8 @@ class SensorREST(threading.Thread):
 
 
 if __name__ == '__main__':
+    settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -365,12 +367,9 @@ if __name__ == '__main__':
             'tools.response_headers.headers': [('Content-Type', 'application/json')]
         }
     }
-    settings = json.load(open(SETTINGS))
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': 8091})
-    #status = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json'))
-    #settings = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json'))
     
-    #status = json.load(open(DEVICES))
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
+    
     s = SensorREST(settings)
     cherrypy.tree.mount(s, '/', conf)
     cherrypy.engine.start()

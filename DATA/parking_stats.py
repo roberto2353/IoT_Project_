@@ -373,9 +373,9 @@ def main():
     st.sidebar.title("Navigation")
     dashboard_choice = st.sidebar.selectbox("Choose Dashboard", ["Occupancy", "Fees", "Durations"])
 
-    OCCUPANCY_URL = f"http://localhost:{adaptor_port}/sensors/occupied"
-    FEE_URL = f"http://localhost:{adaptor_port}/fees"
-    DURATION_URL = f"http://localhost:{adaptor_port}/durations"
+    OCCUPANCY_URL = f"http://adaptor:{adaptor_port}/sensors/occupied"
+    FEE_URL = f"http://adaptor:{adaptor_port}/fees"
+    DURATION_URL = f"http://adaptor:{adaptor_port}/durations"
 
     if dashboard_choice == "Occupancy":
         dashboard = ParkingDashboard(adaptor_url=OCCUPANCY_URL)

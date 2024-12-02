@@ -313,7 +313,7 @@ class SensorREST(threading.Thread):
 
             # Assicurati che 'final_data' sia un dizionario
             if isinstance(final_data, dict):
-                print("E SIAMO QUA'''")
+                #print("E SIAMO QUA'''")
                 data = final_data
                 event = data.get('e', [])[0]
                 print(f"Extracted event: {event}")
@@ -370,11 +370,8 @@ if __name__ == '__main__':
         }
     }
 
-    cherrypy.config.update({'server.socket_host': '127.0.0.1', 'server.socket_port': service_port})
-    #status = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json'))
-    #settings = json.load(open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings.json'))
+    cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     
-    #status = json.load(open(DEVICES))
     s = SensorREST(settings)
     cherrypy.tree.mount(s, '/', conf)
     cherrypy.engine.start()

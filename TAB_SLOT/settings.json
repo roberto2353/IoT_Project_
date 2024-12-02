@@ -9,7 +9,7 @@
     "messageBroker": "mqtt.eclipseprojects.io",
     "brokerPort": 1883, 
     "qos": 2,
-    "catalog_url": "http://localhost:8090",
-    "baseTopic": "ParkingLotFabio",
-    "adaptor_url": "http://localhost:5001"
+    "catalog_url": "http://catalog:8090",
+    "baseTopic": "ParkingLot",
+    "adaptor_url": "http://adaptor:5001"
 }

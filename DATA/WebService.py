@@ -118,7 +118,7 @@ class UserAuthentication:
                 #print("response:", response.json())
                 return response.json().get("users", [])
             except requests.exceptions.RequestException as e:
-                #print("pippo")
+                
                 st.error(f"Error fetching users: {e}")
                 return []
             
@@ -169,7 +169,7 @@ def main():
     settings = json.load(open(SETTINGS))
     adaptor_port = settings['serviceInfo']['port'] 
     catalog_url = settings['catalog_url']
-    adaptor_url = f"http://localhost:{adaptor_port}"  
+    adaptor_url = f"http://adaptor:{adaptor_port}"  
 
 
     authenticator = UserAuthentication(catalog_url)  # Assuming an authenticator class
