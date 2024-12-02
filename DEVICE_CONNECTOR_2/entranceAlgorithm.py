@@ -27,7 +27,7 @@ class Algorithm:
         self.exit_url = conf["exit_url"]
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT(clientID="Simulation2_F", broker=broker, port=port, notifier=None)
+        self.client = MyMQTT(clientID="Simulation_F", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
         self.port = port
         self.devices = devices
@@ -38,7 +38,7 @@ class Algorithm:
         self.floors = []
         self.tot_occupied = 0
         self.arrivals = []
-        self.t_hold_time = 900 # min
+        self.t_hold_time = 900 # 15 min
         
         self.lock = Lock()  # Create a lock
 
@@ -52,7 +52,7 @@ class Algorithm:
         """Stop the MQTT client."""
         self.client.stop()  # Stop MQTT client connection
 
-        # self.t_hold_time = 15
+        # self.t_hold_time = 30
 
     def countFloors(self):
         self.floors=[]
@@ -94,7 +94,7 @@ class Algorithm:
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             for dev in data["devices"]:
-                if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
+               if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
                     print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
@@ -181,8 +181,8 @@ class Algorithm:
         if current_hour in range(0, 6) and self.tot_occupied < self.n_tot_dev - 1: #an arrival every 7.5-15 min during 0-6
             next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(self.t_hold_time/2, self.t_hold_time))
             self.arrivals.append(next_arrival_time)
-        elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev - 1: # an arrival every 1-3.75 min during day (6-24)
-            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(60, int(self.t_hold_time/4)))
+        elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev - 1: # an arrival every 2-7 min during day (6-24)
+            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(120, int(self.t_hold_time/2)))
             self.arrivals.append(next_arrival_time)
         self.arrivals.sort()
 
@@ -212,7 +212,7 @@ class Algorithm:
     def routeArrivals(self, get='False'):
         print("trying to route arrivals if present...\n")
         time = datetime.datetime.now()
-        if self.arrivals and time >= self.arrivals[0] and get == 'False':
+        if self.arrivals and time >= self.arrivals[0] and get == 'False' and self.tot_occupied < self.n_tot_dev:
             self.arrivals.pop(0)
             for floor in range(self.n_floors):
                 print(f"current floor:{floor}")
@@ -294,11 +294,9 @@ class Algorithm:
             threshold = 60
         else:
             threshold = 30
-        
-
         for device in self.devices:
-            #print(f" last update:{device['last_update']}")
-            if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) > 6):
+            print("booking_code: ", device['deviceInfo']['booking_code'])
+            if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) >= 7):
                 if random.random() < departure_probability and (time - datetime.datetime.strptime(device["deviceInfo"]["last_update"], "%Y-%m-%d %H:%M:%S"))>= datetime.timedelta(minutes=threshold):
                     print(f"handling departures of cars altready parked for more than {threshold} min...")
                     print(f'found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}')
@@ -311,7 +309,7 @@ class Algorithm:
 
                     try:
                         
-                        req = requests.post(reservation_url, headers=headers, json=reservation_data)
+                        req = requests.post(exit_url, headers=headers, json=reservation_data)
                         # Only proceed if the response status code is 200 (OK)
                         if req.status_code == 200:
                             try:
@@ -343,7 +341,10 @@ class Algorithm:
                     # NON REGISTERED USERS BUT USERS THAT MADE A RESERVATION REQUEST WILL BE HANDLED BY EXIT FILE.
 
     def refreshDevices(self):
-        
+        # adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
+        # response = requests.get(adaptor_url)
+        # response.raise_for_status()  # Check if response is correct
+        # self.devices = response.json()
         if not self.setting_status_path.exists():
             return
         else:
@@ -404,7 +405,10 @@ class Algorithm:
 
 class EntranceAlgorithmService:
     def __init__(self):
-        
+        #adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
+        # response = requests.get(adaptor_url)
+        # response.raise_for_status()  # Check if response is correct
+        # devices = response.json()  # Fetch devices from adaptor
         self.lock = Lock()
         with self.lock:
             try:
@@ -415,7 +419,8 @@ class EntranceAlgorithmService:
         baseTopic = conf["baseTopic"]
         broker = conf["messageBroker"]
         port = conf["brokerPort"]
-        catalog_url = conf["catalog_url"]
+        #catalog_url = conf["catalog_url"]
+        #adaptor_url = conf["adaptor_url"]
         self.setting_status_path = P / 'settings_status.json'
         self.reset_file(self.setting_status_path)
         
@@ -432,7 +437,7 @@ class EntranceAlgorithmService:
             
         except json.JSONDecodeError:
             print("Error: setting_status.json is corrupted or empty.")
-        self.algorithm = Algorithm(devices,baseTopic, broker, port)  # Create Algorithm instance
+        self.algorithm = Algorithm(devices, baseTopic, broker, port)  # Create Algorithm instance
     
     def reset_file(self, filepath):
         try:
@@ -487,6 +492,6 @@ if __name__ == '__main__':
     entranceAlgorithmService.algorithm.start()
     entranceAlgorithmService.algorithm.free_all_parking_on_dbs()
     entranceAlgorithmService.sim_loop_start()
-    #cherrypy.config.update({'server.socket_port': 8092})  # Change to a different port
+    #cherrypy.config.update({'server.socket_port': 8081})  # Change to a different port
     #cherrypy.quickstart(entranceAlgorithmService)
     
