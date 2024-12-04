@@ -1,6 +1,16 @@
 {
     "messageBroker": "mqtt.eclipseprojects.io",
+    "baseTopic": "ParkingLot",
+    "updateInterval": 60,
+    "serviceInfo": {
+        "ID": 10,
+        "name": "TelegramBotService",
+        "last_update": "",
+        "port": ""
+    },
     "brokerPort": 1883, 
     "qos": 2,
-    "catalog_url": "http://catalog:8090"
+    "catalog_url": "http://catalog:8090",
+    "adaptor_url": "http://adaptor:5001",
+    "res_url": "http://reservation:8098"
 }

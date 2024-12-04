@@ -1,4 +1,5 @@
 import logging
+import threading
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -14,6 +15,7 @@ import uuid
 import numpy as np
 from datetime import datetime
 import matplotlib
+import paho.mqtt.client as PahoMQTT
 
 matplotlib.use('Agg')  # Usa il backend non interattivo
 import matplotlib.pyplot as plt
@@ -89,10 +91,87 @@ class ParkingBot:
         self.NAME, self.SURNAME, self.IDENTITY, self.CREDIT_CARD = range(4)
 
         # Dati utente e stati di login
+        self.catalog_url = self.settings["catalog_url"]
+        self.adaptor_url = self.settings["adaptor_url"]
+        self.res_url = self.settings["res_url"]
+        # Dati utente e stati di login
         self.user_data = {}
         self.logged_in_users = {}
 
-    # Funzione per validare il nome
+        self.pubTopic = self.settings["baseTopic"]
+        self.messageBroker = self.settings["messageBroker"]
+        self.port = self.settings["brokerPort"]
+        self.serviceInfo = self.settings['serviceInfo']
+        self.serviceID = self.serviceInfo['ID']
+        self.updateInterval = self.settings["updateInterval"]
+
+        self.register_service()
+
+        self._paho_mqtt = PahoMQTT.Client(client_id="BotPublisher")
+        self._paho_mqtt.connect(self.messageBroker, self.port)
+        #threading.Thread.__init__(self)
+        self.start_periodic_updates()
+
+    # def start(self):
+    #     """Start the MQTT client."""
+    #     try:
+    #         #self.client.start()  # Start MQTT client connection
+    #         print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
+    #         self.start_periodic_updates()
+    #     except Exception as e:
+    #         print(f"Error starting MQTT client: {e}")
+
+    # def stop(self):
+    #     """Stop the MQTT client."""
+    #     try:
+    #         self.client.stop()  # Stop MQTT client connection
+    #     except Exception as e:
+    #         print(f"Error stopping MQTT client: {e}")
+
+
+    def register_service(self):
+        """Registers the service in the catalog using POST the first time."""
+        #Next times, updated with MQTT
+        
+        # Initial POST request to register the service
+        url = f"{self.catalog_url}/services"
+        response = requests.post(url, json=self.serviceInfo)
+        if response.status_code == 200:
+            self.is_registered = True
+            print(f"Service {self.serviceID} registered successfully.")
+        else:
+            print(f"Failed to register service: {response.status_code} - {response.text}")
+
+    def start_periodic_updates(self):
+        """
+        Starts a background thread that publishes periodic updates via MQTT.
+        """
+        def periodic_update():
+            time.sleep(10)
+            while True:
+                try:
+                    message = {
+                        "bn": "updateCatalogService",  
+                        "e": [
+                            {
+                                "n": f"{self.serviceID}",  
+                                "u": "IP",  
+                                "t": str(time.time()), 
+                                "v": ""  
+                            }
+                        ]
+                    }
+                    topic = f"ParkingLot/alive/{self.serviceID}"
+                    self._paho_mqtt.publish(topic, json.dumps(message))  
+                    print(f"Published message to {topic}: {message}")
+                    time.sleep(self.updateInterval)
+                except Exception as e:
+                    print(f"Error during periodic update: {e}")
+
+        # Start periodic updates in a background thread
+        update_thread = threading.Thread(target=periodic_update, daemon=True)
+        update_thread.start()
+
 
     def show_logged_in_menu(self):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
