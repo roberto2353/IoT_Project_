@@ -52,59 +52,58 @@ class ParkingDashboard(BaseDashboard):
 
     def plot_occupancy(self, df):
         if not df.empty:
-            total_sensors = df['ID'].nunique()
+            #total_sensors = df['ID'].nunique()
             df_occupied = df[df['status'] == 'occupied']
-            df_occupied['time'] = df_occupied['time'].dt.floor('T')
-            df_minute_counts = df_occupied.groupby('time').size().reset_index(name='occupied_count')
-            df_minute_counts['hour'] = df_minute_counts['time'].dt.floor('H')
-            df_hourly_avg = df_minute_counts.groupby('hour')['occupied_count'].mean().reset_index()
+            #df_occupied['time'] = df_occupied['time'].dt.floor('T')
+            #df_minute_counts = df_occupied.groupby('time').size().reset_index(name='occupied_count')
+            df_occupied['hour'] = df_occupied['time'].dt.floor('H')
+            df_hourly = df_occupied.groupby('hour').size().reset_index(name='entered_cars')
             
-            df_hourly_avg['occupancy_percentage'] = (df_hourly_avg['occupied_count'] / total_sensors) * 100
+            #df_hourly_avg['occupancy_percentage'] = (df_hourly_avg['occupied_count'] / total_sensors) * 100
 
-            df_hourly_avg['occupied_count'] = df_hourly_avg['occupied_count'].apply(
-            lambda x: np.ceil(x) if x - int(x) >= 0.5 else np.floor(x)
-        )
+            #df_hourly_avg['occupied_count'] = df_hourly_avg['occupied_count'].apply(
+            #lambda x: np.ceil(x) if x - int(x) >= 0.5 else np.floor(x)
 
             fig = go.Figure(data=[
                 go.Scatter(
-                    x=df_hourly_avg['hour'],
-                    y=df_hourly_avg['occupied_count'],  # Average occupancy count per hour
+                    x=df_hourly['hour'],
+                    y=df_hourly['entered_cars'],  # Average occupancy count per hour
                     mode='lines+markers',
-                    name="Average Hourly Parking Occupancy",
+                    name="Numbers of cars entering in the parking per hour",
                     line=dict(color='royalblue', width=2)
                 )
             ])
 
             fig.update_layout(
-                title="Average Hourly Parking Occupancy",
+                title="Number of cars entering each hour",
                 xaxis_title="Time",
-                yaxis_title="Average Occupied Parkings",
+                yaxis_title="Number of cars",
                 showlegend=False
             )
             
-            fig2 = go.Figure(data=[
-            go.Scatter(
-                x=df_hourly_avg['hour'],
-                y=df_hourly_avg['occupancy_percentage'],
-                mode='lines+markers',
-                name="Percentage Hourly Parking Occupancy",
-                line=dict(color='green', width=2))
-            ])
+        #     fig2 = go.Figure(data=[
+        #     go.Scatter(
+        #         x=df_hourly_avg['hour'],
+        #         y=df_hourly_avg['occupancy_percentage'],
+        #         mode='lines+markers',
+        #         name="Percentage Hourly Parking Occupancy",
+        #         line=dict(color='green', width=2))
+        #     ])
         
 
-            fig2.update_layout(
-            title="Hourly Percentage of Parking Occupancy",
-            xaxis_title="Time",
-            yaxis_title="Percentage of Occupied Parkings",
-            showlegend=False)   
+        #     fig2.update_layout(
+        #     title="Hourly Percentage of Parking Occupancy",
+        #     xaxis_title="Time",
+        #     yaxis_title="Percentage of Occupied Parkings",
+        #     showlegend=False)   
             st.plotly_chart(fig)
-            st.plotly_chart(fig2)
+        #     st.plotly_chart(fig2)
         else:
             st.write("No data to display for occupancy.")
 
     def run(self, parking_id):
-        st.title("Parking Hourly Occupancy Dashboard")
-        st.write("Visualize the occupancy of parking spots over time")
+        st.title("Parking Clients Count Dashboard")
+        st.write("Visualize how many cars access the parking")
         start_time, end_time = self.select_time_range()
         df_filtered = self.fetch_data(start=start_time, end=end_time, parking_id=parking_id)
         self.plot_occupancy(df_filtered)
