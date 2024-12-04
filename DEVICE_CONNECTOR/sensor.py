@@ -19,7 +19,7 @@ class SensorREST(threading.Thread):
     devices_counter=1
 
     def __init__(self, settings):
-        super().__init__()  # Corretto inizializzazione del thread
+        super().__init__()  # Correct thread initialization
         self.catalogUrl = settings['catalogURL']
         self.devices = settings['devices']
         self.setting_status_path = P / 'settings_status.json'
@@ -32,12 +32,11 @@ class SensorREST(threading.Thread):
         self.lock = Lock()  # Create a lock
         self.register_devices()
         
-        # Inizializzazione dell'algoritmo di parcheggio
+        # Park alogirthm initialization
         broker = settings["messageBroker"]
         port = settings["brokerPort"]
         baseTopic = settings["baseTopic"]
-        # self.algorithm = Algorithm(self.devices, baseTopic, broker, port)
-        # self.algorithm.start()
+
 
         self.entranceAlgorithmService = EntranceAlgorithmService()
         self.entranceAlgorithmService.algorithm.start()
@@ -59,15 +58,6 @@ class SensorREST(threading.Thread):
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
         self.start()
-        # threading.Thread(target=self.entranceAlgorithmService.algorithm.simulate_arrivals_loop, daemon=True).start()  # Avvia simulazione
-    
-    # @cherrypy.expose
-    # @cherrypy.tools.json_out()
-    # @cherrypy.tools.allow(methods=['GET'])
-    # def get_best_parking(self):
-    #     """Ottiene il miglior parcheggio disponibile utilizzando l'algoritmo."""
-    #     print("richiesta arrivata")
-    #     return self.entranceAlgorithmService.algorithm.routeArrivals(get='True')
 
     
     def start(self):
@@ -177,7 +167,6 @@ class SensorREST(threading.Thread):
     def load_devs(self):
         """Load the catalog from a JSON file."""
         try:
-            #with open('C:/Users/kevin/Documents/PoliTo/ProgrammingIOT/IoT_Project_/DEVICE_CONNECTOR/settings_status.json') as file:
             with self.lock:
                 with open(DEVICES, 'r') as file:    
                     return(json.load(file))
@@ -247,7 +236,6 @@ class SensorREST(threading.Thread):
                     if device['deviceInfo']['ID'] == int(sensor_id):
                         device['deviceInfo']['active'] = True if new_status == 'active' else False
                         device['deviceInfo']['last_update'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        #TODO: SEE if necessary to also insert free as status since may be reserved or occupied when becomes not active or maybe force a departure
                         device_found = True
                         
                         break  # Exit loop after updating the device
@@ -285,7 +273,7 @@ class SensorREST(threading.Thread):
             raise cherrypy.HTTPError(500, 'Internal Server Error')
 
     def recursive_json_decode(self, data):
-        # Prova a decodificare fino a ottenere un dizionario o una lista
+        # Pdecodes until list or dict
         while isinstance(data, str):
             try:
                 data = json.loads(data)
@@ -298,48 +286,45 @@ class SensorREST(threading.Thread):
         print(f"Connected to {self.messageBroker} with result code: {reasonCode}")
         
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
-        # Un nuovo messaggio viene ricevuto
         print(f"ARRIVED!!!!!!!!! Topic: '{msg.topic}', QoS: '{msg.qos}', Message: '{msg.payload.decode()}'")
         
         try:
-            # Decodifica del payload JSON una prima volta
+            # decoding of JSON payload
             decoded_message = msg.payload.decode()
             print(f"Decoded message (first decode): {decoded_message}")
 
-            # Decodifica ricorsiva fino a ottenere un dizionario o una lista
+            # Recursive decoding
             final_data = self.recursive_json_decode(decoded_message)
             print(f"Final decoded message: {final_data}")
             print(f"Data type after final decode: {type(final_data)}")
 
-            # Assicurati che 'final_data' sia un dizionario
+            # check if final_data is dict
             if isinstance(final_data, dict):
-                #print("E SIAMO QUA'''")
                 data = final_data
                 event = data.get('e', [])[0]
                 print(f"Extracted event: {event}")
 
-                # Estrai i dettagli dell'evento
+                # Extract event details
                 sensor_id = event.get('sensor_id', '')
-                status_ = event.get('v', 'unknown')  # Recupera lo stato
+                status_ = event.get('v', 'unknown')  
                 location = event.get('location', 'unknown')
                 sensor_type = event.get('type', 'unknown')
                 booking_code = event.get('booking_code', '')
                 current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 with self.lock:
-                # Carica i dati esistenti
+                # Load existing data
                     with open(self.setting_status_path, 'r') as f:
                         data = json.load(f)
 
-                # Trova e aggiorna solo il dispositivo specifico
+                # Find and update right device
                 for dev in data["devices"]:
                     if dev["deviceInfo"]['ID'] == sensor_id:
                         dev["deviceInfo"]['status'] = status_
                         dev["deviceInfo"]['last_update'] = current_time
                         dev["deviceInfo"]['booking_code'] = booking_code
                         print(status_)
-                        break  # Esce dal ciclo una volta trovato il dispositivo
+                        break
                 with self.lock:
-                # Riscrivi solo il dispositivo aggiornato nel file
                     with open(self.setting_status_path, 'w') as f:
                         json.dump(data, f, indent=4)
 

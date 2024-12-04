@@ -13,12 +13,9 @@ P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
 class dbAdaptor:
-    exposed = True  # Esponi la classe per CherryPy
+    exposed = True  # Exposes class for CherryPy
 
-    def __init__(self, settings):
-        #influx_host='localhost', influx_port=8086, influx_user='root', influx_password='root', 
-        #        influx_db='IoT_Smart_Parking', influx_stats = 'IoT_SP_Stats'
-        
+    def __init__(self, settings):        
         self.influx_stats = settings["statsDB"]
         self.influx_db = settings["mainDB"]
         self.influx_prova = settings["provaDB"]
@@ -36,16 +33,16 @@ class dbAdaptor:
         self.updateInterval = settings["updateInterval"]
         self.influx_port = settings["influxPort"]
 
-        # Crea un'istanza di paho.mqtt.client
+        # Creates paho.mqtt.client instance
         self._paho_mqtt = PahoMQTT.Client()
 
 
 
-        # Registra i callback
+        # callback registration
         self._paho_mqtt.on_connect = self.myOnConnect
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
-        # Configurazione del client InfluxDB
+        # InfluxDB client registration
         self.client = InfluxDBClient(host="influxdb", port=self.influx_port, username="root", password="root", database=self.influx_db)
         if {'name': self.influx_db} not in self.client.get_list_database():
             self.client.create_database(self.influx_db)
@@ -131,7 +128,7 @@ class dbAdaptor:
         update_thread.start()
 
     def recursive_json_decode(self, data):
-        # Prova a decodificare fino a ottenere un dizionario o una lista
+        # Tries to decode until a list or dictionary is found
         while isinstance(data, str):
             try:
                 data = json.loads(data)
@@ -157,45 +154,44 @@ class dbAdaptor:
                                 "parking_id": parking,
                                 "floor": floor
                             },
-                            "time": str(current_time),  # Timestamp corrente
+                            "time": str(current_time),  # current timestamp 
                             "fields": {
-                                "booking_code": booking_code,  # Codice di prenotazione
+                                "booking_code": booking_code,  
                                 "duration": float(duration),
                                 "fee": float(fee),
                                 "active": active
                             }
                         }
                     ]
-        # TODO NON FUNZIONA
-        print(f"\n\n\nDOVREBBE STAMPARE LA FEE = {float(fee)} E LA DURATION = {float(duration)}. DATA TYPE: {type(fee)}\n\n\n")
-                    # Scrivi l'aggiornamento su InfluxDB
+    
+        print(f"\n\n\n FEE = {float(fee)}, DURATION = {float(duration)}. DATA TYPE: {type(fee)}\n\n\n")
+        # InfluxDB update
         self.client.write_points(json_body,time_precision='s', database=self.influx_prova) #influx_stats
         self.client.write_points(json_body, time_precision='s', database=self.influx_sim_stats) 
         print(f"Updated sensor {sensor_id} in stats db.")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
-        # Un nuovo messaggio viene ricevuto
         print(f"Topic: '{msg.topic}', QoS: '{msg.qos}', Message: '{msg.payload.decode()}'")
         
         try:
-            # Decodifica del payload JSON una prima volta
+            # decoding of the payload for the first time
             decoded_message = msg.payload.decode()
             print(f"Decoded message (first decode): {decoded_message}")
 
-            # Decodifica ricorsiva fino a ottenere un dizionario o una lista
+            # Recursive decoding of the payload 
             final_data = self.recursive_json_decode(decoded_message)
             print(f"Final decoded message: {final_data}")
             print(f"Data type after final decode: {type(final_data)}")
 
-            # Assicurati che 'final_data' sia un dizionario
+            # 'final_data' is dict
             if isinstance(final_data, dict):
                 data = final_data
                 event = data.get('e', [])[0]
                 print(f"Extracted event: {event}")
 
-                # Estrai i dettagli dell'evento
+                # Event details extracted
                 sensor_id = event.get('sensor_id', '')
-                status = event.get('v', 'unknown')  # Recupera lo stato
+                status = event.get('v', 'unknown')  # state retrieval
                 
                 if status == 'free' and event.get('flag', '') != True:
                     self.update_stats_db(event)
@@ -208,12 +204,12 @@ class dbAdaptor:
                 active = event.get('active', True) 
                 parking = event.get('parking', 'unknown')
 
-                # Controlla se un sensore con lo stesso ID esiste già nel database
+                # checks if a sensor with same ID already exists in the db
                 check_query = f'SELECT * FROM "status" WHERE "ID" = \'{sensor_id}\''
                 result = self.client.query(check_query)
                 
                 if list(result.get_points()):
-                    # Se il sensore esiste, aggiorna lo stato nel database InfluxDB
+                    #if sensor exists, update its status
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     json_body = [
                         {
@@ -224,16 +220,16 @@ class dbAdaptor:
                                 "type": sensor_type,
                                 "location": location
                             },
-                            "time": str(current_time),  # Timestamp corrente
+                            "time": str(current_time),  
                             "fields": {
-                                "name": data['bn'],  # Nome del sensore o dispositivo
-                                "status": status,  # Stato aggiornato dal messaggio MQTT (es. 'occupied')
-                                "booking_code": booking_code,  # Codice di prenotazione
+                                "name": data['bn'],  # Nname of sensor
+                                "status": status,  # status updated via MQTT message
+                                "booking_code": booking_code,
                                 "active": active
                             }
                         }
                     ]
-                    # Scrivi l'aggiornamento su InfluxDB
+                    #InfluxDB update
                     self.client.write_points(json_body, time_precision='s', database=self.influx_db)
                     self.client.write_points(json_body, time_precision='s', database=self.influx_sim)
                     print(f"Updated sensor {sensor_id} status to {status}.")
@@ -270,20 +266,20 @@ class dbAdaptor:
                 device_info = cherrypy.request.json
                 required_fields = ['ID', 'name', 'type', 'location', 'active', 'parking']
                 
-                # Verifica che tutti i campi richiesti siano presenti
+                # checks all field requested are present
                 for field in required_fields:
                     if field not in device_info:
                         return {"error": f"Missing field: {field}"}, 400
                 
-                # Controlla se un sensore con lo stesso ID esiste già
+                # checks if a sensor with same id already exists
                 check_query = f'SELECT * FROM "status" WHERE "ID" = \'{device_info["ID"]}\''
                 result = self.client.query(check_query)
                 
-                # Se il risultato non è vuoto, significa che il dispositivo esiste già
+                # if so, device already exists
                 if list(result.get_points()):
                     return {"message": f"Device with ID {device_info['ID']} already exists."}, 409  # Conflict
                 
-                # Se non esiste, inserisci il nuovo dispositivo
+                # if not, adds it
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 json_body = [
                     {
@@ -294,16 +290,16 @@ class dbAdaptor:
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
-                        "time": str(current_time),  # Timestamp corrente
+                        "time": str(current_time), 
                         "fields": {
                             "name": device_info['name'],
-                            "status": "free",  # Lo stato è forzato a "free"
+                            "status": "free",  #state forced to "free"
                             "booking_code": device_info.get('booking_code', ''),
                             "active": device_info['active'] 
                         }
                     }
                 ]
-                # Scrivi i dati su InfluxDB
+                # InfluxDB update
                 self.client.write_points(json_body, database= self.influx_db)
                 self.client.write_points(json_body, database= self.influx_sim)
                 print(f"Registered device with ID {device_info['ID']} on InfluxDB.")
@@ -318,12 +314,12 @@ class dbAdaptor:
                 device_info = cherrypy.request.json
                 required_fields = ['ID', 'name', 'type', 'location', 'booking_code', 'parking']
                 
-                # Verifica che tutti i campi richiesti siano presenti
+                # checks all field requested are present
                 for field in required_fields:
                     if field not in device_info:
                         return {"error": f"Missing field: {field}"}, 400
                 
-                # Verifica l'ultima entry per il dispositivo con ID e booking_code specifico
+                # check last entry with specific id and booking code
                 check_query = f'''
                 SELECT * FROM "status" 
                 WHERE "ID" = '{device_info["ID"]}' AND "booking_code" = '{device_info["booking_code"]}'
@@ -331,17 +327,17 @@ class dbAdaptor:
                 '''
                 result = self.client.query(check_query)
                 
-                # Se non ci sono risultati, significa che non c'è nessuna prenotazione attiva con quel booking_code
+                # if there are no results, no active booking is present with that booking code
                 points = list(result.get_points())
                 if not points:
                     return {"message": f"Device with ID {device_info['ID']} and booking_code {device_info['booking_code']} doesn't exist."}, 409  # Conflict
-                
-                # Controlla se lo stato dell'ultima entry è "reserved"
+            
+                # checks if last entry state is reserved
                 last_entry = points[0]
                 if last_entry['status'] != 'reserved':
-                    return {"message": "Reservation has already expired or was never made."}, 200  # Nessuna azione necessaria
+                    return {"message": "Reservation has already expired or was never made."}, 200  # No necessary action
                 
-                # Se l'ultima entry è "reserved", continua ad aggiornare lo stato
+                # if last entry state is reserved then keeps updating the state
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 json_body = [
                     {
@@ -352,10 +348,10 @@ class dbAdaptor:
                             "type": device_info['type'],
                             "location": device_info['location']
                         },
-                        "time": str(current_time),  # Timestamp corrente
+                        "time": str(current_time), 
                         "fields": {
                             "name": device_info['name'],
-                            "status": "free",  # Lo stato è forzato a "free"
+                            "status": "free",  # state is forced to "free"
                             "booking_code": device_info.get('booking_code', ''),
                             "active": device_info['active']
                         }
@@ -439,7 +435,7 @@ class dbAdaptor:
                 if not booking_code:
                     return {"error": "Missing 'booking_code' in request"}, 400
 
-                # Query per ottenere tutte le transazioni individuali per il booking_code
+                # query to obtain all individual transaction for booking_code
                 query_transactions = f"""
                     SELECT "ID", "duration", "fee", time
                     FROM "status"
@@ -453,14 +449,14 @@ class dbAdaptor:
                         "slot_id": point.get("ID", "N/A"),
                         "duration": point.get("duration", 0),
                         "fee": point.get("fee", 0),
-                        "time": point.get("time")  # Facoltativo: data/ora
+                        "time": point.get("time")
                     })
 
-                # Controlla se ci sono transazioni
+                # checks if any transaction is present
                 if not transactions:
                     return {"message": f"No transactions found for booking_code {booking_code}"}, 404
 
-                # Risposta solo con transazioni individuali
+                # Response with individual transactions
                 response = {
                     "booking_code": booking_code,
                     "transactions": transactions
@@ -487,11 +483,11 @@ class dbAdaptor:
     def GET(self, *uri, **params):
         if len(uri) == 0:
             try:
-                # Esegui una query per ottenere ultimo stato di tutti i sensori dal database
+                # Query to obtain last state of all sensors in the db
                 query = 'SELECT LAST("status") AS "status", "ID", "type", "location", "name", "parking_id", "time", "booking_code", "active" FROM "status" GROUP BY "ID"'
                 result = self.client.query(query)
                 
-                # Converti il risultato in un formato JSON-friendly
+                # Converts result in a JSON-friendly format
                 sensors = []
                 for sensor in result.get_points():
                     sensors.append({
@@ -509,7 +505,7 @@ class dbAdaptor:
                 if not sensors:
                     sensors = {"message": "No sensors found in the database"}
                 
-                # Converti la lista in una stringa JSON
+                # Converts list into JSON
                 print("returned sensors from db via adaptor")
                 return json.dumps(sensors).encode('utf-8')
             
@@ -540,14 +536,14 @@ class dbAdaptor:
             start = params.get('start')
             end = params.get('end')
             parking_id = params.get('parking_id')
-            print("prova query fees su adaptor via db prova stats")
+            print("try query fees on adaptor via db prova stats")
             return self.get_fees(start, end, parking_id)
 
         elif len(uri) ==1 and uri[0] == "durations":
             start = params.get('start')
             end = params.get('end')
             parking_id = params.get('parking_id')
-            print("prova query durations su adaptor via db prova stats")
+            print("try query durations on adaptor via db prova stats")
             return self.get_durations(start, end, parking_id)
         
         else:
@@ -695,7 +691,7 @@ if __name__ == "__main__":
     test = dbAdaptor(settings)
     test.start()
     
-    # Configurazione di CherryPy con MethodDispatcher
+    # CHerryPy config with MethodDispatcher
     config = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -711,7 +707,7 @@ if __name__ == "__main__":
         'engine.autoreload.on': False
     })
 
-    # Monta il servizio su /
+    # Mounts service on
     cherrypy.tree.mount(test, '/', config)
     
     try:

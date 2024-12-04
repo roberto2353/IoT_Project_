@@ -2,113 +2,320 @@
     "updateInterval": 60,
     "pingInterval": 30,
     "catalogURL": "http://catalog:8090",
-    "devices":[
+    "devices": [
         {
-            "deviceInfo":{
-            "ID": 13,
-            "name": "sensor1",
-            "type": "photocell",
-            "location": "P0-1",
-            "active": true
+            "deviceInfo": {
+                "ID": 21,
+                "name": "sensor21",
+                "type": "photocell",
+                "location": "P0-1",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 14,
-            "name": "sensor2",
-            "type": "photocell",
-            "location": "P0-2",
-            "active": true
+            "deviceInfo": {
+                "ID": 22,
+                "name": "sensor22",
+                "type": "photocell",
+                "location": "P0-2",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 15,
-            "name": "sensor3",
-            "type": "photocell",
-            "location": "P0-3",
-            "active": true
+            "deviceInfo": {
+                "ID": 23,
+                "name": "sensor23",
+                "type": "photocell",
+                "location": "P0-3",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 16,
-            "name": "sensor4",
-            "type": "photocell",
-            "location": "P0-4",
-            "active": true
+            "deviceInfo": {
+                "ID": 24,
+                "name": "sensor24",
+                "type": "photocell",
+                "location": "P0-4",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 17,
-            "name": "sensor5",
-            "type": "photocell",
-            "location": "P0-5",
-            "active": true
+            "deviceInfo": {
+                "ID": 25,
+                "name": "sensor25",
+                "type": "photocell",
+                "location": "P0-5",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 18,
-            "name": "sensor6",
-            "type": "photocell",
-            "location": "P0-6",
-            "active": true
+            "deviceInfo": {
+                "ID": 26,
+                "name": "sensor26",
+                "type": "photocell",
+                "location": "P0-6",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 19,
-            "name": "sensor7",
-            "type": "photocell",
-            "location": "P1-1",
-            "active": true
+            "deviceInfo": {
+                "ID": 27,
+                "name": "sensor27",
+                "type": "photocell",
+                "location": "P1-1",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 20,
-            "name": "sensor8",
-            "type": "photocell",
-            "location": "P1-2",
-            "active": true
+            "deviceInfo": {
+                "ID": 28,
+                "name": "sensor28",
+                "type": "photocell",
+                "location": "P1-2",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 21,
-            "name": "sensor9",
-            "type": "photocell",
-            "location": "P1-3",
-            "active": true
+            "deviceInfo": {
+                "ID": 29,
+                "name": "sensor29",
+                "type": "photocell",
+                "location": "P1-3",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 22,
-            "name": "sensor10",
-            "type": "photocell",
-            "location": "P1-4",
-            "active": true
+            "deviceInfo": {
+                "ID": 30,
+                "name": "sensor30",
+                "type": "photocell",
+                "location": "P1-4",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 23,
-            "name": "sensor11",
-            "type": "photocell",
-            "location": "P1-5",
-            "active": true
+            "deviceInfo": {
+                "ID": 31,
+                "name": "sensor31",
+                "type": "photocell",
+                "location": "P1-5",
+                "active": true
             }
         },
         {
-            "deviceInfo":{
-            "ID": 24,
-            "name": "sensor12",
-            "type": "photocell",
-            "location": "P1-6",
-            "active": true
+            "deviceInfo": {
+                "ID": 32,
+                "name": "sensor32",
+                "type": "photocell",
+                "location": "P1-6",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 33,
+                "name": "sensor33",
+                "type": "photocell",
+                "location": "P2-1",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 34,
+                "name": "sensor34",
+                "type": "photocell",
+                "location": "P2-2",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 35,
+                "name": "sensor35",
+                "type": "photocell",
+                "location": "P2-3",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 36,
+                "name": "sensor36",
+                "type": "photocell",
+                "location": "P2-4",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 37,
+                "name": "sensor37",
+                "type": "photocell",
+                "location": "P2-5",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 38,
+                "name": "sensor38",
+                "type": "photocell",
+                "location": "P2-6",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 39,
+                "name": "sensor39",
+                "type": "photocell",
+                "location": "P2-7",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 40,
+                "name": "sensor40",
+                "type": "photocell",
+                "location": "P0-7",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 41,
+                "name": "sensor41",
+                "type": "photocell",
+                "location": "P0-8",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 42,
+                "name": "sensor42",
+                "type": "photocell",
+                "location": "P0-9",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 43,
+                "name": "sensor43",
+                "type": "photocell",
+                "location": "P1-7",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 44,
+                "name": "sensor44",
+                "type": "photocell",
+                "location": "P1-8",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 45,
+                "name": "sensor45",
+                "type": "photocell",
+                "location": "P1-9",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 46,
+                "name": "sensor46",
+                "type": "photocell",
+                "location": "P2-8",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 47,
+                "name": "sensor47",
+                "type": "photocell",
+                "location": "P2-9",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 48,
+                "name": "sensor48",
+                "type": "photocell",
+                "location": "P2-10",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 49,
+                "name": "sensor49",
+                "type": "photocell",
+                "location": "P3-1",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 50,
+                "name": "sensor50",
+                "type": "photocell",
+                "location": "P3-2",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 51,
+                "name": "sensor51",
+                "type": "photocell",
+                "location": "P3-3",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 52,
+                "name": "sensor52",
+                "type": "photocell",
+                "location": "P3-4",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 53,
+                "name": "sensor53",
+                "type": "photocell",
+                "location": "P3-5",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 54,
+                "name": "sensor54",
+                "type": "photocell",
+                "location": "P3-6",
+                "active": true
+            }
+        },
+        {
+            "deviceInfo": {
+                "ID": 55,
+                "name": "sensor55",
+                "type": "photocell",
+                "location": "P3-7",
+                "active": true
             }
         }
     ],
@@ -122,16 +329,16 @@
         "ID": 2,
         "name": "DevConnector2",
         "last_update": "",
-        "location":"Torino",
-        "url":"dev_conn_2",
+        "location": "Torino",
+        "url": "dev_conn_2",
         "port": "8091",
-        "topic":"ParkingLot/DevConnector2"
+        "topic": "ParkingLot/DevConnector2"
     },
-    "brokerPort": 1883, 
+    "brokerPort": 1883,
     "qos": 2,
     "messageBroker": "mqtt.eclipseprojects.io",
     "catalog_url": "http://catalog:8090",
     "exit_url": "http://exit:8056",
     "adaptor_url": "http://adaptor:5001",
     "baseTopic": "ParkingLot"
-}  
+}

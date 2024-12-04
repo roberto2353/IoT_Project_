@@ -333,10 +333,10 @@ class CatalogREST(object):
 class MySubscriber:
         def __init__(self, catalog_manager, settings):
             self.clientID = "CatalogSubscriber_F"
-			# create an instance of paho.mqtt.client
+			# Creates an instance of paho.mqtt.client
             self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID) 
             
-			# register the callback
+			# Register the callback
             self._paho_mqtt.on_connect = self.myOnConnect
             self._paho_mqtt.on_message = self.myOnMessageReceived 
             self.pubTopic = "ParkingLot/alive/+"
@@ -348,10 +348,10 @@ class MySubscriber:
             self.start()
 
         def start (self):
-            #manage connection to broker
+            # Manages connection to broker
             self._paho_mqtt.connect(self.messageBroker, self.port)
             self._paho_mqtt.loop_start()
-            # subscribe for a topic
+            # Subscribes for a topic
             self._paho_mqtt.subscribe(self.pubTopic, 2)
 
         def stop (self):

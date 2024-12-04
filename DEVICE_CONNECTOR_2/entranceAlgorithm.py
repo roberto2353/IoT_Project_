@@ -45,7 +45,7 @@ class Algorithm:
     def start(self):
         """Start the MQTT client."""
         self.client.start()  # Start MQTT client connection
-        print(f"Publisher connesso al broker {self.messageBroker}:{self.port}")
+        print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
        
 
     def stop(self):
@@ -86,30 +86,30 @@ class Algorithm:
     def update_device_status(self, device):
         # status already changed/updated in the received device
         with self.lock:
-            # Leggi i dati esistenti dal file
+
             with open(self.setting_status_path, 'r') as f:
                 data = json.load(f)
             
-            # Cerca e aggiorna solo il dispositivo in considerazione
+            # Finds only device that as someting to be updated
             
         if device["deviceInfo"]['status'] == 'free': #departure case
             for dev in data["devices"]:
                if dev["deviceInfo"]['ID'] == device["deviceInfo"]['ID']:
-                    print("\nDATI VECCHI DA AGGIORNARE DOPO LA PARTENZA:\n")
+                    print("\nOLD DATA TO UPDATE AFTER DEPARTURE:\n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
                     dev["deviceInfo"]['status'] = device["deviceInfo"]['status']
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     dev["deviceInfo"]['booking_code'] = ""
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
-                    print("\n NUOVI DATI DA INSERIRE NEL DB \n")
+                    print("\n NEW DATA TO INSERT IN THE DB \n")
                     print(f'{dev["deviceInfo"]["ID"]},{dev["deviceInfo"]["status"]}, {dev["deviceInfo"]["last_update"]}, {dev["deviceInfo"]["booking_code"]}, {dev["deviceInfo"]["active"]}\n')
-                    print("\n PRESI DAL DEVICE PASSATO AD HANDLING DEPARTURE CON VALORI\n")
+                    print("\nTAKEN FROM THE OLD DEV, THEN PASSED TO HANDLING DEPARTURE WITH VALUES\n")
                     print(print(f'{device["deviceInfo"]["ID"]},{device["deviceInfo"]["status"]}, {device["deviceInfo"]["last_update"]}, {device["deviceInfo"]["booking_code"]}, {device["deviceInfo"]["active"]}\n')
                 )
                     break
                 
             with self.lock:    
-            # Riscrivi il file con i dati aggiornati
+            # RRewrites data with updated values
                 with open(self.setting_status_path, 'w') as f:
                     json.dump(data, f, indent=4)
             event = {
@@ -134,9 +134,9 @@ class Algorithm:
                     dev["deviceInfo"]['last_update'] = device["deviceInfo"]['last_update']
                     dev["deviceInfo"]['booking_code'] = device["deviceInfo"]['booking_code']
                     dev["deviceInfo"]['active'] = device["deviceInfo"]['active']
-                    break  # Esce dopo aver trovato il dispositivo
+                    break  # break after finding the device
             with self.lock:
-            # Riscrivi il file con i dati aggiornati
+            # rewrite the JSON with updated values
                 with open(self.setting_status_path, 'w') as f:
                     json.dump(data, f, indent=4)
             event = {
@@ -156,16 +156,10 @@ class Algorithm:
         message = {"bn": device["deviceInfo"]['name'], "e": [event]}
         mqtt_topic = f'{self.pubTopic}/{str(device["deviceInfo"]["ID"])}/status'
 
-        # Invio del messaggio MQTT all'adaptor
+        # MQTT msg sent to adaptor
         self.client.myPublish(mqtt_topic, json.dumps(message))
         print(f"Messaggio pubblicato su topic {mqtt_topic}")
-
-        # Risposta di successo al frontend
-        # return {
-        #         "message": f"Slot {device['location']} has been successfully  occupied.",
-        #         "slot_id": device['ID']
-        #     }
-
+        
     @staticmethod
     def extract_floor(location):
         if location.startswith("P"):
@@ -216,8 +210,7 @@ class Algorithm:
             self.arrivals.pop(0)
             for floor in range(self.n_floors):
                 print(f"current floor:{floor}")
-                print(f"posti occupati per piano prova:{self.n_occ_dev_per_floor}")
-                print(f"posti occupati:{self.n_occ_dev_per_floor[floor]}; thold posti occupati:{int(0.8 * self.n_dev_per_floor[floor])}")
+                print(f"Occupied slots on this floor:{self.n_occ_dev_per_floor[floor]}; thold of occupied slots:{int(0.8 * self.n_dev_per_floor[floor])}")
                 if self.n_occ_dev_per_floor[floor] < int(0.8 * self.n_dev_per_floor[floor]):
                     device = self.get_free_device_on_floor(floor)
                     if device and self.changeDevState(device):
@@ -250,41 +243,7 @@ class Algorithm:
             if device:
                 return {"message": "Parking found", "parking": device}
             return {"message": "No free parking found"}
-     
-    @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def fee_and_duration_calc(self,device):
-        booking_start_time_str = device.get('time', None)
-        booking_start_time = datetime.datetime.strptime(booking_start_time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)
-
-            
-        #booking_start_timestamp = int(booking_start_time.timestamp())
-
-        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        current_time_ok = datetime.datetime.strptime(current_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.UTC)
-            
-        # print("current_time: ", current_time_ok, "booking_start_time: " ,booking_start_time)
-        parking_duration_seconds = (current_time_ok - booking_start_time).total_seconds()
-        parking_duration_hours = parking_duration_seconds / 3600 # Converti i secondi in ore
-        parking_duration_mins = parking_duration_seconds / 60 # Converti i secondi in min
-
-        # print("parking_duration_hours :", parking_duration_hours)
-
-        if parking_duration_hours <= 10:
-            fee = parking_duration_hours * 2  # 2 euro per ora
-            return fee, parking_duration_mins
-        else:
-            # Se supera le 10 ore, calcola 20 euro ogni 24 ore (giorno intero)
-            full_days = int(parking_duration_hours // 24)  # Numero di giorni interi
-            remaining_hours = parking_duration_hours % 24  # Ore rimanenti dopo giorni interi
-            fee = full_days * 20 + (remaining_hours * 2 if remaining_hours <= 10 else 20)
-            return fee, parking_duration_mins
         
-        
-        
-        
-                
     def handle_departures(self):
         departure_probability = 0.1  # 10% chance for any parked car to leave
         time = datetime.datetime.now()
@@ -337,14 +296,8 @@ class Algorithm:
                     except requests.exceptions.RequestException as e:
                         print(f"Request error: {e}")
                     
-                    #TODO: ONLY REGISTERED USERS AND RANDOM USERS WILL DEPARTURE WITH THIS METHOD. 
-                    # NON REGISTERED USERS BUT USERS THAT MADE A RESERVATION REQUEST WILL BE HANDLED BY EXIT FILE.
 
     def refreshDevices(self):
-        # adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
-        # response = requests.get(adaptor_url)
-        # response.raise_for_status()  # Check if response is correct
-        # self.devices = response.json()
         if not self.setting_status_path.exists():
             return
         else:
@@ -380,7 +333,7 @@ class Algorithm:
             message = {"bn": device["deviceInfo"]['name'], "e": [event]}
             mqtt_topic = f'{self.pubTopic}/{str(device["deviceInfo"]["ID"])}/status'
             self.client.myPublish(mqtt_topic, json.dumps(message))
-            print(f"Messaggio pubblicato su topic {mqtt_topic}")
+            print(f"Message published on topic {mqtt_topic}")
             
     def intraloop_update_var(self):
         print("refreshing devices...\n")
@@ -394,7 +347,7 @@ class Algorithm:
     def simulate_arrivals_loop(self):
         while True:
             
-            print("inizio loop:\n")
+            print("Loop start:\n")
             self.intraloop_update_var()
             self.handle_departures()
             self.intraloop_update_var()
@@ -405,10 +358,6 @@ class Algorithm:
 
 class EntranceAlgorithmService:
     def __init__(self):
-        #adaptor_url = 'http://127.0.0.1:5001/'  # URL for adaptor
-        # response = requests.get(adaptor_url)
-        # response.raise_for_status()  # Check if response is correct
-        # devices = response.json()  # Fetch devices from adaptor
         self.lock = Lock()
         with self.lock:
             try:
@@ -433,7 +382,7 @@ class EntranceAlgorithmService:
                 with open(self.setting_status_path, 'r') as f:
                     conf = json.load(f)
                 devices = conf.get('devices', [])
-                print("CONTROLLO INIZIALIZZAZIONE SETTING_STATUS:\n"+ f"{devices}")
+                print("Check SETTING_STATUS initialization:\n"+ f"{devices}")
             
         except json.JSONDecodeError:
             print("Error: setting_status.json is corrupted or empty.")
