@@ -424,7 +424,7 @@ class dbAdaptor:
 
                 # Query per ottenere tutte le transazioni individuali per il booking_code
                 query_transactions = f"""
-                    SELECT "ID", "duration", "fee", time
+                    SELECT "ID", "duration", "fee", time , "location"
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
@@ -434,9 +434,11 @@ class dbAdaptor:
                 for point in result_transactions.get_points():
                     transactions.append({
                         "slot_id": point.get("ID", "N/A"),
+                        "location": point.get("location", "N/A"),
                         "duration": point.get("duration", 0),
                         "fee": point.get("fee", 0),
                         "time": point.get("time")  # Facoltativo: data/ora
+
                     })
 
                 # Controlla se ci sono transazioni

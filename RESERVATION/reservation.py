@@ -154,13 +154,14 @@ class ReservationService:
                         # Dati da inviare nella richiesta
                         data = {
                             "booking_code": booking_code,
-                            "url":data['url'],
+                            "url":data['_url'],
                             "port":data['port'],
                             "name":data['name']
 
                         }
 
                         # Invio della richiesta POST
+                        time.sleep(10)
                         response = requests.post(url, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
 
                         return {

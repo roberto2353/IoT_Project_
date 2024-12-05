@@ -374,13 +374,14 @@ class ParkingBot:
                 transactions = response_data["transactions"]
                 message = "Your recent transactions:\n"
                 for transaction in transactions:
+                    location = transaction.get("location", "N/A")
                     slot_id = transaction.get("slot_id", "N/A")
                     raw_duration = transaction.get("duration", "N/A")
                     formatted_duration = format_duration(raw_duration)
                     fee = round(transaction.get("fee", 0), 2)
                     raw_time = transaction.get("time", "N/A")
                     formatted_time = format_datetime(raw_time)
-                    message += f"Slot: {slot_id}, Duration: {formatted_duration}, Fee: {fee} €,\n{formatted_time}\n"
+                    message += f"Slot: {slot_id}, Location: {location}, Duration: {formatted_duration}, Fee: {fee} €,\n{formatted_time}\n"
                 bot.sendMessage(self.chat_id, message)
             else:
                 bot.sendMessage(self.chat_id, "No transactions found.")

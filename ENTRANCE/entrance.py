@@ -26,7 +26,7 @@ class Entrance:
 
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher")
+        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_A")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
@@ -164,6 +164,10 @@ class Entrance:
             self._paho_mqtt.publish(mqtt_topic_db, json.dumps(message))
             self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
             print(f"Messaggio pubblicato sui topic")
+            print(f"Topic: {mqtt_topic_db}")
+            print(message)
+            print(f"Topic: {mqtt_topic_dc}")
+            
 
 
             # Successful response to the frontend
