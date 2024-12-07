@@ -501,10 +501,10 @@ class ParkingBot:
             if self.chat_id in self.logged_in_users and self.logged_in_users[self.chat_id]:
                 BC = self.user_data[self.chat_id].get('book_code', 'N/A')
                 bot.sendMessage(self.chat_id,
-                                f"Your reserved slot is: {location}. Your booking code is: {BC}. \n Your parking slot will be reserved for 2 minutes.")
+                                f"Your reserved slot is: {location}. Your booking code is: {BC}. \n Your parking slot will be reserved for 20 minutes.")
             else:
                 bot.sendMessage(self.chat_id,
-                                f"Your reserved slot is: {location}. Your booking code is: {booking_code}. \n Your parking slot will be reserved for 2 minutes.")
+                                f"Your reserved slot is: {location}. Your booking code is: {booking_code}. \n Your parking slot will be reserved for 20 minutes.")
 
             # Timer per la scadenza della prenotazione
             Timer(120, self.expire_reservation, args=[r, booking_code, msg]).start()
