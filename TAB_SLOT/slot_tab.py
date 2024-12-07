@@ -20,6 +20,8 @@ class SlotBoard:
         self.total_slots = 0
         self.sensors_data = {}
         self.catalogUrl = settings["catalog_url"]
+        self.deviceInfo = settings["deviceInfo"]
+        self.lock = threading.Lock()
         self.initialize_board()
         
     def initialize_board(self):
@@ -48,12 +50,17 @@ class SlotBoard:
             devConnUrl = f"http://{selected_parking['url']}:{selected_parking['port']}/devices"
             print(f"Connettendosi al parcheggio: {selected_parking['name']}")
 
+            #Registra il tabellone come device nel catalog
+            self.activate_tab(selected_parking)
+            self.register_device()
+
             # Ottieni i dispositivi del parcheggio selezionato
             response = requests.get(devConnUrl)
             response.raise_for_status()  # Verifica che la risposta sia corretta
             devices = response.json()
             print(f"Dispositivi nel parcheggio {selected_parking['name']}: {devices}")
             
+        
             # Get the list of devices from the adaptor
             slots = response.json()
             if isinstance(slots, str): 
@@ -84,6 +91,40 @@ class SlotBoard:
         except Exception as e:
             print(f"Errore nell'inizializzazione del tabellone: {e}")
 
+    def activate_tab(self, selected_parking):
+        
+        self.deviceInfo["active"] = True
+        self.deviceInfo["location"] = selected_parking["name"]
+        self.write_json()
+
+    def write_json(self):
+        try:
+            with self.lock:
+                with open(SETTINGS, 'r') as settings:
+                    data = json.load(settings)
+
+        # Update the `deviceInfo` key with the new data
+                data['deviceInfo'] = self.deviceInfo
+                
+        # Open the file in write mode to save the updated data
+                with open(SETTINGS, 'w') as settings:
+                    json.dump(data, settings, indent=4)
+                
+                
+            
+        except FileNotFoundError:
+            print("Settings file not found.")
+        except json.JSONDecodeError:
+            print("Error decoding JSON from the settings file.")
+        
+    def register_device(self):
+        url = f"{self.catalogUrl}/devices"
+        response = requests.post(url, json=self.deviceInfo)
+        if response.status_code == 200:
+            #self.is_registered = True
+            print(f"Device Tab registered successfully.")
+        else:
+            print(f"Failed to register device: {response.status_code} - {response.text}")
 
     def update_slot(self, slot_id, status):
         """Aggiorna solo i conteggi dei posti liberi e occupati."""
@@ -114,15 +155,16 @@ class SlotBoard:
 class MySubscriber:
 
     def __init__(self, clientID, settings, message_callback):
-
         self.clientID = clientID
         self.serviceInfo = settings["serviceInfo"]
         self.serviceID = self.serviceInfo["ID"]
         self.catalog_address = settings["catalog_url"]
         self.topic = settings["baseTopic"]+"/+/status"
+        self.deviceInfo = settings["deviceInfo"]
         self.publish_topic = f"ParkingLot/alive/{self.serviceID}"
-        self.register_service()
+        self.aliveTopic = f"ParkingLot/alive/"
         self.update_interval = settings["updateInterval"]  # Interval for periodic updates
+        self.register_service()
         self.message_callback = message_callback
         self._paho_mqtt = PahoMQTT.Client(client_id=self.clientID)
         self._paho_mqtt.on_connect = self.myOnConnect
@@ -130,6 +172,9 @@ class MySubscriber:
         self.messageBroker = settings["messageBroker"]
         self.port = settings["brokerPort"]
         self.qos = settings["qos"]
+        self.pingInterval = settings["pingInterval"]
+        self.start()
+        self.pingCatalog()
 
     def start(self):
         """Start the subscriber and publisher."""
@@ -169,7 +214,6 @@ class MySubscriber:
     def register_service(self):
         """Registers the service in the catalog using POST the first time."""
         #Next times, updated with MQTT
-        
         # Initial POST request to register the service
         url = f"{self.catalog_address}/services"
         response = requests.post(url, json=self.serviceInfo)
@@ -178,6 +222,33 @@ class MySubscriber:
             print(f"Service {self.serviceID} registered successfully.")
         else:
             print(f"Failed to register service: {response.status_code} - {response.text}")
+
+    def pingCatalog(self):
+        time.sleep(5)
+        while True:
+                with open(SETTINGS, 'r') as settings:
+                    data = json.load(settings)
+                
+                    if data["deviceInfo"]["active"] == True:
+                        location = data["deviceInfo"]["location"]
+                        message = {
+                        "bn": "updateCatalogSlot",  
+                        "e": [
+                        {
+                            "n": f'{data["deviceInfo"]["ID"]}',  
+                            "u": "IP",  
+                            "t": str(time.time()), 
+                            "v": ""  
+                        }
+                        ]
+                        }
+                        # Publish the message to the broker
+                        #print(self.aliveTopic+location)
+                        #check on catalog, location would be device conn
+                        self._paho_mqtt.publish(f"{self.aliveTopic}{data["deviceInfo"]["ID"]}", json.dumps(message))
+                        print(f'Published to topic {self.aliveTopic}{data["deviceInfo"]["ID"]}: {json.dumps(message)}')
+                print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
+                time.sleep(self.pingInterval)
 
     def start_periodic_updates(self):
         """Starts a background thread for periodic updates."""
@@ -255,8 +326,6 @@ def main():
         except Exception as e:
             print(f"Errore nel processare il messaggio: {e}")
 
-    
-    # Inizializza il subscriber MQTT e inizia a ricevere aggiornamenti
     subscriber = MySubscriber("SlotTabSubscriber", settings, on_message_received)
     subscriber.start()
 

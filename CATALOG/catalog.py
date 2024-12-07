@@ -112,9 +112,10 @@ class CatalogManager:
     # Check if the service ID already exists in the catalog
         if any(service['ID'] == service_info['ID'] for service in self.catalog["services"]):
             raise ValueError(f"Service with ID {service_info['ID']} already exists.")
-    
+        print("pippo")
         self.catalog["services"].append(service_info)
         self.write_catalog()
+        print("entrato")
         return f"Service with ID {service_info['ID']} added successfully."
 
 
@@ -371,7 +372,7 @@ class MySubscriber:
                 id = message['e'][0]['n']
                 print(f"Device {id} updated")
             if message['bn'] == "updateCatalogService":            
-                self.catalog_manager.update_service_alive(message['e'][0])# {"n": serviceName, "t": time.time(), "v": "", "u": IP}
+                self.catalog_manager.update_service_alive(message['e'][0])# {"n": serviceID, "t": time.time(), "v": "", "u": IP}
                 id = message['e'][0]['n']
                 print(f"Service {id} updated")
 

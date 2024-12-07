@@ -1,10 +1,19 @@
 {
     "updateInterval": 60,
+    "pingInterval": 30,
     "serviceInfo": {
         "ID": 7,
         "name": "TabSlotService",
         "last_update": "",
         "port": ""
+    },
+    "deviceInfo":{
+        "ID": 99,
+        "name": "parkingTab",
+        "type": "tab",
+        "location": "",
+        "last_update": "",
+        "active": false
     },
     "messageBroker": "mqtt.eclipseprojects.io",
     "brokerPort": 1883, 
