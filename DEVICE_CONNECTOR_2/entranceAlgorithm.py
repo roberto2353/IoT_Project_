@@ -307,7 +307,7 @@ class Algorithm:
 
                     try:
                         
-                        req = requests.post(reservation_url, headers=headers, json=reservation_data)
+                        req = requests.post(exit_url, headers=headers, json=reservation_data)
                         # Only proceed if the response status code is 200 (OK)
                         if req.status_code == 200:
                             try:
