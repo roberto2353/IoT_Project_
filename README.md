@@ -67,3 +67,8 @@ Ensure you have the following installed:
 ```bash
 git clone https://github.com/yourusername/IoT-SmartParking.git
 cd IoT_Project_
+
+### 2. **Install Dependencies**
+Use `pip` to install the required libraries:
+```bash
+pip install -r requirements.txt
