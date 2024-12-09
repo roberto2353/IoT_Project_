@@ -64,11 +64,55 @@ Ensure you have the following installed:
 - Telegram Bot API Token
 
 ### **1. Clone the Repository**
-```bash
 git clone https://github.com/yourusername/IoT-SmartParking.git
 cd IoT_Project_
 
-### 2. **Install Dependencies**
+### 2. Install Dependencies
+
 Use `pip` to install the required libraries:
-```bash
 pip install -r requirements.txt
+
+### 3. Configure the System
+
+Edit the `config.json` file to include:
+
+- **MQTT Broker Details** (host, port, username, password)
+- **InfluxDB Credentials**
+- **Telegram Bot API Token**
+
+Example `config.json`:
+{
+  "mqtt": {
+    "broker": "localhost",
+    "port": 1883
+  },
+  "influxdb": {
+    "host": "localhost",
+    "port": 8086,
+    "database": "parking_data"
+  },
+  "telegram": {
+    "bot_token": "YOUR_BOT_TOKEN"
+  }
+}
+
+### 4. Run the Backend Service
+
+Start the CherryPy backend server by running the following command:
+python name_service.py
+
+## 📡 MQTT Topics
+
+| Topic               | Description                        |
+|---------------------|------------------------------------|
+| `parking/device/status`    | Updates slot availability status on InfluxDb |
+| `parking/deviceConnector/device/status`    | Updates and control slot availability status |
+| `parking/device/alive`     | Devices updates                | 
+| `parking/service/alive`      | Services time updates                 |
+
+---
+
+
+
+
+
