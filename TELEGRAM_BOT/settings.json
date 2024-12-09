@@ -10,7 +10,7 @@
     },
     "brokerPort": 1883, 
     "qos": 2,
-    "catalog_url": "http://catalog:8090",
-    "adaptor_url": "http://adaptor:5001",
-    "res_url": "http://reservation:8098"
+    "catalog_url": "http://127.0.0.1:8090",
+    "adaptor_url": "http://127.0.0.1:5001",
+    "res_url": "http://127.0.0.1:8098"
 }

@@ -543,7 +543,7 @@ class ParkingBot:
 
     def book_slot(self, msg):
         self.chat_id = msg['chat']['id']
-        book_url = 'http://reservation:8098/book'
+        book_url = 'http://127.0.0.1:8098/book'
 
         # Controllo se l'utente ha selezionato un parcheggio
         parking_url = self.user_data.get(self.chat_id, {}).get('parking_url')
@@ -594,7 +594,7 @@ class ParkingBot:
 
     def expire_reservation(self, selected_device, booking_code, msg):
         self.chat_id = msg['chat']['id']
-        reservation_url = 'http://adaptor:5001/reservation_exp'
+        reservation_url = 'http://127.0.0.1:5001/reservation_exp'
         headers = {'Content-Type': 'application/json'}
 
         # Verifica che 'name_dev' esista in user_data
@@ -606,7 +606,9 @@ class ParkingBot:
             "type": selected_device.get('type', 'unknown'),
             "location": selected_device.get('location', 'unknown'),
             "booking_code": booking_code,
-            "name_dev": name_dev
+            "name_dev": name_dev, 
+            "parking":self.user_data[self.chat_id].get('parking_name', 'N/A'),
+            "active":True
         }
 
         try:
