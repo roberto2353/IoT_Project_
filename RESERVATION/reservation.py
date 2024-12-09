@@ -28,7 +28,7 @@ class ReservationService:
         self.register_service()
 
         self._paho_mqtt = PahoMQTT.Client()
-        self.client = MyMQTT("Reservation_F", self.messageBroker, self.port, None)
+        self.client = MyMQTT("Reservation_Kev", self.messageBroker, self.port, None)
 
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
@@ -203,6 +203,7 @@ if __name__ == '__main__':
     }
 }
     settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     res = ReservationService(settings)
     cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(res, '/', conf)

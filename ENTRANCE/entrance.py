@@ -26,7 +26,7 @@ class Entrance:
 
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_F")
+        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
@@ -34,6 +34,7 @@ class Entrance:
     def start(self):
         """Start the MQTT client."""
         try:
+            #self.client.start()  # Start MQTT client connection
             print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
             self.start_periodic_updates()
         except Exception as e:
@@ -108,13 +109,13 @@ class Entrance:
 
             # Get the list of devices from the adaptor
             slots = response.json()
-            
-            
-            #check if slot is string
+            #print("slots: ", slots)
+
+            # Assicurati che 'slots' sia un dizionario
             if isinstance(slots, str):
-                slots = json.loads(slots) 
-                
-            # check slot is dict
+                slots = json.loads(slots)  # Decodifica la stringa JSON manualmente
+
+            # Controlla che 'slots' sia un dizionario e contenga la chiave 'devices'
             if not isinstance(slots, dict) or "devices" not in slots:
                 raise ValueError("La risposta JSON non contiene un dizionario valido o manca la chiave 'devices'.")
 
@@ -123,7 +124,7 @@ class Entrance:
 
             # Filter devices with status 'reserved'
             reserved_slots = [device["deviceInfo"] for device in devices if device.get("deviceInfo", {}).get("status") == 'reserved']
-            
+            #self.pubTopic = input_data.get('topic')
             print("reserved_slots: ", reserved_slots)
 
 
@@ -159,12 +160,10 @@ class Entrance:
             mqtt_topic_dc = f"{self.pubTopic}/{name_dev}/{str(selected_device['ID'])}/status"
 
 
-            # MQTT msg sent to adaptor
+            # Invio del messaggio MQTT all'adaptor
             self._paho_mqtt.publish(mqtt_topic_db, json.dumps(message))
             self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
-            print(f"Message publish on topic:")
-            print("\n",mqtt_topic_db)
-            print("\n",mqtt_topic_dc)
+            print(f"Messaggio pubblicato sui topic")
 
 
             # Successful response to the frontend
@@ -197,6 +196,7 @@ if __name__ == '__main__':
     }
     }
     settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     en = Entrance(settings)
     cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(en, '/', conf)

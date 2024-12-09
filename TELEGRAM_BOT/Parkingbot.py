@@ -453,7 +453,7 @@ class ParkingBot:
                 transactions = response_data["transactions"]
                 message = "Your recent transactions:\n"
                 for transaction in transactions:
-                    slot_id = transaction.get("slot_id", "N/A")
+                    slot_id = transaction.get("sensor_id", "N/A")
                     raw_duration = transaction.get("duration", "N/A")
                     formatted_duration = format_duration(raw_duration)
                     fee = round(transaction.get("fee", 0), 2)
@@ -543,7 +543,7 @@ class ParkingBot:
 
     def book_slot(self, msg):
         self.chat_id = msg['chat']['id']
-        book_url = 'http://127.0.0.1:8098/book'
+        book_url = 'http://reservation:8098/book'
 
         # Controllo se l'utente ha selezionato un parcheggio
         parking_url = self.user_data.get(self.chat_id, {}).get('parking_url')
@@ -594,11 +594,11 @@ class ParkingBot:
 
     def expire_reservation(self, selected_device, booking_code, msg):
         self.chat_id = msg['chat']['id']
-        reservation_url = 'http://127.0.0.1:5001/reservation_exp'
+        reservation_url = 'http://adaptor:5001/reservation_exp'
         headers = {'Content-Type': 'application/json'}
 
         # Verifica che 'name_dev' esista in user_data
-        name_dev = self.user_data.get(self.chat_id, {}).get('name_dev', 'guest')  # Default 'guest' se non registrato
+        name_dev = self.user_data.get(self.chat_id, {}).get('parking_name', 'guest')  # Default 'guest' se non registrato
 
         reservation_data = {
             "ID": selected_device['slot_id'],

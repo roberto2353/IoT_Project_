@@ -145,11 +145,7 @@ class dbAdaptor:
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
-<<<<<<< HEAD
         active = data.get('active',True)
-=======
-        active = data.get('active', True)
->>>>>>> 42f06a6fb9cbd01b2b1463424d2a3f9fa3291179
         json_body = [
                         {
                             "measurement": 'status',
@@ -220,6 +216,7 @@ class dbAdaptor:
                             "measurement": 'status',
                             "tags": {
                                 "sensor_id": sensor_id,
+                                "ID": sensor_id,
                                 "parking_id": parking,
                                 "type": sensor_type,
                                 "location": location
@@ -381,7 +378,7 @@ class dbAdaptor:
                 mqtt_topic_dc = f"{self.pubTopic}/{device_info['name_dev']}/{str(device_info['ID'])}/status"
                 self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
                 print(f"Messaggio pubblicato su topic per il DC scadenza prenotazione")
-
+                print(mqtt_topic_dc)
                 print(f"Device with ID {device_info['ID']} is again free on InfluxDB.")
 
                 return {"message": f"Device with ID {device_info['ID']} is again free."}, 201
@@ -441,7 +438,7 @@ class dbAdaptor:
 
                 # query to obtain all individual transaction for booking_code
                 query_transactions = f"""
-                    SELECT "ID", "duration", "fee", time
+                    SELECT "ID", "sensor_id", "duration", "fee", time
                     FROM "status"
                     WHERE "booking_code" = '{booking_code}'
                 """
@@ -451,6 +448,7 @@ class dbAdaptor:
                 for point in result_transactions.get_points():
                     transactions.append({
                         "slot_id": point.get("ID", "N/A"),
+                        "sensor_id":point.get("sensor_id", "N/A"),
                         "duration": point.get("duration", 0),
                         "fee": point.get("fee", 0),
                         "time": point.get("time")

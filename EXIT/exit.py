@@ -28,7 +28,7 @@ class Exit:
 
         self.register_service()
 
-        self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher_F")
+        self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
@@ -93,6 +93,11 @@ class Exit:
         else:
             print(f"Failed to register service: {response.status_code} - {response.text}")
 
+   
+    def extract_floor(self, location):
+        if location.startswith("P"):
+            return location[1]
+        return None
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -149,11 +154,6 @@ class Exit:
             
             parking_duration_hours, fee = self.calculate_fee_and_duration(sensor_id)
 
-            @staticmethod
-            def extract_floor(location):
-                if location.startswith("P"):
-                    return location[1]
-                return None
 
             # Creazione del messaggio MQTT per cambiare lo stato su "occupied"
             event = {
@@ -169,7 +169,7 @@ class Exit:
                 "parking":name_dev,
                 "fee": fee,
                 "duration":parking_duration_hours,
-                "floor": extract_floor(selected_device.get('location', 'unknown')),
+                "floor": self.extract_floor(selected_device.get('location', 'unknown')),
             }
             message = {"bn": sensor_name, "e": [event]}
             mqtt_topic_db = f"{self.pubTopic}/{sensor_id}/status"
@@ -288,6 +288,7 @@ if __name__ == '__main__':
         }
     }
     settings = json.load(open(SETTINGS))
+    service_port = int(settings["serviceInfo"]["port"])
     ex = Exit(settings)
     cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(ex, '/', conf)
