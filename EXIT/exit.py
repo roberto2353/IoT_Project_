@@ -288,7 +288,6 @@ if __name__ == '__main__':
         }
     }
     settings = json.load(open(SETTINGS))
-    service_port = int(settings["serviceInfo"]["port"])
     ex = Exit(settings)
     cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': service_port})
     cherrypy.tree.mount(ex, '/', conf)

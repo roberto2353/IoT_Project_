@@ -145,12 +145,16 @@ class dbAdaptor:
         duration = data.get('duration')
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         sensor_id = data.get('sensor_id')
+<<<<<<< HEAD
+        active = data.get('active',True)
+=======
         active = data.get('active', True)
+>>>>>>> 42f06a6fb9cbd01b2b1463424d2a3f9fa3291179
         json_body = [
                         {
                             "measurement": 'status',
                             "tags": {
-                                "ID": sensor_id,
+                                "sensor_id": sensor_id,
                                 "parking_id": parking,
                                 "floor": floor
                             },
@@ -215,7 +219,7 @@ class dbAdaptor:
                         {
                             "measurement": 'status',
                             "tags": {
-                                "ID": sensor_id,
+                                "sensor_id": sensor_id,
                                 "parking_id": parking,
                                 "type": sensor_type,
                                 "location": location
