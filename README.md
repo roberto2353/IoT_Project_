@@ -66,4 +66,4 @@ Ensure you have the following installed:
 ### **1. Clone the Repository**
 ```bash
 git clone https://github.com/yourusername/IoT-SmartParking.git
-cd IoT-SmartParking
+cd IoT_Project_
