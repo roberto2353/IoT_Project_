@@ -1,0 +1,64 @@
+Index: CATALOG/catalog.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n    \"project_name\": \"IoT4SmartParking\",\r\n    \"project_owner\": \"IoT_Group8\",\r\n    \"device_catalog\": {\r\n        \"ip\": \"127.0.0.1\",\r\n        \"port\": 8080,\r\n        \"methods\": [\r\n            \"GET\",\r\n            \"POST\",\r\n            \"PUT\"\r\n        ]\r\n    },\r\n    \"devices\": [\r\n        {\r\n            \"ID\": 1,\r\n            \"name\": \"sensor1\",\r\n            \"type\": \"photocell\",\r\n            \"location\": \"P0-1\",\r\n            \"commands\": [\r\n                \"status\"\r\n            ],\r\n            \"last_update\": 1726004665.9094641,\r\n            \"status\": \"free\",\r\n            \"booking_code\": \"3bc6e98d-4bcb-4074-8729-47eea7ebfc95\"\r\n        },\r\n        {\r\n            \"ID\": 2,\r\n            \"name\": \"sensor2\",\r\n            \"type\": \"photocell\",\r\n            \"location\": \"P0-2\",\r\n            \"commands\": [\r\n                \"status\"\r\n            ],\r\n            \"last_update\": 1726004665.88847,\r\n            \"status\": \"free\",\r\n            \"booking_code\": \"f35dad84-2977-4fd8-bd66-5a949c189750\"\r\n        },\r\n        {\r\n            \"ID\": 3,\r\n            \"name\": \"sensor3\",\r\n            \"type\": \"photocell\",\r\n            \"location\": \"P0-3\",\r\n            \"commands\": [\r\n                \"status\"\r\n            ],\r\n            \"last_update\": 1726004665.89505,\r\n            \"status\": \"free\",\r\n            \"booking_code\": \"86547367-5f36-4b16-8337-94894b5f477c\"\r\n        },\r\n        {\r\n            \"ID\": 4,\r\n            \"name\": \"sensor4\",\r\n            \"type\": \"photocell\",\r\n            \"location\": \"P0-4\",\r\n            \"commands\": [\r\n                \"status\"\r\n            ],\r\n            \"last_update\": 1726004665.899743,\r\n            \"status\": \"free\",\r\n            \"booking_code\": \"780448d8-007d-4091-89f7-dbf928d8445e\"\r\n        },\r\n        {\r\n            \"ID\": 5,\r\n            \"name\": \"sensor5\",\r\n            \"type\": \"photocell\",\r\n            \"location\": \"P0-5\",\r\n            \"commands\": [\r\n                \"status\"\r\n            ],\r\n            \"last_update\": 1726004665.9042912,\r\n            \"status\": \"free\"\r\n        },\r\n        {\r\n            \"ID\": 6,\r\n            \"name\": \"sensor6\",\r\n            \"type\": \"photocell\",\r\n            \"location\": \"P0-6\",\r\n            \"commands\": [\r\n                \"status\"\r\n            ],\r\n            \"last_update\": 1726004660.858804,\r\n            \"status\": \"occupied\",\r\n            \"booking_code\": \"35c44dcc-fedf-4c29-9027-172d3dac88a4\"\r\n        }\r\n    ],\r\n    \"service_catalog\": {\r\n        \"ip\": \"127.0.0.1\",\r\n        \"port\": 8084,\r\n        \"methods\": [\r\n            \"GET\",\r\n            \"POST\",\r\n            \"PUT\"\r\n        ]\r\n    },\r\n    \"users\": [],\r\n    \"services\": [],\r\n    \"parkings\": []\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/CATALOG/catalog.json b/CATALOG/catalog.json
+--- a/CATALOG/catalog.json	(revision 2f0918cffd2716955f1c653c61a72b46fa78fc23)
++++ b/CATALOG/catalog.json	(date 1729437692463)
+@@ -19,7 +19,7 @@
+             "commands": [
+                 "status"
+             ],
+-            "last_update": 1726004665.9094641,
++            "last_update": 1729437684.2513907,
+             "status": "free",
+             "booking_code": "3bc6e98d-4bcb-4074-8729-47eea7ebfc95"
+         },
+@@ -31,7 +31,7 @@
+             "commands": [
+                 "status"
+             ],
+-            "last_update": 1726004665.88847,
++            "last_update": 1729437686.3085206,
+             "status": "free",
+             "booking_code": "f35dad84-2977-4fd8-bd66-5a949c189750"
+         },
+@@ -43,7 +43,7 @@
+             "commands": [
+                 "status"
+             ],
+-            "last_update": 1726004665.89505,
++            "last_update": 1729437688.36577,
+             "status": "free",
+             "booking_code": "86547367-5f36-4b16-8337-94894b5f477c"
+         },
+@@ -55,7 +55,7 @@
+             "commands": [
+                 "status"
+             ],
+-            "last_update": 1726004665.899743,
++            "last_update": 1729437690.4122686,
+             "status": "free",
+             "booking_code": "780448d8-007d-4091-89f7-dbf928d8445e"
+         },
+@@ -67,7 +67,7 @@
+             "commands": [
+                 "status"
+             ],
+-            "last_update": 1726004665.9042912,
++            "last_update": 1729437675.1454103,
+             "status": "free"
+         },
+         {
+@@ -78,7 +78,7 @@
+             "commands": [
+                 "status"
+             ],
+-            "last_update": 1726004660.858804,
++            "last_update": 1729437677.2024734,
+             "status": "occupied",
+             "booking_code": "35c44dcc-fedf-4c29-9027-172d3dac88a4"
+         }
