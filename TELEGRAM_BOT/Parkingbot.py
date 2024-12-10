@@ -453,7 +453,7 @@ class ParkingBot:
                 transactions = response_data["transactions"]
                 message = "Your recent transactions:\n"
                 for transaction in transactions:
-                    slot_id = transaction.get("slot_id", "N/A")
+                    slot_id = transaction.get("sensor_id", "N/A")
                     raw_duration = transaction.get("duration", "N/A")
                     formatted_duration = format_duration(raw_duration)
                     fee = round(transaction.get("fee", 0), 2)
@@ -598,7 +598,7 @@ class ParkingBot:
         headers = {'Content-Type': 'application/json'}
 
         # Verifica che 'name_dev' esista in user_data
-        name_dev = self.user_data.get(self.chat_id, {}).get('name_dev', 'guest')  # Default 'guest' se non registrato
+        name_dev = self.user_data.get(self.chat_id, {}).get('parking_name', 'guest')  # Default 'guest' se non registrato
 
         reservation_data = {
             "ID": selected_device['slot_id'],
@@ -606,7 +606,9 @@ class ParkingBot:
             "type": selected_device.get('type', 'unknown'),
             "location": selected_device.get('location', 'unknown'),
             "booking_code": booking_code,
-            "name_dev": name_dev
+            "name_dev": name_dev, 
+            "parking":self.user_data[self.chat_id].get('parking_name', 'N/A'),
+            "active":True
         }
 
         try:

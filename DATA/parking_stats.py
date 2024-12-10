@@ -257,7 +257,6 @@ class UserAuthentication:
             #print("response:", response.json())
             return response.json().get("users", [])
         except requests.exceptions.RequestException as e:
-            #print("pippo")
             st.error(f"Error fetching users: {e}")
             return []
 
