@@ -85,7 +85,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Inizializza il ParkingManager
     manager = ParkModifier()
 
     if args.action == "add_floor":

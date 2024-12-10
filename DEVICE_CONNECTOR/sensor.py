@@ -32,7 +32,7 @@ class SensorREST(threading.Thread):
         self.lock = Lock()  # Create a lock
         self.register_devices()
         
-        # Park alogirthm initialization
+        # Park algorithm initialization
         broker = settings["messageBroker"]
         port = settings["brokerPort"]
         baseTopic = settings["baseTopic"]
@@ -203,10 +203,10 @@ class SensorREST(threading.Thread):
                 
                 
             elif uri[0] == 'get_best_parking':
-                print("Richiesta per 'get_best_parking' ricevuta")
+                print("Request for 'get_best_parking' received")
                 return self.entranceAlgorithmService.algorithm.routeArrivals(get='True')
             else:
-                raise cherrypy.HTTPError(status=404, message='Endpoint non trovato')
+                raise cherrypy.HTTPError(status=404, message='Endpoint not found')
         except Exception as e:
             print(f"Error in GET: {e}")
             raise cherrypy.HTTPError(500, 'no JSON file available')
