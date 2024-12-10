@@ -254,69 +254,6 @@
                 "location": "P2-10",
                 "active": true
             }
-        },
-        {
-            "deviceInfo": {
-                "ID": 49,
-                "name": "sensor49",
-                "type": "photocell",
-                "location": "P3-1",
-                "active": true
-            }
-        },
-        {
-            "deviceInfo": {
-                "ID": 50,
-                "name": "sensor50",
-                "type": "photocell",
-                "location": "P3-2",
-                "active": true
-            }
-        },
-        {
-            "deviceInfo": {
-                "ID": 51,
-                "name": "sensor51",
-                "type": "photocell",
-                "location": "P3-3",
-                "active": true
-            }
-        },
-        {
-            "deviceInfo": {
-                "ID": 52,
-                "name": "sensor52",
-                "type": "photocell",
-                "location": "P3-4",
-                "active": true
-            }
-        },
-        {
-            "deviceInfo": {
-                "ID": 53,
-                "name": "sensor53",
-                "type": "photocell",
-                "location": "P3-5",
-                "active": true
-            }
-        },
-        {
-            "deviceInfo": {
-                "ID": 54,
-                "name": "sensor54",
-                "type": "photocell",
-                "location": "P3-6",
-                "active": true
-            }
-        },
-        {
-            "deviceInfo": {
-                "ID": 55,
-                "name": "sensor55",
-                "type": "photocell",
-                "location": "P3-7",
-                "active": true
-            }
         }
     ],
     "serviceInfo": {

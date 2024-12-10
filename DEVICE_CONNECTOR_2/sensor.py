@@ -17,7 +17,7 @@ DEVICES = P / 'settings_status.json'
 
 class SensorREST(threading.Thread):
     exposed = True
-    devices_counter=1
+    #devices_counter=1
 
     def __init__(self, settings):
         super().__init__()  # Correct thread initialization
@@ -83,10 +83,10 @@ class SensorREST(threading.Thread):
     def register_devices(self):
         for device in self.devices:
             device_info = device['deviceInfo']
-            device_info['ID'] = self.devices_counter
-            device_info['active'] = True
-            device_info['parking'] = 'DevConnector2'
-            self.devices_counter += 1
+            device_info['ID'] = device['deviceInfo']['ID']
+            device_info['active'] = True 
+            device_info['parking'] = 'DevConnector2' 
+            #self.devices_counter += 1
             if device_info['type'] == 'photocell':
                 device_info['commands'] = ['status']
             device_info['last_update'] = time.time()

@@ -569,8 +569,8 @@ class dbAdaptor:
             
             
             query += ' GROUP BY "ID"'
-            # result = self.client.query(query, database = 'prova_stats')
-            result = self.client.query(query, database = 'sim_stats_db')
+            result = self.client.query(query, database = 'prova_stats')
+            #result = self.client.query(query, database = 'sim_stats_db')
             #print(result)
             sensors = []
             sensors = list(result.get_points())
@@ -599,8 +599,8 @@ class dbAdaptor:
                 query += f' WHERE parking_id = \'{parking_id}\''
             
             query += ' GROUP BY "ID"'
-            # result = self.client.query(query, database = 'prova_stats')
-            result = self.client.query(query, database = 'sim_stats_db')            
+            result = self.client.query(query, database = 'prova_stats')
+            #result = self.client.query(query, database = 'sim_stats_db')            
             #print(result)
             sensors = []
             sensors = list(result.get_points())

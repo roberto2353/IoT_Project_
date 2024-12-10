@@ -13,7 +13,7 @@ P = Path(__file__).parent.absolute()
 SETTINGS = P / 'settings.json'
 
 class SlotBoard:
-    """Gestisce il tabellone per mostrare i posti liberi e occupati."""
+    """Shows with tab the free and occupied spots"""
     def __init__(self, settings):
         self.free_slots = 0
         self.occupied_slots = 0
@@ -25,40 +25,37 @@ class SlotBoard:
         self.initialize_board()
         
     def initialize_board(self):
-        """Inizializza il tabellone con il numero di posti totali, liberi e occupati."""
+        
         try:
             
             parking_url = self.catalogUrl+"/parkings"
             response = requests.get(parking_url)
             response.raise_for_status()
             parkings = response.json().get("parkings", [])
-            #parkings = response.json()
-            #print(parkings)
 
-            print("Parcheggi disponibili:")
+            print("Parkings available:")
             for idx, parking in enumerate(parkings):
-                print(f"{idx + 1}. Nome: {parking['name']}, Indirizzo: {parking['url']}, Porta: {parking['port']}")
+                print(f"{idx + 1}. Name: {parking['name']}, Address: {parking['url']}, Port: {parking['port']}")
 
-            # Chiedi all'utente di selezionare un parcheggio
-            choice = int(input("Seleziona il numero del parcheggio da utilizzare: ")) - 1
+            # Ask the user to choose the parking
+            choice = int(input("Select number of parking to use: ")) - 1
             if choice < 0 or choice >= len(parkings):
-                print("Selezione non valida. Riprova.")
+                print("Not valid. Try again")
                 return
 
-            # Ottieni i dettagli del parcheggio selezionato
             selected_parking = parkings[choice]
             devConnUrl = f"http://{selected_parking['url']}:{selected_parking['port']}/devices"
-            print(f"Connettendosi al parcheggio: {selected_parking['name']}")
+            print(f"Connecting to parking: {selected_parking['name']}")
 
-            #Registra il tabellone come device nel catalog
+            #Register tab in catalog
             self.activate_tab(selected_parking)
             self.register_device()
 
-            # Ottieni i dispositivi del parcheggio selezionato
+            # Get the devices of selected parking
             response = requests.get(devConnUrl)
-            response.raise_for_status()  # Verifica che la risposta sia corretta
+            response.raise_for_status()  
             devices = response.json()
-            print(f"Dispositivi nel parcheggio {selected_parking['name']}: {devices}")
+            print(f"Devices in parking {selected_parking['name']}: {devices}")
             
         
             # Get the list of devices from the adaptor
@@ -68,28 +65,26 @@ class SlotBoard:
                 print("Double-encoded JSON:", final_data)
             unique_ids = {device["deviceInfo"]["ID"] for device in final_data["devices"]}
             self.total_slots = len(unique_ids)
-            print(f"Tabellone inizializzato: {self.total_slots} posti totali")
+            print(f"Tab initialized: {self.total_slots} total spots")
 
-            # Inizializza il numero di posti liberi e occupati
             devices = final_data["devices"]
             for slot in devices:
                 slot_id = slot["deviceInfo"]["ID"]
                 status = slot["deviceInfo"]["status"]
                 self.sensors_data[slot_id] = status
                 
-                # Debug: Stampa lo stato di ogni slot per la verifica
-                print(f"Inizializzazione slot {slot_id} con stato: {status}")
+                print(f"Initialization of slot {slot_id} with status: {status}")
                 
                 if status == "free":
                     self.free_slots += 1
                 elif status == "occupied":
                     self.occupied_slots += 1
 
-            # Visualizza lo stato iniziale del tabellone
+            # Initial state of tab
             self.display_board()
 
         except Exception as e:
-            print(f"Errore nell'inizializzazione del tabellone: {e}")
+            print(f"Error in tab initialization: {e}")
 
     def activate_tab(self, selected_parking):
         
@@ -102,11 +97,8 @@ class SlotBoard:
             with self.lock:
                 with open(SETTINGS, 'r') as settings:
                     data = json.load(settings)
-
-        # Update the `deviceInfo` key with the new data
                 data['deviceInfo'] = self.deviceInfo
-                
-        # Open the file in write mode to save the updated data
+
                 with open(SETTINGS, 'w') as settings:
                     json.dump(data, settings, indent=4)
                 
@@ -121,35 +113,33 @@ class SlotBoard:
         url = f"{self.catalogUrl}/devices"
         response = requests.post(url, json=self.deviceInfo)
         if response.status_code == 200:
-            #self.is_registered = True
+            
             print(f"Device Tab registered successfully.")
         else:
             print(f"Failed to register device: {response.status_code} - {response.text}")
 
     def update_slot(self, slot_id, status):
-        """Aggiorna solo i conteggi dei posti liberi e occupati."""
+        """Updates free and occupied spots count"""
         
-        # Debug: stampa lo stato nuovo e il conteggio attuale
         print(f"Aggiornamento slot {slot_id}: Stato nuovo={status}")
         
-        # Se lo slot diventa libero, decrementa i posti occupati e incrementa i posti liberi
+
         if status == "free":
             self.occupied_slots -= 1
             self.free_slots += 1
 
-        # Se lo slot diventa occupato, decrementa i posti liberi e incrementa i posti occupati
         elif status == "occupied":
             self.free_slots -= 1
             self.occupied_slots += 1
 
-        # Debug: stampa i nuovi conteggi
+
         print(f"Posti liberi aggiornati: {self.free_slots}, Posti occupati aggiornati: {self.occupied_slots}")
         self.display_board()
 
 
 
     def display_board(self):
-        """Visualizza il tabellone con lo stato aggiornato."""
+        """Displays live tab status"""
         print(f"Posti Liberi: {self.free_slots} | Posti Occupati: {self.occupied_slots} | Totale: {self.total_slots}")
 
 class MySubscriber:
@@ -159,10 +149,10 @@ class MySubscriber:
         self.serviceInfo = settings["serviceInfo"]
         self.serviceID = self.serviceInfo["ID"]
         self.catalog_address = settings["catalog_url"]
-        self.topic = settings["baseTopic"]+"/+/status"
+        self.topic = settings["sensorTopic"]
         self.deviceInfo = settings["deviceInfo"]
-        self.publish_topic = f"ParkingLot/alive/{self.serviceID}"
-        self.aliveTopic = f"ParkingLot/alive/"
+        self.aliveTopic = settings["aliveTopic"]
+        self.publish_topic = f"{self.aliveTopic}{self.serviceID}"
         self.update_interval = settings["updateInterval"]  # Interval for periodic updates
         self.register_service()
         self.message_callback = message_callback
@@ -242,10 +232,8 @@ class MySubscriber:
                         }
                         ]
                         }
-                        # Publish the message to the broker
-                        #print(self.aliveTopic+location)
-                        #check on catalog, location would be device conn
-                        self._paho_mqtt.publish(f"{self.aliveTopic}{data["deviceInfo"]["ID"]}", json.dumps(message))
+                        
+                        self._paho_mqtt.publish(f'{self.aliveTopic}{data["deviceInfo"]["ID"]}', json.dumps(message))
                         print(f'Published to topic {self.aliveTopic}{data["deviceInfo"]["ID"]}: {json.dumps(message)}')
                 print(f"Sensor's update terminated. Next update in {self.pingInterval} seconds")
                 time.sleep(self.pingInterval)
@@ -282,7 +270,6 @@ def main():
     slot_board = SlotBoard(settings)
 
     def recursive_json_decode(data):
-        # Prova a decodificare fino a ottenere un dizionario o una lista
         while isinstance(data, str):
             try:
                 data = json.loads(data)
@@ -292,18 +279,17 @@ def main():
         return data
 
     def on_message_received(msg):
-        """Callback per l'elaborazione dei messaggi MQTT ricevuti."""
-        print(f"Messaggio ricevuto: Topic={msg.topic}, Payload={msg.payload.decode()}")
+        """Callback for MQTT received messages"""
+        print(f"Received message: Topic={msg.topic}, Payload={msg.payload.decode()}")
 
         try:
             decoded_message = msg.payload.decode()
             print(f"Decoded message (first decode): {decoded_message}")
 
-            # Decodifica ricorsiva fino a ottenere un dizionario o una lista
             data = recursive_json_decode(decoded_message)
             print(f"Final decoded message: {data}")
             print(f"Data type after final decode: {type(data)}")
-            print(f"Payload decodificato: {data}")
+            print(f"Payload {data}")
             event = data.get("e", [])[0]
             slot_status = event.get("v")
             slot_id = event.get("n").split("/")[0] 
@@ -314,17 +300,12 @@ def main():
             last_change_time = slot_board.sensors_data.get(slot_id + "_time", current_time)
             duration = (current_time - last_change_time).total_seconds() if last_change_time else 0
             
-            # Aggiorna lo stato del tabellone
+            # Update tab status
             slot_board.update_slot(slot_id, slot_status)
-            
-            # Registra l'evento nel logger
-            #slot_board.event_logger.log_event(slot_id, previous_status, slot_status, duration)
-            
-            # Aggiorna il tempo dell'ultimo cambiamento
             slot_board.sensors_data[slot_id + "_time"] = current_time
             
         except Exception as e:
-            print(f"Errore nel processare il messaggio: {e}")
+            print(f"Error in processing the message: {e}")
 
     subscriber = MySubscriber("SlotTabSubscriber", settings, on_message_received)
     subscriber.start()
