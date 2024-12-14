@@ -112,10 +112,8 @@ class CatalogManager:
     # Check if the service ID already exists in the catalog
         if any(service['ID'] == service_info['ID'] for service in self.catalog["services"]):
             raise ValueError(f"Service with ID {service_info['ID']} already exists.")
-        print("pippo")
         self.catalog["services"].append(service_info)
         self.write_catalog()
-        print("entrato")
         return f"Service with ID {service_info['ID']} added successfully."
 
 

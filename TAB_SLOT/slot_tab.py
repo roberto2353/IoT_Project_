@@ -121,7 +121,7 @@ class SlotBoard:
     def update_slot(self, slot_id, status):
         """Updates free and occupied spots count"""
         
-        print(f"Aggiornamento slot {slot_id}: Stato nuovo={status}")
+        print(f"Update of slot {slot_id}: New state ={status}")
         
 
         if status == "free":
@@ -133,14 +133,14 @@ class SlotBoard:
             self.occupied_slots += 1
 
 
-        print(f"Posti liberi aggiornati: {self.free_slots}, Posti occupati aggiornati: {self.occupied_slots}")
+        print(f"Updated free slots: {self.free_slots}, Updated occupied slots: {self.occupied_slots}")
         self.display_board()
 
 
 
     def display_board(self):
         """Displays live tab status"""
-        print(f"Posti Liberi: {self.free_slots} | Posti Occupati: {self.occupied_slots} | Totale: {self.total_slots}")
+        print(f"Free slots: {self.free_slots} | Occupied slots: {self.occupied_slots} | Total: {self.total_slots}")
 
 class MySubscriber:
 

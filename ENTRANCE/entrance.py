@@ -96,7 +96,6 @@ class Entrance:
     @cherrypy.tools.allow(methods=['POST']) 
     def activate(self):
         try:
-            #print("RICHIESTA OKS")
             input_data = cherrypy.request.json
             booking_code = input_data.get('booking_code')
             url_ = input_data.get('url')
@@ -111,13 +110,12 @@ class Entrance:
             slots = response.json()
             #print("slots: ", slots)
 
-            # Assicurati che 'slots' sia un dizionario
+            # Ensure 'slots' is a dictionary
             if isinstance(slots, str):
-                slots = json.loads(slots)  # Decodifica la stringa JSON manualmente
-
-            # Controlla che 'slots' sia un dizionario e contenga la chiave 'devices'
+                slots = json.loads(slots)  # decode json string manually
+            # check 'slots' is a dict and contains 'devices'
             if not isinstance(slots, dict) or "devices" not in slots:
-                raise ValueError("La risposta JSON non contiene un dizionario valido o manca la chiave 'devices'.")
+                raise ValueError("JSON response is not a dictionary or does not contain key device.")
 
             devices = slots.get("devices", [])
             print("devices: ", devices)
@@ -160,7 +158,7 @@ class Entrance:
             mqtt_topic_dc = f"{self.pubTopic}/{name_dev}/{str(selected_device['ID'])}/status"
 
 
-            # Invio del messaggio MQTT all'adaptor
+            # send MQTT message to the adaptor
             self._paho_mqtt.publish(mqtt_topic_db, json.dumps(message))
             self._paho_mqtt.publish(mqtt_topic_dc, json.dumps(message))
             print(f"Messaggio pubblicato sui topic")

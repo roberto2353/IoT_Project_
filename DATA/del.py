@@ -1,18 +1,24 @@
 from influxdb import InfluxDBClient
+from pathlib import Path
+import json
+P = Path(__file__).parent.absolute()
+SETTINGS = P / 'settings.json'
 
 def delete_all_sensors():
     try:
-        # Connessione a InfluxDB
-        client = InfluxDBClient(host='localhost', port=8086, username='root', password='root', database='IoT_Smart_Parking')
+        # Connection to influxDB
+        settings = json.load(open(SETTINGS))
+        influx_port = settings["influxPort"]
+        client = InfluxDBClient(host='localhost', port=influx_port, username='root', password='root', database='IoT_Smart_Parking')
 
-        # Query per cancellare tutti i punti dalla misura "status"
+        # Query to cancel all status points
         delete_query = 'DELETE FROM "status"'
         client.query(delete_query)
         
-        print("Tutti i sensori sono stati cancellati dal database.")
+        print("All sensor have been deleted from database.")
     
     except Exception as e:
-        print(f"Errore durante la cancellazione dei sensori: {e}")
+        print(f"Error during sensor deletion: {e}")
 
-# Esegui la funzione per cancellare i dati
+# Execute the function to remove all points from influx
 delete_all_sensors()

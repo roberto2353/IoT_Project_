@@ -14,7 +14,7 @@ class MyMQTT:
         self._paho_mqtt.on_message = self.myOnMessageReceived
 
     def myOnConnect(self, client, userdata, flags, rc, properties=None):
-        print(f"Connesso a {self.broker} con codice di risultato: {str(rc)}")
+        print(f"Connected to {self.broker} with result code: {str(rc)}")
 
     def myOnMessageReceived(self, paho_mqtt, userdata, msg):
         if self.notifier is not None:
@@ -22,7 +22,7 @@ class MyMQTT:
 
     def myPublish(self, topic, msg):
         self._paho_mqtt.publish(topic, json.dumps(msg), qos=2)
-        print(f"Messaggio pubblicato su {topic}: {json.dumps(msg)}")
+        print(f"Message published on {topic}: {json.dumps(msg)}")
 
     def start(self):
         self._paho_mqtt.connect(self.broker, self.port)

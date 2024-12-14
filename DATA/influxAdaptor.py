@@ -358,7 +358,7 @@ class dbAdaptor:
                         }
                     }
                 ]
-                # Scrivi i dati su InfluxDB
+                #Write data on InfluxDB
                 self.client.write_points(json_body, database=self.influx_db)
                 self.client.write_points(json_body, database=self.influx_sim)
                 event = {

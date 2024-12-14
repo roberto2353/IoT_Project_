@@ -104,14 +104,11 @@ class ReservationService:
             booking_code = data['booking_code']
             url = data['url']
             dev_name = data['name']
-            #print("passed: booking_code ", booking_code)
-            #print("passed: url ", url)
             response = requests.get(url)
             if response.status_code == 200:
-                #print(response.json())
                 selected_device_ = response.json().get("parking")
                 selected_device = selected_device_.get("deviceInfo", {})
-                print(f"selected device for current booking: {selected_device['ID']}")
+                print(f"Selected device for current booking: {selected_device['ID']}")
                 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 if selected_device:
                     # Create a booking code
@@ -128,7 +125,7 @@ class ReservationService:
                         "n": f"{selected_device['ID']}/status", 
                         "u": "boolean", 
                         #"t": str(datetime.datetime.now()), 
-                        "v": selected_device['status'],  # Cambiamo lo stato in 'reserved'
+                        "v": selected_device['status'],  
                         "sensor_id": selected_device['ID'],
                         "location": selected_device['location'],
                         "type": selected_device['type'],
@@ -142,7 +139,7 @@ class ReservationService:
                     mqtt_topic_dc = f"{self.pubTopic}/{dev_name}/{str(selected_device['ID'])}/status"
 
 
-                    # Invio del messaggio MQTT all'adaptor
+                    # SEnd MQTT message to the adaptor
                     self.client.myPublish(mqtt_topic_db, json.dumps(message))
                     self.client.myPublish(mqtt_topic_dc, json.dumps(message))
                     print(f"Messaggio pubblicato sul topic ", mqtt_topic_dc)
@@ -151,7 +148,7 @@ class ReservationService:
                     if booking_code.isupper():
                         url = f'{self.entrance_url}/activate'
 
-                        # Dati da inviare nella richiesta
+                        # Data to send on request
                         data = {
                             "booking_code": booking_code,
                             "url":data['url'],
@@ -160,7 +157,7 @@ class ReservationService:
 
                         }
 
-                        # Invio della richiesta POST
+                        # Send POST request
                         response = requests.post(url, headers={'Content-Type': 'application/json'}, data=json.dumps(data))
 
                         return {
