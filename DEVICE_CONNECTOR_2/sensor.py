@@ -52,7 +52,7 @@ class SensorREST(threading.Thread):
         self.topic = "ParkingLot/alive/"
         self.messageBroker = broker
         self.port = port
-        self._paho_mqtt = PahoMQTT.Client(client_id="EntrancePublisher_F")
+        self._paho_mqtt = PahoMQTT.Client(client_id="Entrance2Publisher_F")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread(target=self.pingCatalog, daemon=True).start()
 
