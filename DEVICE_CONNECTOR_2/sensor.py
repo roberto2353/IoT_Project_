@@ -32,7 +32,7 @@ class SensorREST(threading.Thread):
         self.updateInterval = settings["updateInterval"]
         self.lock = Lock()  # Create a lock
         self.register_devices()
-        
+        self.register_service()
         # Park alogirthm initialization
         broker = settings["messageBroker"]
         port = settings["brokerPort"]
@@ -46,7 +46,7 @@ class SensorREST(threading.Thread):
         self.entranceAlgorithmService.sim_loop_start()
 
         time.sleep(3)
-        self.register_service()
+        
         self.register_parking()
         
         self.topic = "ParkingLot/alive/"

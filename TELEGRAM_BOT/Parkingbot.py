@@ -6,8 +6,8 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 import requests
 import json
 import time
-import random
-import string
+#import random
+#import string
 from threading import Timer
 from threading import Lock
 from pathlib import Path
@@ -17,25 +17,25 @@ from datetime import datetime
 import matplotlib
 import paho.mqtt.client as PahoMQTT
 
-matplotlib.use('Agg')  # Usa il backend non interattivo
+matplotlib.use('Agg')  
 import matplotlib.pyplot as plt
 from dateutil import parser
 from io import BytesIO
 import requests
 from dateutil import parser
 
-
+##### BOT SETUP #####
 def loadSettings():
-    # Percorso al file delle impostazioni
+    
     P = Path(__file__).parent.absolute()
     SETTINGS_PATH = P / 'settings.json'
     with Lock():
-        # Carica le impostazioni
+        
         with open(SETTINGS_PATH, 'r') as file:
             settings = json.load(file)
             return settings
 
-
+##### Formats an ISO datetime string to 'On: dd-mm-yyyy hh:mm:ss' #####
 def format_datetime(datetime_str):
     """Converte una stringa datetime ISO in un formato leggibile."""
     try:
@@ -44,28 +44,28 @@ def format_datetime(datetime_str):
     except Exception as e:
         return "Invalid date and time"
 
-
+##### Formats a duration in hours to a readable format #####
 def format_duration(duration):
     """Converte una durata in ore in un formato leggibile."""
     if duration == "N/A" or duration is None:
         return "N/A"
 
     try:
-        total_seconds = duration * 3600  # Converti ore in secondi
-        if total_seconds >= 3600:  # Se è più di un'ora
+        total_seconds = duration * 3600  
+        if total_seconds >= 3600:  #more than an hour
             hours = int(total_seconds // 3600)
             minutes = int((total_seconds % 3600) // 60)
             return f"{hours} hours and {minutes} minutes"
-        elif total_seconds >= 60:  # Se è più di un minuto
+        elif total_seconds >= 60:  #more than a minute
             minutes = int(total_seconds // 60)
             seconds = int(total_seconds % 60)
             return f"{minutes} minutes and {seconds} seconds"
-        else:  # Altrimenti in secondi
+        else:  
             return f"{int(total_seconds)} seconds"
     except Exception as e:
         return "Invalid duration"
 
-
+##### check valididty of fields #####
 def is_valid_name(name):
     return name.isalpha()
 
@@ -77,24 +77,24 @@ def is_valid_identity(id_number):
 def is_valid_credit_card(card_number):
     return card_number.isdigit() and len(card_number) == 16
 
-
+##### BOT CLASS #####
 class ParkingBot:
     def __init__(self):
         self.query_data = None
         self.chat_id = None
         self.query_id = None
         self.settings = loadSettings()
-        # Token del bot Telegram
+        ##### Token of bot #####
         self.TOKEN = '7501377611:AAGhXNYizRlkdl3V_BGtiIK-Slb76WcxzZ8'
 
-        # Stati per la registrazione
+        ##### status of user in the registration #####
         self.NAME, self.SURNAME, self.IDENTITY, self.CREDIT_CARD = range(4)
 
-        # Dati utente e stati di login
+        ##### Load settings #####
         self.catalog_url = self.settings["catalog_url"]
         self.adaptor_url = self.settings["adaptor_url"]
         self.res_url = self.settings["res_url"]
-        # Dati utente e stati di login
+        
         self.user_data = {}
         self.logged_in_users = {}
 
@@ -106,34 +106,15 @@ class ParkingBot:
         self.updateInterval = self.settings["updateInterval"]
 
         self.register_service()
-
+        ##### MQTT #####
         self._paho_mqtt = PahoMQTT.Client(client_id="BotPublisher")
         self._paho_mqtt.connect(self.messageBroker, self.port)
-        #threading.Thread.__init__(self)
+        #threading.Thread._init_(self)
         self.start_periodic_updates()
 
-    # def start(self):
-    #     """Start the MQTT client."""
-    #     try:
-    #         #self.client.start()  # Start MQTT client connection
-    #         print(f"Publisher connected to broker {self.messageBroker}:{self.port}")
-    #         self.start_periodic_updates()
-    #     except Exception as e:
-    #         print(f"Error starting MQTT client: {e}")
 
-    # def stop(self):
-    #     """Stop the MQTT client."""
-    #     try:
-    #         self.client.stop()  # Stop MQTT client connection
-    #     except Exception as e:
-    #         print(f"Error stopping MQTT client: {e}")
-
-
+    #####Registers the service in the catalog using POST the first time#####
     def register_service(self):
-        """Registers the service in the catalog using POST the first time."""
-        #Next times, updated with MQTT
-        
-        # Initial POST request to register the service
         url = f"{self.catalog_url}/services"
         response = requests.post(url, json=self.serviceInfo)
         if response.status_code == 200:
@@ -142,10 +123,9 @@ class ParkingBot:
         else:
             print(f"Failed to register service: {response.status_code} - {response.text}")
 
+    ##### Starts a background thread that periodically publishes 'alive' updates to an MQTT topic #####
     def start_periodic_updates(self):
-        """
-        Starts a background thread that publishes periodic updates via MQTT.
-        """
+        
         def periodic_update():
             time.sleep(10)
             while True:
@@ -168,11 +148,11 @@ class ParkingBot:
                 except Exception as e:
                     print(f"Error during periodic update: {e}")
 
-        # Start periodic updates in a background thread
+        
         update_thread = threading.Thread(target=periodic_update, daemon=True)
         update_thread.start()
 
-
+    ##### menu of the bot #####
     def show_logged_in_menu(self):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🔍 Check free slots", callback_data='check')],
@@ -194,11 +174,11 @@ class ParkingBot:
         ])
         bot.sendMessage(self.chat_id, 'Welcome to the IoTSmartParking! Choose one of the following options:',
                         reply_markup=keyboard)
-
+    ##### Fetches the list of available parkings from the catalog #####
     def choose_parking(self):
         catalog_url = self.settings['catalog_url'] + '/parkings'
         response = requests.get(catalog_url)
-        print("Risposta del catalogo per /parkings:", response.text)  # Log del risultato
+        print("Respons of the catalog for /parkings:", response.text)  
 
         try:
             parkings = response.json().get("parkings", [])
@@ -213,11 +193,15 @@ class ParkingBot:
 
             bot.sendMessage(self.chat_id, "Choose a parking:", reply_markup=keyboard)
         except Exception as e:
-            bot.sendMessage(self.chat_id, f"Errore nel recupero dei parcheggi: {e}")
+            bot.sendMessage(self.chat_id, f"Error in retrieve parkings {e}")
 
     def handle_change_parking(self, chat_id):
         bot.sendMessage(chat_id, "Select a parking from the list:")
         self.choose_parking()
+
+# Handles the initial interaction with the user.
+#    - If no parking is selected, prompts the user to choose one.
+#    - If a parking is already selected, displays the selected parking and appropriate menu.
 
     def start(self, msg):
         self.chat_id = msg['chat']['id']
@@ -231,7 +215,7 @@ class ParkingBot:
                 self.show_logged_in_menu()
             else:
                 self.show_initial_menu()
-
+    ##### Reset the parking selection #####
     def reset_parking(self, msg):
         self.chat_id = msg['chat']['id']
         if self.chat_id in self.user_data:
@@ -241,6 +225,7 @@ class ParkingBot:
         bot.sendMessage(self.chat_id, "Select a again the parking:")
         self.choose_parking()
 
+    ##### Callback function for the bot #####
     def on_callback_query(self, msg):
         self.query_id, self.chat_id, self.query_data = telepot.glance(msg, flavor='callback_query')
 
@@ -263,7 +248,7 @@ class ParkingBot:
 
                     bot.sendMessage(self.chat_id, f"Parking {parking['name']} selected!")
 
-                    # Mostra il menu aggiornato
+                    
                     if self.chat_id in self.logged_in_users and self.logged_in_users[self.chat_id]:
                         self.show_logged_in_menu()
                     else:
@@ -299,12 +284,13 @@ class ParkingBot:
 
         elif self.query_data == 'show_graphs':
             self.show_graphs({'chat': {'id': self.chat_id}})
-
+    ##### Registration of the user #####
     def register(self, msg):
         self.chat_id = msg['chat']['id']
         bot.sendMessage(self.chat_id, "Type your name:")
         self.user_data[self.chat_id] = {'state': self.NAME}
 
+    ##### login of the user #####
     def login(self, msg):
         self.chat_id = msg['chat']['id']
         # Verifica se il parcheggio è stato selezionato DECIDIDIAMO SE SIA NECESSARIO???????
@@ -321,7 +307,7 @@ class ParkingBot:
         self.chat_id = msg['chat']['id']
         text = msg.get('text', '').strip().lower()
 
-        # Se l'utente è loggato
+    ##### if the user is already logged in #####
         if self.chat_id in self.logged_in_users and self.logged_in_users[self.chat_id]:
             if text == '/start':
                 self.show_logged_in_menu()
@@ -329,19 +315,19 @@ class ParkingBot:
                 bot.sendMessage(self.chat_id, "You are already logged in. Use the menu to choose an option.")
             return
 
-        # Se l'utente è nel processo di login
+    ##### if the user is in the login process #####
         if self.chat_id in self.user_data and 'state' in self.user_data[self.chat_id]:
             self.process_state(text)
             return
 
-        # Se l'utente non è loggato né in login, avvia il menu iniziale
+    ##### If the user is not logged in and not in the login process show the initial menu #####
         if text == '/start':
             self.start(msg)
         elif text == '/parkings':
             self.reset_parking(msg)
         else:
             bot.sendMessage(self.chat_id, "Use /parkings to begin.")
-
+    ##### Process the user input based on the current state of the registration process #####
     def process_state(self, text):
         state = self.user_data[self.chat_id]['state']
 
@@ -426,7 +412,7 @@ class ParkingBot:
                     self.show_logged_in_menu()
                     return
 
-                    # Credenziali non valide
+        ##### Not valid credentials #####
             bot.sendMessage(self.chat_id, "Credentials are not valid. Try again.")
             self.show_initial_menu()
 
@@ -523,12 +509,12 @@ class ParkingBot:
                 slots = json.loads(slots)
 
             if not isinstance(slots, dict) or "devices" not in slots:
-                raise ValueError("La risposta JSON non contiene un dizionario valido o manca la chiave 'devices'.")
+                raise ValueError("The JSON response does not contain a valid dictionary or the 'devices' key is missing'.")
 
             devices = slots.get("devices", [])
             if not isinstance(devices, list):
                 raise ValueError(
-                    "La risposta JSON non contiene una lista di dispositivi valida sotto la chiave 'devices'.")
+                    "The JSON response does not contain a valid device list under the 'devices' key.")
 
             free_slots = [device["deviceInfo"] for device in devices if
                           device.get("deviceInfo", {}).get("status") == "free"]
@@ -539,17 +525,17 @@ class ParkingBot:
             else:
                 bot.sendMessage(self.chat_id, 'There are no more avaiable parking slots now.')
         except Exception as e:
-            bot.sendMessage(self.chat_id, f'Errore nel recupero dei dati dei posti: {e}')
+            bot.sendMessage(self.chat_id, f'Error retrieving seat data: {e}')
 
     def book_slot(self, msg):
         self.chat_id = msg['chat']['id']
         book_url = 'http://reservation:8098/book'
 
-        # Controllo se l'utente ha selezionato un parcheggio
+        
         parking_url = self.user_data.get(self.chat_id, {}).get('parking_url')
         parking_port = self.user_data.get(self.chat_id, {}).get('parking_port')
         name_dev = self.user_data.get(self.chat_id, {}).get('parking_name',
-                                                            'guest')  # Nome predefinito per utenti non registrati
+                                                            'guest')  # predefined 'guest' if the user is not registered
 
         if not parking_url or not parking_port:
             bot.sendMessage(self.chat_id, "Error: Plese select a parking before book.")
@@ -558,7 +544,7 @@ class ParkingBot:
         url = f'http://{parking_url}:{parking_port}/get_best_parking'
 
         try:
-            # Crea il payload per la richiesta
+            
             if self.chat_id not in self.logged_in_users or not self.logged_in_users[self.chat_id]:
                 data = {'booking_code': '', 'url': url, 'name': name_dev}
             else:
@@ -584,21 +570,21 @@ class ParkingBot:
                 bot.sendMessage(self.chat_id,
                                 f"Your reserved slot is: {location}. Your booking code is: {booking_code}. \n Your parking slot will be reserved for 2 minutes.")
 
-            # Timer per la scadenza della prenotazione
+            
             Timer(120, self.expire_reservation, args=[r, booking_code, msg]).start()
 
         except requests.exceptions.RequestException as e:
-            bot.sendMessage(self.chat_id, f"Errore durante la comunicazione con il sistema di prenotazione: {e}")
+            bot.sendMessage(self.chat_id, f"Error when communicating with the reservation system: {e}")
         except Exception as e:
-            bot.sendMessage(self.chat_id, f"Errore durante la prenotazione: {e}")
+            bot.sendMessage(self.chat_id, f"Error during booking: {e}")
 
     def expire_reservation(self, selected_device, booking_code, msg):
         self.chat_id = msg['chat']['id']
         reservation_url = 'http://adaptor:5001/reservation_exp'
         headers = {'Content-Type': 'application/json'}
 
-        # Verifica che 'name_dev' esista in user_data
-        name_dev = self.user_data.get(self.chat_id, {}).get('parking_name', 'guest')  # Default 'guest' se non registrato
+        
+        name_dev = self.user_data.get(self.chat_id, {}).get('parking_name', 'guest')  # Default 'guest' if not registered
 
         reservation_data = {
             "ID": selected_device['slot_id'],
@@ -630,36 +616,36 @@ class ParkingBot:
             return
 
         try:
-            # URL di base per il servizio REST
+            
             base_url = 'http://adaptor:5001'
 
-            # Ottieni ID utente
+            
             user_id = self.user_data[self.chat_id].get('book_code', '')
             print("ID utente:", user_id)
             parking_id = self.user_data[self.chat_id].get('parking_name', '')
             name = self.user_data[self.chat_id].get('login_name', '')
             surname = self.user_data[self.chat_id].get('surname', '')
 
-            # Recupera transazioni settimanali (fees)
+           
             fees_url = f'{base_url}/fees'
             fees_params = {'parking_id': parking_id}
             fees_response = requests.get(fees_url, params=fees_params)
-            fees_response.raise_for_status()  # Lancia un'eccezione se la richiesta non va a buon fine
+            fees_response.raise_for_status()  
             fees_datalist = fees_response.json()
 
-            # Recupera tempo trascorso settimanalmente (durations)
+           
             durations_url = f'{base_url}/durations'
             durations_params = {'parking_id': parking_id}
             durations_response = requests.get(durations_url, params=durations_params)
             durations_response.raise_for_status()
             durations_datalist = durations_response.json()
 
-            # Validazione delle risposte
+            
             if not isinstance(fees_datalist, list):
-                bot.sendMessage(self.chat_id, "Errore: i dati delle transazioni non sono nel formato corretto.")
+                bot.sendMessage(self.chat_id, "Error: Transaction data is not in the correct format.")
                 return
             if not isinstance(durations_datalist, list):
-                bot.sendMessage(self.chat_id, "Errore: i dati delle durate non sono nel formato corretto.")
+                bot.sendMessage(self.chat_id, "Error: Duration data is not in the correct format.")
                 return
 
             total_fees = 0
@@ -672,7 +658,7 @@ class ParkingBot:
             count_parkings_user = 0
             count_parkings_weekly_user = {}
 
-            # Elaborazione dei dati delle transazioni
+            
             weekly_spending = {}
             for entry in fees_datalist:
                 try:
@@ -688,9 +674,9 @@ class ParkingBot:
                         count_parkings_weekly_user[week] = count_parkings_weekly_user.get(week, 0) + 1
                         user_fees_weekly[week] = user_fees_weekly.get(week, 0) + entry.get("fee", 0)
                 except Exception as e:
-                    print(f"Errore nel parsing della data per le transazioni: {e}")
+                    print(f"Error parsing date for transactions: {e}")
 
-            # Elaborazione dei dati delle durate
+            
             weekly_durations = {}
             for entry in durations_datalist:
                 try:
@@ -703,28 +689,28 @@ class ParkingBot:
                         user_durations += duration
                         user_durations_weekly[week] = user_durations_weekly.get(week, 0) + duration
                 except Exception as e:
-                    print(f"Errore nel parsing della data per le durate: {e}")
+                    print(f"Error parsing date for durations: {e}")
 
-            # Generazione dei grafici e invio
-            self.plot_stats_manager(weekly_durations, weekly_spending)
+            
+            #self.plot_stats_manager(weekly_durations, weekly_spending)
             self.plot_stats_user(user_durations_weekly, user_fees_weekly, name, surname)
-            self.show_stats_manager(total_durations, total_fees, count_parkings)
+            #self.show_stats_manager(total_durations, total_fees, count_parkings)
             self.show_stats_user(user_durations, user_fees, count_parkings_user, name, surname)
             self.show_logged_in_menu()
 
         except requests.exceptions.RequestException as e:
-            bot.sendMessage(self.chat_id, f"Errore nella richiesta al servizio REST: {e}")
+            bot.sendMessage(self.chat_id, f"Error in request to REST service: {e}")
         except Exception as e:
-            bot.sendMessage(self.chat_id, f"Errore generale: {e}")
+            bot.sendMessage(self.chat_id, f"General error: {e}")
 
     def plot_stats_manager(self, weekly_durations, weekly_spending):
-        # Prepara i dati per i grafici
+        ##### Prepare data for the plots #####
         max_week = max(weekly_durations.keys() | weekly_spending.keys(), default=0)
         weeks = list(range(1, max_week + 1))
         spending = [weekly_spending.get(i, 0) for i in weeks]
         time_spent = [weekly_durations.get(i, 0) for i in weeks]
 
-        # Grafico delle spese
+        ##### Plot the aggregate spending #####
         fig1, ax1 = plt.subplots(figsize=(10, 6))
         ax1.plot(weeks, spending, marker='o', color='green', label='Spending (€)')
         ax1.set_title('Weekly Spending (€)')
@@ -738,7 +724,7 @@ class ParkingBot:
         buf1.seek(0)
         plt.close(fig1)
 
-        # Grafico del tempo trascorso
+        ##### Plot the aggregate time spent #####
         fig2, ax2 = plt.subplots(figsize=(10, 6))
         ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (hours)')
         ax2.set_title('Time Spent in Parking (Weekly)')
@@ -752,18 +738,17 @@ class ParkingBot:
         buf2.seek(0)
         plt.close(fig2)
 
-        # Invia i grafici a Telegram
+        ##### Send the plots to Telegram #####
         bot.sendPhoto(self.chat_id, buf1)
         bot.sendPhoto(self.chat_id, buf2)
 
     def plot_stats_user(self, user_weekly_duration, user_weekly_spending, name, surname):
-        # Prepara i dati per i grafici
         max_week = max(user_weekly_duration.keys() | user_weekly_spending.keys(), default=0)
         weeks = list(range(1, max_week + 1))
         spending = [user_weekly_spending.get(i, 0) for i in weeks]
         time_spent = [user_weekly_duration.get(i, 0) for i in weeks]
 
-        # Grafico delle spese
+        ##### plot of single user spending  #####
         fig1, ax1 = plt.subplots(figsize=(10, 6))
         ax1.plot(weeks, spending, marker='o', color='green', label='Spending (€)')
         ax1.set_title(f'Weekly Spending of {name} {surname}(€)')
@@ -777,7 +762,7 @@ class ParkingBot:
         buf1.seek(0)
         plt.close(fig1)
 
-        # Grafico del tempo trascorso
+        ##### plot of single user time spent  #####
         fig2, ax2 = plt.subplots(figsize=(10, 6))
         ax2.plot(weeks, time_spent, marker='o', color='red', label='Time Spent (min)')
         ax2.set_title(f'Time Spent in Parking by {name} {surname}(Weekly)')
@@ -791,7 +776,7 @@ class ParkingBot:
         buf2.seek(0)
         plt.close(fig2)
 
-        # Invia i grafici a Telegram
+        
         bot.sendPhoto(self.chat_id, buf1)
         bot.sendPhoto(self.chat_id, buf2)
 
@@ -815,17 +800,17 @@ class ParkingBot:
         co_2_to_reach_parking_diesel = tot_km_to_reach_parking_wc * co_2_diesel_fuel  # (g)
         co_2_to_reach_parking_gas = tot_km_to_reach_parking_wc * co_2_gas  # g
         # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
-        print("Parking stats for diesel vehicles: \n")
-        print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
-        print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
-        print(f"Total money to reach our parkings: {tot_money_to_reach_parking_diesel} euros")
-        print(f"Total CO2 emissions: {co_2_to_reach_parking_diesel} g")
+        #print("Parking stats for diesel vehicles: \n")
+        #print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
+        #print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
+        #print(f"Total money to reach our parkings: {tot_money_to_reach_parking_diesel} euros")
+        #print(f"Total CO2 emissions: {co_2_to_reach_parking_diesel} g")
 
-        print("Parking stats for gas vehicles: \n")
-        print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
-        print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
-        print(f"Total money to reach our parkings: {tot_money_to_reach_parking_gas} euros")
-        print(f"Total CO2 emissions: {co_2_to_reach_parking_gas} g")
+        #print("Parking stats for gas vehicles: \n")
+        #print(f"Total time to reach our parkings: {tot_time_to_reach_parking_wc} min")
+        #print(f"Total distance to reach our parkings: {tot_km_to_reach_parking_wc} km")
+        #print(f"Total money to reach our parkings: {tot_money_to_reach_parking_gas} euros")
+        #print(f"Total CO2 emissions: {co_2_to_reach_parking_gas} g")
         # bot.sendMessage(chat_id, f"Total stats while using our: {e}")
 
         # STATS NOT USING PARKINGS
@@ -839,17 +824,17 @@ class ParkingBot:
         co_2_to_reach_ext_park_gas = tot_km_to_reach_ext_park * co_2_gas  # g
         # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message    
 
-        print("Stats if our parkings were not used - diesel vehicles: \n")
-        print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
-        print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
-        print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_diesel} euros")
-        print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_diesel} g")
+        #print("Stats if our parkings were not used - diesel vehicles: \n")
+        #print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
+        #print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
+        #print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_diesel} euros")
+        #print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_diesel} g")
 
-        print("Stats if our parkings were not used - gas vehicles: \n")
-        print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
-        print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
-        print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_gas} euros")
-        print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_gas} g")
+        #print("Stats if our parkings were not used - gas vehicles: \n")
+        #print(f"Total time to find outdoor parkings: {tot_time_to_reach_ext_park} min")
+        #print(f"Total distance to find outdoor parkings: {tot_km_to_reach_ext_park} km")
+        #print(f"Total money to find outdoor parkings: {tot_money_to_reach_ext_park_gas} euros")
+        #print(f"Total c02 emission while searching outdoor parkings: {co_2_to_reach_ext_park_gas} g")
 
         # TOTAL MONEY SPENT (INDOOR VS OUTDOOR, DIESEL VS GAS)
 
@@ -858,14 +843,14 @@ class ParkingBot:
         tot_money_park_plus_reach_outdoor_diesel = tot_money_to_reach_ext_park_diesel + tot_dur_usr * avg_ext_per_hour_park_fee
         tot_money_park_plus_reach_outdoor_gas = tot_money_to_reach_ext_park_gas + tot_dur_usr * avg_ext_per_hour_park_fee
         # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
-        print(
-            f"Total money spent while using our services (money to reach parking plus fees) - diesel vehicles :{tot_money_park_plus_reach_indoor_diesel} euros\n")
-        print(
-            f"Total money spent while using our services (money to reach parking plus fees) - gas vehicles :{tot_money_park_plus_reach_indoor_gas} euros\n")
-        print(
-            f"Total money spent if our services were not used (money to find external parkings plus fees) - diesel vehicles :{tot_money_park_plus_reach_outdoor_diesel} euros\n")
-        print(
-            f"Total money spent if our services were not used (money to find external parkings plus fees) - gas vehicles :{tot_money_park_plus_reach_outdoor_gas} euros\n")
+        #print(
+         #   f"Total money spent while using our services (money to reach parking plus fees) - diesel vehicles :{tot_money_park_plus_reach_indoor_diesel} euros\n")
+        #print(
+         #   f"Total money spent while using our services (money to reach parking plus fees) - gas vehicles :{tot_money_park_plus_reach_indoor_gas} euros\n")
+        #print(
+         #   f"Total money spent if our services were not used (money to find external parkings plus fees) - diesel vehicles :{tot_money_park_plus_reach_outdoor_diesel} euros\n")
+        #print(
+         #   f"Total money spent if our services were not used (money to find external parkings plus fees) - gas vehicles :{tot_money_park_plus_reach_outdoor_gas} euros\n")
 
         # TOTAL CO2 EMISSIONS (INDOOR VS OUTDOOR, DIESEL VS GAS)
 
@@ -874,12 +859,12 @@ class ParkingBot:
         tot_co2_outdoor_gas = co_2_to_reach_ext_park_diesel
         tot_co2_outdoor_diesel = co_2_to_reach_ext_park_diesel
         # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
-        print(f"Total co2 emissions using our services - diesel vehicle: {tot_co2_indoor_diesel} g \n")
-        print(f"Total co2 emissions using our services - gas vehicle: {tot_co2_indoor_gas} g\n")
-        print(
-            f"Total co2 emissions if our services were not used (co2 to find external parkings) - diesel vehicle: {tot_co2_outdoor_diesel} g\n")
-        print(
-            f"Total co2 emissions if our services were not used (co2 to find external parkings) - gas vehicle: {tot_co2_outdoor_gas} g\n")
+        #print(f"Total co2 emissions using our services - diesel vehicle: {tot_co2_indoor_diesel} g \n")
+        #print(f"Total co2 emissions using our services - gas vehicle: {tot_co2_indoor_gas} g\n")
+        #print(
+         #   f"Total co2 emissions if our services were not used (co2 to find external parkings) - diesel vehicle: {tot_co2_outdoor_diesel} g\n")
+        #print(
+          #  f"Total co2 emissions if our services were not used (co2 to find external parkings) - gas vehicle: {tot_co2_outdoor_gas} g\n")
 
         # SAVINGS
         saved_time = tot_time_to_reach_ext_park - tot_time_to_reach_ext_park
@@ -888,13 +873,19 @@ class ParkingBot:
         saved_co2_diesel = tot_co2_outdoor_diesel - tot_co2_indoor_diesel
         saved_money_gas = tot_money_park_plus_reach_outdoor_gas - tot_money_park_plus_reach_indoor_gas
         saved_money_diesel = tot_money_park_plus_reach_outdoor_diesel - tot_money_park_plus_reach_indoor_diesel
-        print("Savings achieved using our services:\n")
-        print(f"Money saved - diesel vehicle: {saved_money_diesel} euros\n")
-        print(f"Money saved - gas vehicle: {saved_money_gas} euros\n")
-        print(f"Distance saved: {saved_km} km\n")
-        print(f"co2 emissions saved - diesel vehicle: {saved_co2_diesel} g\n")
-        print(f"co2 emissions saved - gas vehicle: {saved_co2_gas} g\n")
-        print(f"Time saved: {saved_time} min\n")
+
+        message = (
+            "🚗 Savings achieved using our services:\n\n"
+            f"💰 *Money saved - diesel vehicle: *: {saved_money_diesel:.2f} euro\n"
+            f"💰 **Money saved - gas vehicle: {saved_money_gas:.2f} euro\n"
+            f"🛣️ **Distance saved: {saved_km:.2f} km\n"
+            f"🌍 **co2 emissions saved - diesel vehicle: {saved_co2_diesel:.2f} g\n"
+            f"🌍 co2 emissions saved - gas vehicle: {saved_co2_gas:.2f} g\n"
+            f"⏱️ Time saved: {saved_time:.2f} min"
+        )
+
+        # Invia il messaggio su Telegram
+        bot.sendMessage(self.chat_id, message, parse_mode="Markdown")
 
     def show_stats_manager(self, tot_dur, tot_fee, tot_park):
         gas_price_per_litre = 1.74
@@ -999,14 +990,14 @@ class ParkingBot:
 
         # TODO: MAYBE PER WEEK,MONTH,YEAR?? add message
 
-
+##### Main #####
 if __name__ == '__main__':
 
-    # Inizializza il bot
+    
     botClass = ParkingBot()
     bot = telepot.Bot(botClass.TOKEN)
 
-    # Avvia il loop dei messaggi
+    ##### start message loop #####
     MessageLoop(bot, {
         'chat': botClass.handle_message,
         'callback_query': botClass.on_callback_query
@@ -1014,6 +1005,6 @@ if __name__ == '__main__':
 
     print("Bot in esecuzione...")
 
-    # Mantiene il programma in esecuzione
+    
     while True:
         time.sleep(10)

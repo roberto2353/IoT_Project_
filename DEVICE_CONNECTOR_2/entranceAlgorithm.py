@@ -27,7 +27,7 @@ class Algorithm:
         self.exit_url = conf["exit_url"]
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
-        self.client = MyMQTT(clientID="Simulation_F", broker=broker, port=port, notifier=None)
+        self.client = MyMQTT(clientID="Simulation2_F", broker=broker, port=port, notifier=None)
         self.messageBroker = broker
         self.port = port
         self.devices = devices
