@@ -23,8 +23,11 @@ class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
         conf = json.load(open(SETTINGS))
         self.catalog_url = conf["catalog_url"]
-        self.adaptor_url = conf["adaptor_url"]
-        self.exit_url = conf["exit_url"]
+        #self.adaptor_url = conf["adaptor_url"]
+        self.needed_services = conf["needed_services"]
+        self.ports = self.request_to_catalog()
+        self.exit_url = f'http://exit:{self.ports["ExitService"]}'
+        print(self.exit_url)
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
         self.client = MyMQTT(clientID="Simulation_F", broker=broker, port=port, notifier=None)
@@ -38,10 +41,25 @@ class Algorithm:
         self.floors = []
         self.tot_occupied = 0
         self.arrivals = []
-        self.t_hold_time = 900 # 15 min
+        self.t_hold_time = 120 # 15 min
         
         self.lock = Lock()  # Create a lock
 
+    def request_to_catalog(self):
+        try:
+            response = requests.get(f"{self.catalog_url}/services")
+            response.raise_for_status()
+            resp = response.json()
+            services = resp.get("services", [])
+            ports = {service["name"]: int(service["port"])
+                    for service in services 
+                    if service["name"] in self.needed_services}
+
+            print(ports)
+            return ports
+        except requests.exceptions.RequestException as e:
+            raise cherrypy.HTTPError(500, f"Error communicating with catalog: {str(e)}")
+        
     def start(self):
         """Start the MQTT client."""
         self.client.start()  # Start MQTT client connection
@@ -178,7 +196,7 @@ class Algorithm:
             next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(self.t_hold_time/2, self.t_hold_time))
             self.arrivals.append(next_arrival_time)
         elif current_hour in range(6, 24) and self.tot_occupied < self.n_tot_dev - 1: # an arrival every 2-7 min during day (6-24)
-            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(120, int(self.t_hold_time/2)))
+            next_arrival_time = datetime.datetime.now() + datetime.timedelta(seconds=random.randint(30, int(self.t_hold_time/2)))
             self.arrivals.append(next_arrival_time)
         self.arrivals.sort()
 
@@ -258,7 +276,7 @@ class Algorithm:
         for device in self.devices:
             print("booking_code: ", device['deviceInfo']['booking_code'])
             if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) >= 7):
-                if random.random() < departure_probability and (time - datetime.datetime.strptime(device["deviceInfo"]["last_update"], "%Y-%m-%d %H:%M:%S"))>= datetime.timedelta(minutes=threshold):
+                if random.random() < departure_probability:
                     print(f"handling departures of cars altready parked for more than {threshold} min...")
                     print(f'found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}')
                     exit_url = f'{self.exit_url}/calcola_fee'

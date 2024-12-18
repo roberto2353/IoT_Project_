@@ -24,14 +24,33 @@ class Exit:
         self.serviceInfo = settings['serviceInfo']
         self.serviceID = self.serviceInfo['ID']
         self.updateInterval = settings["updateInterval"]
-        self.adaptor_url = settings['adaptor_url']
+        #self.adaptor_url = settings['adaptor_url']
+
+        self.needed_services = settings["needed_services"]
+        self.ports = self.request_to_catalog()
+        self.adaptor_url = f'http://adaptor:{self.ports["AdaptorService"]}'
+        print(self.adaptor_url)
 
         self.register_service()
-
         self._paho_mqtt = PahoMQTT.Client(client_id="ExitPublisher")
         self._paho_mqtt.connect(self.messageBroker, self.port)
         threading.Thread.__init__(self)
         self.start()
+
+    def request_to_catalog(self):
+        try:
+            response = requests.get(f"{self.catalog_address}/services")
+            response.raise_for_status()
+            resp = response.json()
+            services = resp.get("services", [])
+            ports = {service["name"]: int(service["port"])
+                    for service in services 
+                    if service["name"] in self.needed_services}
+
+            print(ports)
+            return ports
+        except requests.exceptions.RequestException as e:
+            raise cherrypy.HTTPError(500, f"Error communicating with catalog: {str(e)}")
 
     def start_periodic_updates(self):
         """

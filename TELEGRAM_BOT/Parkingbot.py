@@ -92,9 +92,13 @@ class ParkingBot:
 
         ##### Load settings #####
         self.catalog_url = self.settings["catalog_url"]
-        self.adaptor_url = self.settings["adaptor_url"]
-        self.res_url = self.settings["res_url"]
+        #self.adaptor_url = self.settings["adaptor_url"]
+        #self.res_url = self.settings["res_url"]
         
+        self.needed_services = self.settings["needed_services"]
+        self.ports = self.request_to_catalog()
+        self.adaptor_url = f'http://adaptor:{self.ports["AdaptorService"]}'
+        self.res_url = f'http://reservation:{self.ports["ReservationService"]}'
         self.user_data = {}
         self.logged_in_users = {}
 
@@ -112,6 +116,17 @@ class ParkingBot:
         #threading.Thread._init_(self)
         self.start_periodic_updates()
 
+    def request_to_catalog(self):
+        response = requests.get(f"{self.catalog_url}/services")
+        response.raise_for_status()
+        resp = response.json()
+        services = resp.get("services", [])
+        ports = {service["name"]: int(service["port"])
+                for service in services 
+                if service["name"] in self.needed_services}
+
+        print(ports)
+        return ports
 
     #####Registers the service in the catalog using POST the first time#####
     def register_service(self):

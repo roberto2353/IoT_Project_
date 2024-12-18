@@ -21,6 +21,7 @@ class SlotBoard:
         self.sensors_data = {}
         self.catalogUrl = settings["catalog_url"]
         self.deviceInfo = settings["deviceInfo"]
+        self.needed_services = settings["needed_services"]
         self.lock = threading.Lock()
         self.initialize_board()
         

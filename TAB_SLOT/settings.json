@@ -21,6 +21,5 @@
     "catalog_url": "http://catalog:8090",
     "baseTopic": "ParkingLot",
     "aliveTopic": "ParkingLot/alive/",
-    "sensorTopic": "ParkingLot/+/status",
-    "adaptor_url": "http://adaptor:5001"
+    "sensorTopic": "ParkingLot/+/status"
 }

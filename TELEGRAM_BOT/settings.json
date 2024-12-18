@@ -11,6 +11,5 @@
     "brokerPort": 1883, 
     "qos": 2,
     "catalog_url": "http://catalog:8090",
-    "adaptor_url": "http://adaptor:5001",
-    "res_url": "http://reservation:8098"
+    "needed_services": ["AdaptorService", "ReservationService"]
 }
