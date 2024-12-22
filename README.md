@@ -22,7 +22,7 @@
    - Provides users with a wallet feature to view recent transactions.  
    - Managed via the Telegram bot.
   
-   5 **Parking Entrance kiosk App**  
+5 **Parking Entrance kiosk App**  
    App allows users to check and reserve available parking slots in real time. Once a slot is selected, the app registers the reservation by sending the data to the backend. Slot availability is dynamically updated, and the app ensures a user-friendly interface for a seamless experience..
   
 6. **Parking Exit kiosk App**  
