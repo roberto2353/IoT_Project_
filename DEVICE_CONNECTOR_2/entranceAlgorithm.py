@@ -23,8 +23,10 @@ class Algorithm:
     def __init__(self, devices, baseTopic, broker, port):
         conf = json.load(open(SETTINGS))
         self.catalog_url = conf["catalog_url"]
-        self.adaptor_url = conf["adaptor_url"]
-        self.exit_url = conf["exit_url"]
+        #self.adaptor_url = conf["adaptor_url"]
+        self.needed_services = conf["needed_services"]
+        self.ports = self.request_to_catalog()
+        self.exit_url = f'http://exit:{self.ports["ExitService"]}'
         self.setting_status_path = P / 'settings_status.json'
         self.pubTopic = f"{baseTopic}"
         self.client = MyMQTT(clientID="Simulation2_F", broker=broker, port=port, notifier=None)
@@ -41,6 +43,21 @@ class Algorithm:
         self.t_hold_time = 900 # 15 min
         
         self.lock = Lock()  # Create a lock
+
+    def request_to_catalog(self):
+        try:
+            response = requests.get(f"{self.catalog_url}/services")
+            response.raise_for_status()
+            resp = response.json()
+            services = resp.get("services", [])
+            ports = {service["name"]: int(service["port"])
+                    for service in services 
+                    if service["name"] in self.needed_services}
+
+            print(ports)
+            return ports
+        except requests.exceptions.RequestException as e:
+            raise cherrypy.HTTPError(500, f"Error communicating with catalog: {str(e)}")
 
     def start(self):
         """Start the MQTT client."""

@@ -276,7 +276,7 @@ class Algorithm:
         for device in self.devices:
             print("booking_code: ", device['deviceInfo']['booking_code'])
             if (device["deviceInfo"]['status'] == 'occupied' and device["deviceInfo"]["active"] in ['True', True] and len(device["deviceInfo"]["booking_code"]) >= 7):
-                if random.random() < departure_probability:
+                if random.random() < departure_probability and (time - datetime.datetime.strptime(device["deviceInfo"]["last_update"], "%Y-%m-%d %H:%M:%S"))>= datetime.timedelta(minutes=threshold):
                     print(f"handling departures of cars altready parked for more than {threshold} min...")
                     print(f'found device to depart has {device["deviceInfo"]["status"], device["deviceInfo"]["active"], device["deviceInfo"]["booking_code"]}')
                     exit_url = f'{self.exit_url}/calcola_fee'
