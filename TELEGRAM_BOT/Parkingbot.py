@@ -89,11 +89,9 @@ class ParkingBot:
 
         ##### status of user in the registration #####
         self.NAME, self.SURNAME, self.IDENTITY, self.CREDIT_CARD = range(4)
-
+    
         ##### Load settings #####
         self.catalog_url = self.settings["catalog_url"]
-        #self.adaptor_url = self.settings["adaptor_url"]
-        #self.res_url = self.settings["res_url"]
         
         self.needed_services = self.settings["needed_services"]
         self.ports = self.request_to_catalog()
@@ -108,7 +106,7 @@ class ParkingBot:
         self.serviceInfo = self.settings['serviceInfo']
         self.serviceID = self.serviceInfo['ID']
         self.updateInterval = self.settings["updateInterval"]
-
+    
         self.register_service()
         ##### MQTT #####
         self._paho_mqtt = PahoMQTT.Client(client_id="BotPublisher")
@@ -441,12 +439,11 @@ class ParkingBot:
             bot.sendMessage(self.chat_id, "Login is compulsory to see your wallet.")
             return
 
-        url = 'http://adaptor:5001/get_booking_info'
         headers = {'Content-Type': 'application/json'}
         data = {"booking_code": self.user_data[self.chat_id].get('book_code', '')}
 
         try:
-            response = requests.post(url, headers=headers, json=data)
+            response = requests.post(self.adaptor_url, headers=headers, json=data)
             response.raise_for_status()
 
             response_data = response.json()
@@ -544,7 +541,6 @@ class ParkingBot:
 
     def book_slot(self, msg):
         self.chat_id = msg['chat']['id']
-        book_url = 'http://reservation:8098/book'
 
         
         parking_url = self.user_data.get(self.chat_id, {}).get('parking_url')
@@ -566,7 +562,7 @@ class ParkingBot:
                 data = {'booking_code': self.user_data[self.chat_id].get('book_code', ''), 'url': url, 'name': name_dev}
 
             headers = {'Content-Type': 'application/json'}
-            book_response = requests.post(book_url, headers=headers, json=data)
+            book_response = requests.post(self.res_url,headers=headers, json=data)
             book_response.raise_for_status()
 
             r = book_response.json()
@@ -595,7 +591,6 @@ class ParkingBot:
 
     def expire_reservation(self, selected_device, booking_code, msg):
         self.chat_id = msg['chat']['id']
-        reservation_url = 'http://adaptor:5001/reservation_exp'
         headers = {'Content-Type': 'application/json'}
 
         
@@ -613,7 +608,7 @@ class ParkingBot:
         }
 
         try:
-            req = requests.post(reservation_url, headers=headers, json=reservation_data)
+            req = requests.post(self.adaptor_url, headers=headers, json=reservation_data)
             req.raise_for_status()
 
             response_data = req.json()
@@ -631,8 +626,6 @@ class ParkingBot:
             return
 
         try:
-            
-            base_url = 'http://adaptor:5001'
 
             
             user_id = self.user_data[self.chat_id].get('book_code', '')
@@ -642,14 +635,14 @@ class ParkingBot:
             surname = self.user_data[self.chat_id].get('surname', '')
 
            
-            fees_url = f'{base_url}/fees'
+            fees_url = f'{self.adaptor_url}/fees'
             fees_params = {'parking_id': parking_id}
             fees_response = requests.get(fees_url, params=fees_params)
             fees_response.raise_for_status()  
             fees_datalist = fees_response.json()
 
            
-            durations_url = f'{base_url}/durations'
+            durations_url = f'{self.adaptor_url}/durations'
             durations_params = {'parking_id': parking_id}
             durations_response = requests.get(durations_url, params=durations_params)
             durations_response.raise_for_status()
