@@ -21,6 +21,12 @@
 4. **User Wallet and Recent Transactions**  
    - Provides users with a wallet feature to view recent transactions.  
    - Managed via the Telegram bot.
+  
+5. **Parking Entrance kiosk App**  
+   App allows users to check and reserve available parking slots in real time. Once a slot is selected, the app registers the reservation by sending the data to the backend. Slot availability is dynamically updated, and the app ensures a user-friendly interface for a seamless experience..
+  
+6. **Parking Exit kiosk App**  
+   App enables users to enter their booking code received during entry and calculates the total amount to be paid based on the parking duration. It displays a pop-up with the total in euros and automatically updates the slot status to "available" once the exit process is completed
 
 ---
 
